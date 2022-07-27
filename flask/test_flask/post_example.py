@@ -1,10 +1,10 @@
-from flask import Flask, redirect, url_for, request
+from flask import Flask, request, url_for,redirect, render_template
 app = Flask(__name__)
 
 
 @app.route('/')  # decorator drfines the
 def home():
-    return "Welcome to Server."
+    return render_template('index.html')
 
 
 @app.route('/success/<name>')
@@ -17,11 +17,11 @@ def login():
     uname = request.form['uname']
     passwrd = request.form['pass']
     if uname == "abhimanyus1997" and passwrd == "123":
-        return "Welcome Admin:  %s" % uname
+        return render_template('admin.html')
     elif uname == "abhimanyus1997" and passwrd != "123":
         return "<script> alert('Wrong Password for Admin')</script>"
     else:
         return redirect(url_for('success', name=uname))
 
 if __name__ == '__main__':
-   app.run(debug=True)
+   app.run(host="0.0.0.0",debug=True)
