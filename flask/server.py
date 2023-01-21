@@ -7,7 +7,7 @@ app = Flask(__name__) #creating the Flask class object
 
 @app.route('/') #decorator drfines the
 def index():
-    name = "abhimanyu"
+    name = "Abhimanyu"
     return render_template('dashboard.html', title='Welcome', username=name)
 
 @app.route('/hi')
