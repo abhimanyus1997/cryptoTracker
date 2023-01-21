@@ -1,14 +1,14 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 from markupsafe import escape
 
 app = Flask(__name__) #creating the Flask class object
 
 @app.route('/') #decorator drfines the
-def home():
-    return "hello, this is our first flask website";
-
+def index():
+    name = "abhimanyu"
+    return render_template('dashboard.html', title='Welcome', username=name)
 
 @app.route('/hi')
 def hello_world():
