@@ -19,7 +19,7 @@ ECHO "                              "
 ECHO "Starting Flask Server"
 ECHO "------------------------------"
 cd ..\..\Flask
-flask --app server run --host=0.0.0.0 --reload
+flask --app server run --host=0.0.0.0 --port=8080
 
 
 echo "The program has completed"
