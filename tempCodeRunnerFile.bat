@@ -1,1 +1,0 @@
-py django\cryptotracker\manage.py runserver
