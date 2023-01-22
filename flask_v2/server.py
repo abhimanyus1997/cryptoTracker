@@ -9,7 +9,7 @@ app = Flask(__name__) #creating the Flask class object
 def index():
     name = "Vitalik B"
     wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" #vitalik's address
-    return render_template('index.html', title='Welcome', username=name)
+    return render_template('index.html', title='Welcome', username=name, erc20=wallet)
 
 @app.route('/hi')
 def hello_world():

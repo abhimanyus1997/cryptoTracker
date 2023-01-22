@@ -8,16 +8,16 @@
     <meta name="theme-color" content="#ff0000">
 
     <!-- favicon -->
-    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png' }}">
-    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png' }}">
-    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png' }}">
-    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png' }}">
-    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png' }}">
+    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="256x50" href="{{ url_for('static', filename='img/favicon.png') }}">
 
     <!-- bootstrap -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css' }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json' }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
     <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
@@ -32,8 +32,8 @@
     <link rel="stylesheet" href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css">
 
     <!-- Local css -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/fontawesome5-overrides.min.css' }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.min.css' }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/fontawesome5-overrides.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
 </head>
 
@@ -72,7 +72,7 @@
                                     </form>
                                 </div>
                             </li>
-                            <li class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link flex-shrink-0 flex-wrap nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-size: 0.8vw;font-weight: bold;color: var(--bs-gray-900);font-family: 'Advent Pro', sans-serif;"><br>0x0000000000000000000000000000000000000000<br><br></a>
+                            <li class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link flex-shrink-0 flex-wrap nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-size: 0.8vw;font-weight: bold;color: var(--bs-gray-900);font-family: 'Advent Pro', sans-serif;"><br>{{erc20}}<br><br></a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
                                     <h6 class="dropdown-header">alerts center</h6><a class="dropdown-item d-flex align-items-center" href="#">
                                         <div class="me-3">
@@ -102,7 +102,7 @@
                             </li>
                             <div class="d-none d-sm-block topbar-divider"></div>
                             <li class="nav-item dropdown no-arrow">
-                                <div class="nav-item dropdown show no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="true" data-bs-toggle="dropdown" href="#"><span class="d-none d-lg-inline me-2 text-gray-600 small">User</span><img class="border rounded-circle img-profile" src="assets/img/avatars/man.png"></a>
+                                <div class="nav-item dropdown show no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="true" data-bs-toggle="dropdown" href="#"><span class="d-none d-lg-inline me-2 text-gray-600 small">{{username}}</span><img class="border rounded-circle img-profile" src="assets/img/avatars/man.png"></a>
                                     <div class="dropdown-menu show shadow dropdown-menu-end animated--grow-in" data-bs-popper="none"><a class="dropdown-item" href="profile.html"><i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profile</a><a class="dropdown-item" href="table.html"><i class="fas fa-list fa-sm fa-fw me-2 text-gray-400"></i>Tracker</a>
                                         <div class="dropdown-divider"></div><a class="dropdown-item" href="login.html"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Logout</a>
                                     </div>
@@ -268,7 +268,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/script.min.js' }}"></script>
+    <script src="{{ url_for('static', filename='js/script.min.js') }}"></script>
 </body>
 
 </html>
