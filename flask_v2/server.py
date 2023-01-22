@@ -7,8 +7,9 @@ app = Flask(__name__) #creating the Flask class object
 
 @app.route('/') #decorator drfines the
 def index():
-    name = "Abhimanyu"
-    return render_template('dashboard.html', title='Welcome', username=name)
+    name = "Vitalik B"
+    wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" #vitalik's address
+    return render_template('index.html', title='Welcome', username=name)
 
 @app.route('/hi')
 def hello_world():
