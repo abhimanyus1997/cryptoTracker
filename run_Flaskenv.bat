@@ -3,23 +3,19 @@
 ECHO Starting virtual environment
 ECHO ------------------------------
 
-ECHO Deactivating old environments
-ECHO ------------------------------
-python virtualenv deactivate
+@REM ECHO Deactivating old environments
+TITLE "cryptoTracker Flask Server - abhimanyus1997"
 
-ECHO "Opening Scripts"
-ECHO "------------------------------"
+COLOR 1
+ECHO ----------Opening Scripts----------
 CD "env\Scripts"
 
-ECHO "Executing venv using Powershell"
-ECHO "------------------------------"
-powershell.exe -command "activate.ps1"
-ECHO "                              "
+COLOR 2
+ECHO ----------Executing venv using CMD----------
+cmd.exe /c activate.bat
 
-ECHO "Starting Flask Server"
-ECHO "------------------------------"
+COLOR 5
+ECHO ----------Starting Flask Server----------
 cd ..\..\Flask
-flask --app server run --host=0.0.0.0 --port=8080
+python app.py
 
-
-echo "The program has completed"
