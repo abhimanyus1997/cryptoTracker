@@ -13,5 +13,5 @@ A set of jupyter notebook files that helps you to manage your portfolio
 
 ## Step to Run
 1. Install python & all dependencies of the project (Flask, Pandas, Numpy, Matplotlib, Seaborn,etc)
-2. Run flask server using run_Flaskenv.bat or app.py (inside Flask directory)
+2. Run flask server using ```run_Flaskenv.bat``` or ```app.py``` (inside Flask directory)
 3. Open http://localhost to check the dashboard
