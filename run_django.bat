@@ -18,7 +18,7 @@ ECHO "                              "
 
 ECHO "Starting Django Server"
 ECHO "------------------------------"
-cd ..\..\django
+cd ..\..\django\cryptotracker\
 py manage.py runserver
 
 
