@@ -5,7 +5,9 @@ from django.shortcuts import render
 
 
 def index(request):
-   return render(request, "dashboard/template/hello.html", {})
+    username = "Vitalik"
+    wallet = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+   return render(request, "dashboard/template/index.html", {'username' : username, 'erc20':wallet})
 
 # def index(request):
 #   template = loader.get_template('index.html')
