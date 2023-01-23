@@ -18,4 +18,6 @@ A set of jupyter notebook files that helps you to manage your portfolio
 
 
 ## Screenshots:
-![Vitalik.eth](https://user-images.githubusercontent.com/20315792/214073236-f7c6e5e9-0375-47aa-adb0-08e2726bcfe7.png)
+![Vitalik.eth](https://user-images.githubusercontent.com/20315792/214074805-a2757266-5d38-427c-bb14-4a344735f212.png)
+![login](https://user-images.githubusercontent.com/20315792/214075075-4c36bd1f-7818-488b-a61c-a5d316c211d7.png)
+
