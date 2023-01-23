@@ -1,0 +1,11 @@
+autopep8
+beautifulsoup4
+flask
+netaddr
+pickleshare
+pip-chill
+pure-eval
+pytz
+requests
+varint
+wcwidth
