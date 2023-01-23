@@ -3,14 +3,44 @@ import os
 from flask import Flask, render_template
 from markupsafe import escape
 
+# Custom Made Modules for tracking balance
+import cryptotracker_scrapping as ct
+
+
 app = Flask(__name__) #creating the Flask class object
 
 @app.route('/') #decorator drfines the
 def index():
-    name = "Vitalik B"
+    #name = "Vitalik B"
     wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" #vitalik's address
-    return render_template('index.html', title='Welcome', username=name, erc20=wallet)
+    # getting balance
+    bal,ens = ct.getEther()
+    eth,usd = bal[0],bal[1]
+    return render_template('index.html', title='Welcome',
+        username=ens.text,
+        erc20=wallet,
+        eth=eth.text,
+        usd=usd.text)
 
+
+@app.route('/<erc20>')  # decorator drfines the
+def user(erc20):
+    name = "User"
+    # getting balance
+    bal, ens = ct.getEther(erc20)
+    eth_, usd_ = bal[0], bal[1]
+
+    # If No ENS
+    if ens == None:
+        ens = "User"
+    else:
+        ens = ens.text
+
+    return render_template('index.html',
+                           username=ens,
+                           erc20=erc20,
+                           eth=eth_.text,
+                           usd=usd_.text)
 
 @app.route('/login/')
 def login():
