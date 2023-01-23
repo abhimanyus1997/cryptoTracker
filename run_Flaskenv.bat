@@ -19,3 +19,4 @@ ECHO ----------Starting Flask Server----------
 cd ..\..\Flask
 python app.py
 
+COLOR
