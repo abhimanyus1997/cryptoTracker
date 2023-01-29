@@ -18,6 +18,8 @@
 
     <!-- bootstrap -->
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"> -->
 
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
@@ -40,8 +42,8 @@
             <div class="card-body p-0">
                 <div class="row">
                     <div class="col-lg-5 d-none d-lg-flex">
-                        <div class="flex-grow-1 bg-register-image"
-                            style="background-image: url(&quot;assets/img/dogs/image2.jpeg&quot;);"></div>
+                        <div class="flex-grow-1 bg-register-image img-fluid"
+                            style=" background-size: cover;background-image: url({{ url_for('static', filename='img/undraw_predictive_analytics_re_wxt8.svg') }});"></div>
                     </div>
                     <div class="col-lg-7">
                         <div class="p-5">
@@ -53,10 +55,12 @@
                             <form class="user" method="POST">
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input class="form-control form-control-user" type="text" id="firstName" placeholder="First Name" name="first_name">
+                                        <input class="form-control form-control-user" type="text" id="firstName"
+                                            placeholder="First Name" name="first_name">
                                     </div>
                                     <div class="col-sm-6">
-                                        <input class="form-control form-control-user" type="text" id="lastName" placeholder="Last Name" name="last_name">
+                                        <input class="form-control form-control-user" type="text" id="lastName"
+                                            placeholder="Last Name" name="last_name">
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -65,18 +69,44 @@
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input class="form-control form-control-user" type="password"
-                                            id="password" placeholder="Password" name="password">
+                                        <input class="form-control form-control-user" type="password" id="password"
+                                            placeholder="Password" name="password">
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control form-control-user" type="password"
-                                            id="passwordRepeat" placeholder="Repeat Password"
-                                            name="password_repeat">
+                                            id="passwordRepeat" placeholder="Repeat Password" name="password_repeat">
                                     </div>
                                 </div>
                                 <button class="btn btn-primary d-block btn-user w-100" type="submit">Register
                                     Account</button>
                                 <hr>
+
+                                <!-- Error Messages Comes here -->
+                                <div id="status_validation">
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                    {% for category,message in messages %}
+
+                                    {% if category == 'error' %}
+                                    <!-- Error in validation-->
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>Error: </strong>{{message}}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    {% else %}
+                                    <!-- If Successfully Validated -->
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{message}}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    {% endif %}
+
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
                                 <hr>
                             </form>
 
@@ -90,8 +120,10 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/script.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.min.js') }}"></script>
+
 </body>
 
 </html>
