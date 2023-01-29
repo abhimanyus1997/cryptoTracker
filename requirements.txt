@@ -1,6 +1,7 @@
 autopep8
 beautifulsoup4
 flask
+gunicorn
 ipykernel
 netaddr
 pip-chill
