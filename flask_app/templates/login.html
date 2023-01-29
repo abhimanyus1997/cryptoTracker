@@ -16,6 +16,7 @@
 
     <!-- bootstrap -->
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
@@ -48,10 +49,12 @@
                                         <h4 class="text-dark mb-4">Welcome to CryptoTracker</h4>
                                     </div>
                                     <form class="user">
-                                        <div class="mb-3"><input class="form-control form-control-user" type="email"
+                                        <div class="mb-3">
+                                            <input class="form-control form-control-user" type="email"
                                                 id="email" aria-describedby="emailHelp"
                                                 placeholder="Enter Email Address..." name="email"></div>
-                                        <div class="mb-3"><input class="form-control form-control-user" type="password"
+                                        <div class="mb-3">
+                                            <input class="form-control form-control-user" type="password"
                                                 id="password" placeholder="Password" name="password"></div>
                                         <div class="mb-3">
                                             <div class="custom-control custom-checkbox small">
@@ -64,11 +67,36 @@
                                         </div><button class="btn btn-primary d-block btn-user w-100"
                                             type="submit">Login</button>
                                         <hr>
+                                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                            {% if messages %}
+                                            {% for category,message in messages %}
+
+                                            {% if category == 'error' %}
+                                            <!-- Error in validation-->
+                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                <strong>Error: </strong>{{message}}
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            {% else %}
+                                            <!-- If Successfully Validated -->
+                                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                {{message}}
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            {% endif %}
+
+                                            {% endfor %}
+                                            {% endif %}
+                                            {% endwith %}
+
                                         <hr>
                                     </form>
                                     <div class="text-center"><a class="small" href="forgot-password.html">Forgot
                                             Password?</a></div>
-                                    <div class="text-center"><a class="small" href="{{url_for('auth.register')}}">Create an
+                                    <div class="text-center"><a class="small" href="{{url_for('auth.register')}}">Create
+                                            an
                                             Account!</a></div>
                                 </div>
                             </div>
@@ -78,7 +106,8 @@
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='js/script.min.js') }}"></script>
 </body>
 
