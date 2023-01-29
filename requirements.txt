@@ -2,12 +2,11 @@ autopep8
 beautifulsoup4
 flask
 ipykernel
-matplotlib
 netaddr
-pandas
 pip-chill
 plotly
 requests
+seaborn
 sqlalchemy
 varint
 virtualenv
