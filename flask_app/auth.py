@@ -1,4 +1,9 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for
+from .models import User
+from . import db
+
+# To store password & Hash a password with the given method and salt with a string of the given length.
+from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint('auth', __name__)
 
@@ -30,5 +35,14 @@ def register():
             flash("Password Missmatch", category='error')
         else:
             # Add user to Database
+            new_user = User(email=email,
+                            first_name=first_name,
+                            last_name=last_name,
+                            password=generate_password_hash(password, method='sha256'))
+            db.session.add(new_user)
+            db.session.commit()
+
+            # Return to homepage if password is correct
+            return redirect(url_for('views.dashboard'))
             flash("Registration Sucessful", category='success')
     return render_template('register.html')
