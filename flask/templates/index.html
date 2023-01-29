@@ -47,6 +47,8 @@
 
 <body id="page-top">
     <div id="wrapper">
+
+        <!-- Navbar -->
         <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0"
             style="width: 93px;padding: 0px;padding-right: 0px;padding-left: 4px;background: var(--bs-red);">
             <div class="container-fluid d-flex flex-column p-0"><a
@@ -58,18 +60,21 @@
                             style="font-family: Aldrich, sans-serif;font-style: italic;">cryptoTracker</span></div>
                 </a>
                 <hr class="sidebar-divider my-0">
+
+                <!-- Sidebar URL menu -->
                 <ul class="navbar-nav text-light" id="accordionSidebar">
-                    <li class="nav-item"><a class="nav-link active" href="/"><i
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('home') }}"><i
                                 class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="profile"><i
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}"><i
                                 class="fas fa-user"></i><span>Profile</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="table"><i
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('table') }}"><i
                                 class="fas fa-table"></i><span>Portfolio</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="login"><i
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i
                                 class="far fa-user-circle"></i><span>Login</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="register"><i
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}"><i
                                 class="fas fa-user-circle"></i><span>Register</span></a></li>
                 </ul>
+
                 <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0"
                         id="sidebarToggle" type="button"></button></div><a
                     class="btn btn-sm text-capitalize link-light border rounded-pill d-md-flex" role="button"
@@ -87,18 +92,17 @@
                                 <input id="eth_add" class="bg-light form-control border-0 small" type="text"
                                     placeholder="Enter ERC-20 Address" pattern="0x+[A-F,a-f,0-9]{40}" required=""
                                     style="background: var(--bs-red);">
-                                <button class="btn btn-primary py-0" type="button" onclick="location.href = document.getElementById('eth_add').value;"
+                                <button class="btn btn-primary py-0" type="button"
+                                    onclick="location.href = document.getElementById('eth_add').value;"
                                     style="color: var(--bs-white);background: var(--bs-dark);">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                         </form>
                         <ul class="navbar-nav flex-nowrap ms-auto">
-                            <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link"
-                                    aria-expanded="false" data-bs-toggle="dropdown" href="#"><i
+                            <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"><i
                                         class="fas fa-search"></i></a>
-                                <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in"
-                                    aria-labelledby="searchDropdown">
+                                <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in" aria-labelledby="searchDropdown">
                                     <form class="me-auto navbar-search w-100">
                                         <div class="input-group"><input class="bg-light form-control border-0 small"
                                                 type="text" placeholder="Search for ...">
@@ -108,9 +112,7 @@
                                     </form>
                                 </div>
                             </li>
-                            <li class="nav-item dropdown no-arrow"><a
-                                    class="dropdown-toggle nav-link flex-shrink-0 flex-wrap nav-link"
-                                    aria-expanded="false" data-bs-toggle="dropdown" href="#"
+                            <li class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link flex-shrink-0 flex-wrap nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#"
                                     style="font-size: 0.8vw;font-weight: bold;color: var(--bs-gray-900);font-family: 'Aldrich', sans-serif;"><br>{{erc20}}<br><br></a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
                                     <h6 class="dropdown-header">alerts center</h6><a
@@ -147,11 +149,14 @@
                             </li>
                             <div class="d-none d-sm-block topbar-divider"></div>
                             <li class="nav-item dropdown no-arrow">
-                                <div class="nav-item dropdown show no-arrow"><a class="dropdown-toggle nav-link"
-                                        aria-expanded="true" data-bs-toggle="dropdown" href="#"><span
-                                            class="d-none d-lg-inline me-2 text-gray-600 small">{{username}}</span><img
-                                            class="border rounded-circle img-profile"
-                                            src="{{ url_for('static', filename='img/avatars/man.png') }}"></a>
+
+                                <div class="nav-item dropdown show no-arrow">
+                                    <a class="dropdown-toggle nav-link" aria-expanded="true" data-bs-toggle="dropdown"
+                                        href="#">
+                                        <span class="d-none d-lg-inline me-2 text-gray-600 small">{{username}}</span>
+                                        <img class="border rounded-circle img-profile"
+                                            src="{{ url_for('static', filename='img/avatars/man.png') }}">
+                                    </a>
                                     <div class="dropdown-menu show shadow dropdown-menu-end animated--grow-in"
                                         data-bs-popper="none"><a class="dropdown-item" href="profile.html"><i
                                                 class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profile</a><a
