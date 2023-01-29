@@ -2,8 +2,10 @@ autopep8
 beautifulsoup4
 flask
 ipykernel
+matplotlib
 netaddr
 pip-chill
+plotly
 pytz
 requests
 sqlalchemy
