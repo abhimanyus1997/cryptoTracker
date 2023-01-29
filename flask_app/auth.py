@@ -16,7 +16,7 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
+        email = request.form.get('email').lower()
         password = request.form.get('password')
         # Search for first USeer
         user = User.query.filter_by(email=email).first()
@@ -27,7 +27,7 @@ def login():
                 logging.critical("Hash Matched Successfully")
                 flash("Logged in Successfully", category="success")
                 # Return to homepage if password is correct
-                return redirect(url_for('views.dashboard'))
+                return redirect(url_for('views.user', erc20=user.erc20))
             else:
                 logging.error("Incorrect Password")
                 flash("Incorrect Password ", category="error")
@@ -41,11 +41,12 @@ def login():
 def register():
     if request.method == 'POST':
         #    Geting Form Data
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        email = request.form.get('email')
+        first_name = request.form.get('first_name').lower()
+        last_name = request.form.get('last_name').lower()
+        email = request.form.get('email').lower()
         password = request.form.get('password')
         password_repeat = request.form.get('password_repeat')
+        erc20 = request.form.get('erc20').lower()
         # Avoid Adding Duplicate USer
         user = User.query.filter_by(email=email).first()
         if user:
@@ -57,12 +58,18 @@ def register():
             flash("Short Password. Use 8 or more digit", category='error')
         elif password != password_repeat:
             flash("Password Missmatch", category='error')
+        elif len(erc20) != 42:
+            flash("Wallet Address Must be 42 digit including 0x", category='error')
+        elif erc20[:2] != "0x":
+            flash("Wallet Address Must start with 0x", category='error')
         else:
             # Add user to Database
             new_user = User(email=email,
                             first_name=first_name,
                             last_name=last_name,
-                            password=generate_password_hash(password, method='sha256'))
+                            password=generate_password_hash(password, method='sha256'),
+                            erc20 = erc20
+                            )
             db.session.add(new_user)
             db.session.commit()
 

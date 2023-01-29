@@ -27,3 +27,6 @@ security.log
 instance/database.db
 instance/database.db
 security.log
+instance/database.db
+flask_app/__pycache__/auth.cpython-311.pyc
+instance/database.db

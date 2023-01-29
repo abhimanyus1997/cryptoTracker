@@ -9,9 +9,12 @@ def home():
 
 
 @views.route('/dashboard')  # decorator drfines the
-def dashboard():
+def dashboard(wallet=None):
     # name = "Vitalik B"
-    wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"  # vitalik's address
+    if wallet==None:
+        wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"  # vitalik's address
+    else:
+        wallet = wallet
     # getting balance
     bal, ens = ct.getEther()
     eth, usd = bal[0], bal[1]
