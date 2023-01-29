@@ -10,3 +10,4 @@ requests
 varint
 wcwidth
 gunicorn
+sqlalchemy
