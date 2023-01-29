@@ -2,6 +2,11 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from .models import User
 from . import db
 
+import logging
+logging.basicConfig(filename='security.log', filemode='w',
+            format='%(name)s - %(levelname)s - %(message)s',
+            level=logging.DEBUG)
+
 # To store password & Hash a password with the given method and salt with a string of the given length.
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -10,9 +15,26 @@ auth = Blueprint('auth', __name__)
 #### LOGIN FORM ######
 @auth.route('/login/', methods=['GET', 'POST'])
 def login():
-    data = request.form
-    print(data)
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        # Search for first USeer
+        user = User.query.filter_by(email=email).first()
+        logging.critical("user searched in query")
+        if user:
+            # Check password with hashed password
+            if check_password_hash(user.password, password):
+                logging.critical("Hash Matched Successfully")
+                flash("Logged in Successfully", category="success")
+                # Return to homepage if password is correct
+                return redirect(url_for('views.dashboard'))
+            else:
+                logging.error("Incorrect Password")
+                flash("Incorrect Password ", category="error")
+        else:
+            flash("Email Doesn't Exist", category="error")
     return render_template('login.html')
+
 
 #### REGISTRATION FORM ######
 @auth.route('/register/', methods=['GET', 'POST'])
@@ -24,8 +46,12 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         password_repeat = request.form.get('password_repeat')
+        # Avoid Adding Duplicate USer
+        user = User.query.filter_by(email=email).first()
+        if user:
+            flash("User Already Exist", category='error')
         # Form Validation With Flask
-        if len(first_name) < 2 or len(last_name) < 2:
+        elif len(first_name) < 2 or len(last_name) < 2:
             flash("Short Name", category='error')
         elif len(password) < 8:
             flash("Short Password. Use 8 or more digit", category='error')
