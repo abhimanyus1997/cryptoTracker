@@ -67,6 +67,6 @@ def register():
             db.session.commit()
 
             # Return to homepage if password is correct
-            return redirect(url_for('views.dashboard'))
+            return redirect(url_for('auth.login'))
             flash("Registration Sucessful", category='success')
     return render_template('register.html')
