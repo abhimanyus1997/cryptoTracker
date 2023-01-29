@@ -23,3 +23,4 @@ flask_app/__pycache__/views.cpython-311.pyc
 flask_app/__pycache__/auth.cpython-311.pyc
 flask_app/__pycache__/views.cpython-311.pyc
 flask_app/__pycache__/auth.cpython-311.pyc
+security.log
