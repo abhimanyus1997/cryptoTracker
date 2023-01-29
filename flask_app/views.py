@@ -3,13 +3,13 @@ from flask_app import cryptotracker_scrapping as ct
 
 views = Blueprint('views', __name__)
 
-# @views.route('/')
-# def home():
-#     return "<h1>Test</h1>"
+@views.route('/')
+def home():
+    return "<h1>Test</h1>"
 
 
-@views.route('/')  # decorator drfines the
-def index():
+@views.route('/dashboard')  # decorator drfines the
+def dashboard():
     # name = "Vitalik B"
     wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"  # vitalik's address
     # getting balance
