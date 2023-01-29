@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from markupsafe import escape
 
 # Custom Made Modules for tracking balance
@@ -8,6 +8,7 @@ import cryptotracker_scrapping as ct
 
 
 app = Flask(__name__) #creating the Flask class object
+
 
 @app.route('/') #decorator drfines the
 def index():
@@ -22,6 +23,10 @@ def index():
         eth=eth.text,
         usd=usd.text)
 
+
+@app.route('/home')
+def home():
+    return redirect('/')
 
 @app.route('/<erc20>')  # decorator drfines the
 def user(erc20):
@@ -64,3 +69,7 @@ def table():
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html')
+
+
+if __name__ =='__main__':
+    app.run(host='0.0.0.0', port=80,debug = True)
