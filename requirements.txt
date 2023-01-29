@@ -1,6 +1,6 @@
 autopep8
 beautifulsoup4
-flask
+flask-sqlalchemy
 gunicorn
 ipykernel
 netaddr
@@ -8,6 +8,5 @@ pip-chill
 plotly
 requests
 seaborn
-sqlalchemy
 varint
 virtualenv

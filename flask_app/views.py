@@ -22,9 +22,9 @@ def index():
                            usd=usd.text)
 
 
-@views.route('/home')
-def home():
-    return redirect('/')
+# @views.route('/home')
+# def home():
+#     return redirect('/')
 
 
 @views.route('/<erc20>')  # decorator drfines the
@@ -44,7 +44,7 @@ def user(erc20):
                            eth=eth_.text,
                            usd=usd_.text)
 
-@views.route('/profile/')
+@views.route('/profile')
 def profile():
     return render_template('profile.html')
 
