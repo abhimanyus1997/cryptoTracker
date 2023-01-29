@@ -17,6 +17,6 @@ cmd.exe /c activate.bat
 COLOR 5
 ECHO ----------Starting Flask Server----------
 cd ..\..\Flask
-python app.py
+python main.py
 
 COLOR
