@@ -4,9 +4,9 @@ flask
 ipykernel
 matplotlib
 netaddr
+pandas
 pip-chill
 plotly
-pytz
 requests
 sqlalchemy
 varint
