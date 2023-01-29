@@ -1,5 +1,13 @@
 flask/__pycache__/server.cpython-39.pyc
 tempCodeRunnerFile.bat
+flask/__pycache__/
 flask/__pycache__/cryptotracker_scrapping.cpython-39.pyc
 flask/__pycache__/cryptotracker_scrapping.cpython-310.pyc
 flask/__pycache__/cryptotracker_scrapping.cpython-311.pyc
+flask_app/__pycache__/__init__.cpython-311.pyc
+flask_app/__pycache__/views.cpython-311.pyc
+flask_app/__pycache__/cryptotracker_scrapping.cpython-311.pyc
+flask_app/__pycache__/__init__.cpython-311.pyc
+flask_app/__pycache__/views.cpython-311.pyc
+flask_app/__pycache__/__init__.cpython-311.pyc
+flask_app/__pycache__/views.cpython-311.pyc
