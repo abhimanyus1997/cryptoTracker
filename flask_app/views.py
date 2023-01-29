@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, request, flash, redirect
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_app import cryptotracker_scrapping as ct
 
 views = Blueprint('views', __name__)
 
 @views.route('/')
 def home():
-    return "<h1>Test</h1>"
+    return redirect(url_for('auth.login'))
 
 
 @views.route('/dashboard')  # decorator drfines the
