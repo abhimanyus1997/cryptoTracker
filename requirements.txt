@@ -5,6 +5,7 @@ flask-sqlalchemy
 gunicorn
 ipykernel
 netaddr
+openpyxl
 pip-chill
 plotly
 requests
