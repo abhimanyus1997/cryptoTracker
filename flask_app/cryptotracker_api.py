@@ -5,7 +5,7 @@ import pandas as pd
 base_url = "https://api.ethplorer.io"
 
 
-def getTokensCSV(address, filename=f"tokens-{address}"):
+def getTokensCSV(address, filename="export_csv"):
     """
     Returns no of tokens for an address and saves a CSV
     """
@@ -13,11 +13,16 @@ def getTokensCSV(address, filename=f"tokens-{address}"):
     url = base_url + endpoint
     response = requests.get(url)
     if response.status_code == 200:
+        # If successful save response
         token_info_response = json.loads(response.text)
-    else:
         token_list = token_info_response['tokens']
-        #returns no of tokens
-        no_of_tokens = len(token_list)
+    else:
+        # Returns zero if no token found or api error
+        token_list = []
+        return 0
+
+    #returns no of tokens
+    no_of_tokens = len(token_list)
 
     #code to generate CSV
     flag = True
