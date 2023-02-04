@@ -1,3 +1,4 @@
+import numpy as np
 import requests
 import json
 import pandas as pd
@@ -41,3 +42,24 @@ def getTokensCSV(address, export_csv=False, filename="export_csv"):
             df = pd.concat([df, info], axis=0)
             df.to_csv(f"{filename}.csv")
     return no_of_tokens
+
+
+def readCSV(filename="export_csv"):
+    """
+    Reads CSV and returns tuple of
+    return -> (symbols, price, holding, worth in USD)
+    """
+    df = pd.read_csv(f"{filename}.csv")
+    symbols = list(df.symbol)
+    prices = list(df.price)
+    # Convert holdings from wei
+    holding = [bal_wei*1E-18 for bal_wei in list(df.balance)]
+    pricelist = []
+    for nth_price in prices:
+        if nth_price:
+            pricelist.append(nth_price["rate"])
+        else:
+            pricelist.append(0)
+    a = np.multiply(np.array(holding), np.array(pricelist))
+    value = ["{:0.2f}".format(x) for x in a]
+    return symbols, pricelist, holding, value

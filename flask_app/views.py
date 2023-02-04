@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_app import cryptotracker_scrapping as ct
 from flask_app import cryptotracker_api as cta
+import pandas as pd
 
 views = Blueprint('views', __name__)
 
@@ -47,12 +48,16 @@ def user(erc20):
         ens = "User"
     else:
         ens = ens.text
+    # Reading data from CSV
+    df = pd.read_csv("token_generated.csv")
+    tokens = list(df.symbol)
     return render_template('index.html',
                            username=ens,
                            erc20=erc20,
                            eth=eth_.text,
                            usd=usd_.text,
-                           nTokens=nTokens)
+                           nTokens=nTokens,
+                           tokens=tokens)
 
 
 @views.route('/profile')
