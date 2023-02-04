@@ -321,30 +321,31 @@
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
                                     <h6 class="text-primary fw-bold m-0">WALLET DETAILS</h6>
-                                    <p> Tokens:<br> {{tokens}}</p>
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
                                                 <tr>
                                                     <th>Token</th>
-                                                    <th>Balance</th>
                                                     <th>Price</th>
-                                                    <th>Value</th>
+                                                    <th>Holding</th>
+                                                    <th>Value (in USD)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                {%- for row in data %}
                                                 <tr>
+                                                    <td>{{ row[0] }}</td>
+                                                    <td>${{ row[1]|float}}</td>
+                                                    <td>{{ row[2] }}</td>
+                                                    <td>${{ row[3]|float}}</td>
+                                                </tr>
+                                                {%- endfor %}
+                                                <!-- <tr>
                                                     <td>ETH</td>
                                                     <td>0</td>
                                                     <td>0</td>
                                                     <td>0</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>BNB</td>
-                                                    <td>0</td>
-                                                    <td>0</td>
-                                                    <td>0</td>
-                                                </tr>
+                                                </tr> -->
                                             </tbody>
                                         </table>
                                     </div>

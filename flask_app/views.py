@@ -50,14 +50,18 @@ def user(erc20):
         ens = ens.text
     # Reading data from CSV
     df = pd.read_csv("token_generated.csv")
-    tokens = list(df.symbol)
+
+    # CSV reader
+    symbols, pricelist, holding, value = cta.readCSV("token_generated")
+    data = list(zip(symbols, pricelist, holding, value))
     return render_template('index.html',
                            username=ens,
                            erc20=erc20,
                            eth=eth_.text,
                            usd=usd_.text,
                            nTokens=nTokens,
-                           tokens=tokens)
+                           data=data
+                           )
 
 
 @views.route('/profile')
