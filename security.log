@@ -1,2 +1,28 @@
 werkzeug - WARNING -  * Debugger is active!
 werkzeug - INFO -  * Debugger PIN: 235-458-874
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:56] "[32mGET / HTTP/1.1[0m" 302 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:56] "GET /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:56] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:57] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:57] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:57] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:57] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:57] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:13:57] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - CRITICAL - Hash Matched Successfully
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:02] "[32mPOST /login/ HTTP/1.1[0m" 302 -
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
+urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 None
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:03] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:03] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/js/Chart.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 10:14:04] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
