@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_app import cryptotracker_scrapping as ct
+from flask_app import cryptotracker_api as cta
 
 views = Blueprint('views', __name__)
+
 
 @views.route('/')
 def home():
@@ -10,15 +12,17 @@ def home():
 
 @views.route('/dashboard')  # decorator drfines the
 def dashboard(wallet=None):
-    # name = "Vitalik B"
-    if wallet==None:
+    if wallet == None:
         wallet = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"  # vitalik's address
     else:
         wallet = wallet
+    # generating csv
+    nTokens = cta.getTokensCSV(address=wallet, filename=f"{wallet}-export-csv")
     # getting balance
     bal, ens = ct.getEther()
     eth, usd = bal[0], bal[1]
-    return render_template('index.html', title='Welcome',
+    return render_template('index.html',
+                           nTokens=nTokens,
                            username=ens.text,
                            erc20=wallet,
                            eth=eth.text,
@@ -36,6 +40,8 @@ def user(erc20):
     # getting balance
     bal, ens = ct.getEther(erc20)
     eth_, usd_ = bal[0], bal[1]
+    # generating csv
+    nTokens = cta.getTokensCSV(address=erc20, filename=f"{erc20}-export-csv")
     # If No ENS
     if ens == None:
         ens = "User"
@@ -45,7 +51,9 @@ def user(erc20):
                            username=ens,
                            erc20=erc20,
                            eth=eth_.text,
-                           usd=usd_.text)
+                           usd=usd_.text,
+                           nTokens=nTokens)
+
 
 @views.route('/profile')
 def profile():
