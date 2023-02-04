@@ -2,6 +2,8 @@ import numpy as np
 import requests
 import json
 import pandas as pd
+import logging
+
 
 base_url = "https://api.ethplorer.io"
 
@@ -49,17 +51,22 @@ def readCSV(filename="export_csv"):
     Reads CSV and returns tuple of
     return -> (symbols, price, holding, worth in USD)
     """
-    df = pd.read_csv(f"{filename}.csv")
-    symbols = list(df.symbol)
-    prices = list(df.price)
+    df = pd.read_csv(f"{filename}.csv", index_col=False)
+    symbol_list = list(df.symbol)
+    price_list_uncleaned = list(df.price)
     # Convert holdings from wei
-    holding = [bal_wei*1E-18 for bal_wei in list(df.balance)]
-    pricelist = []
-    for nth_price in prices:
-        if nth_price:
-            pricelist.append(nth_price["rate"])
+    holding_list = [bal_wei*1E-18 for bal_wei in list(df.balance)]
+    price_list = []
+    value_list =[]
+    # print(type(price_list_uncleaned))
+    for nth_price in price_list_uncleaned:
+        if nth_price == 'False':
+            price_list.append(0)
         else:
-            pricelist.append(0)
-    a = np.multiply(np.array(holding), np.array(pricelist))
-    value = ["{:0.2f}".format(x) for x in a]
-    return symbols, pricelist, holding, value
+            # convert raw string to dict
+            nth_price_dic = eval(nth_price)
+            price_list.append(nth_price_dic["rate"])
+    value_float = np.multiply(np.array(holding_list), np.array(price_list))
+    value_list = ["{:0.2f}".format(x) for x in value_float]
+
+    return symbol_list, price_list, holding_list, value_list

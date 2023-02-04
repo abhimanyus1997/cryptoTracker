@@ -1,0 +1,5 @@
+,address,name,symbol,lastUpdated,owner,totalSupply,issuancesCount,holdersCount,ethTransfersCount,decimals,price,balance,totalIn,totalOut,rawBalance
+0,0xd1e5b0ff1287aa9f9a268759062e4ab08b9dacbe,.crypto,UD,1674822889,,0,0,25239,0,0,False,2,0,0,2
+0,0x932261f9fc8da46c4a22e31b45c4de60623848bf,Zerion DNA 1.0,DNA,1675491515,0x96ebc0797ded0248a71eeca231505182179ee6fd,75150,0,56734,,,False,1,0,0,1
+0,0x5bf5bcc5362f88721167c1068b58c60cad075aac,Proof Of Stake Pages,PoSp,1664256247,0xb010ca9be09c382a9f31b79493bb232bcc319f01,71842,0,71745,75792,0,False,1,0,0,1
+0,0x7409f5b06c370997b9ef7ba263c6987bbcc1c6ff,Galxe ETH Merge NFT,Galxe ETH Merge,1674825570,0xd88f19d444019b3726d83099c8c1dd9b85f19bac,29418,0,28517,0,0,False,1,0,0,1

@@ -1,2 +1,18 @@
 werkzeug - WARNING -  * Debugger is active!
 werkzeug - INFO -  * Debugger PIN: 235-458-874
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
+urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 None
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.ethplorer.io:443
+urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/0xd7e9d18153de624713c18b1ca18a238c42033ea5?apiKey=freekey HTTP/1.1" 200 None
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:00] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:02] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:02] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:02] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
