@@ -1,18 +1,24 @@
 werkzeug - WARNING -  * Debugger is active!
 werkzeug - INFO -  * Debugger PIN: 235-458-874
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[33mGET /static/js/bootstrap.bundle.min.js.map HTTP/1.1[0m" 404 -
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
-urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 None
+urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/export_csv.csv HTTP/1.1" 200 None
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.ethplorer.io:443
-urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/0xd7e9d18153de624713c18b1ca18a238c42033ea5?apiKey=freekey HTTP/1.1" 200 None
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:00] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:01] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:02] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:02] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 12:51:02] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/export_csv.csv?apiKey=freekey HTTP/1.1" 406 None
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "GET /export_csv.csv HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:32] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:32] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:32] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -

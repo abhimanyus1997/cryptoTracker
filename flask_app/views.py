@@ -49,10 +49,10 @@ def user(erc20):
     else:
         ens = ens.text
     # Reading data from CSV
-    df = pd.read_csv("token_generated.csv")
+    #df = pd.read_csv("token_generated.csv")
 
     # CSV reader
-    symbols, pricelist, holding, value = cta.readCSV("token_generated")
+    symbols, pricelist, holding, value = cta.readCSV("export_csv.csv")
     data = list(zip(symbols, pricelist, holding, value))
     return render_template('index.html',
                            username=ens,

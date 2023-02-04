@@ -4,11 +4,11 @@ import json
 import pandas as pd
 import logging
 
-
+FILE_NAME = "export_csv.csv"
 base_url = "https://api.ethplorer.io"
 
 
-def getTokensCSV(address, export_csv=False, filename="export_csv"):
+def getTokensCSV(address, export_csv=False, filename=FILE_NAME):
     """
     Returns no of tokens for an address and saves a CSV
     """
@@ -42,16 +42,16 @@ def getTokensCSV(address, export_csv=False, filename="export_csv"):
                 df = pd.DataFrame(columns=columns)
                 flag = False
             df = pd.concat([df, info], axis=0)
-            df.to_csv(f"{filename}.csv")
+            df.to_csv(filename)
     return no_of_tokens
 
 
-def readCSV(filename="export_csv"):
+def readCSV(filename=FILE_NAME):
     """
     Reads CSV and returns tuple of
     return -> (symbols, price, holding, worth in USD)
     """
-    df = pd.read_csv(f"{filename}.csv", index_col=False)
+    df = pd.read_csv(filename, index_col=False)
     symbol_list = list(df.symbol)
     price_list_uncleaned = list(df.price)
     # Convert holdings from wei
