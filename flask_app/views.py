@@ -3,6 +3,8 @@ from flask_app import cryptotracker_scrapping as ct
 from flask_app import cryptotracker_api as cta
 import pandas as pd
 
+CSV_PATH = "flask_app/static/userfiles"
+
 views = Blueprint('views', __name__)
 
 
@@ -18,7 +20,8 @@ def dashboard(wallet=None):
     else:
         wallet = wallet
     # generating csv
-    nTokens = cta.getTokensCSV(address=wallet, filename=f"{wallet}-export-csv")
+    nTokens = cta.getTokensCSV(
+        address=wallet, filename=f"{CSV_PATH}/{wallet}-export-csv.csv")
     # getting balance
     bal, ens = ct.getEther()
     eth, usd = bal[0], bal[1]
@@ -36,23 +39,26 @@ def dashboard(wallet=None):
 
 
 @views.route('/<erc20>')  # decorator drfines the
-def user(erc20):
-    name = "User"
+def user(erc20: str):
+    # Lowering wallet address
+    erc20 = erc20.lower()
+    # Full file path of user
+    FILEPATH = f"{CSV_PATH}/{erc20}-export-csv.csv"
     # getting balance
     bal, ens = ct.getEther(erc20)
     eth_, usd_ = bal[0], bal[1]
     # generating csv
-    nTokens = cta.getTokensCSV(address=erc20, filename=f"{erc20}-export-csv")
+    nTokens = cta.getTokensCSV(address=erc20, filename=FILEPATH)
     # If No ENS
     if ens == None:
         ens = "User"
     else:
         ens = ens.text
     # Reading data from CSV
-    #df = pd.read_csv("token_generated.csv")
+    # df = pd.read_csv("token_generated.csv")
 
     # CSV reader
-    symbols, pricelist, holding, value = cta.readCSV("export_csv.csv")
+    symbols, pricelist, holding, value = cta.readCSV(FILEPATH)
     data = list(zip(symbols, pricelist, holding, value))
     return render_template('index.html',
                            username=ens,

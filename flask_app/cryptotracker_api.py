@@ -8,10 +8,11 @@ FILE_NAME = "export_csv.csv"
 base_url = "https://api.ethplorer.io"
 
 
-def getTokensCSV(address, export_csv=False, filename=FILE_NAME):
+def getTokensCSV(address: str, export_csv: bool = True, filename : str = FILE_NAME):
     """
     Returns no of tokens for an address and saves a CSV
     """
+    address = address.lower()
     endpoint = f"/getAddressInfo/{address}?apiKey=freekey"
     url = base_url + endpoint
     response = requests.get(url)
@@ -23,10 +24,8 @@ def getTokensCSV(address, export_csv=False, filename=FILE_NAME):
         # Returns zero if no token found or api error
         token_list = []
         return 0
-
     #returns no of tokens
     no_of_tokens = len(token_list)
-
     #code to generate CSV
     if export_csv:
         flag = True
@@ -46,7 +45,7 @@ def getTokensCSV(address, export_csv=False, filename=FILE_NAME):
     return no_of_tokens
 
 
-def readCSV(filename=FILE_NAME):
+def readCSV(filename : str=FILE_NAME):
     """
     Reads CSV and returns tuple of
     return -> (symbols, price, holding, worth in USD)
@@ -60,10 +59,11 @@ def readCSV(filename=FILE_NAME):
     value_list =[]
     # print(type(price_list_uncleaned))
     for nth_price in price_list_uncleaned:
-        if nth_price == 'False':
+        if nth_price == 'False' or nth_price == False:
             price_list.append(0)
         else:
             # convert raw string to dict
+            logging.debug(f"nth_price: {nth_price}\nType of nth_price: {nth_price}")
             nth_price_dic = eval(nth_price)
             price_list.append(nth_price_dic["rate"])
     value_float = np.multiply(np.array(holding_list), np.array(price_list))
