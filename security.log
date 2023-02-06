@@ -1,24 +1,46 @@
 werkzeug - WARNING -  * Debugger is active!
 werkzeug - INFO -  * Debugger PIN: 235-458-874
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:19] "[33mGET /static/js/bootstrap.bundle.min.js.map HTTP/1.1[0m" 404 -
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
-urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/export_csv.csv HTTP/1.1" 200 None
+urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 None
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.ethplorer.io:443
-urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/export_csv.csv?apiKey=freekey HTTP/1.1" 406 None
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "GET /export_csv.csv HTTP/1.1" 200 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:30] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:31] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:32] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:32] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2023 13:02:32] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/0xd7e9d18153de624713c18b1ca18a238c42033ea5?apiKey=freekey HTTP/1.1" 200 None
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
+urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0x9c85c376a50721c75e4e015ac22efe066dbb73ec HTTP/1.1" 200 None
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.ethplorer.io:443
+urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/0x9c85c376a50721c75e4e015ac22efe066dbb73ec?apiKey=freekey HTTP/1.1" 200 None
+root - DEBUG - nth_price: {'rate': 6.820925943601977, 'diff': -5.91, 'diff7d': 3.12, 'ts': 1675679760, 'marketCapUsd': 5198973369.821366, 'availableSupply': 762209326.5354977, 'volume24h': 149174574.38400862, 'volDiff1': 17.076013074821276, 'volDiff7': 44.44428318500891, 'volDiff30': 132.7665859476332, 'diff30d': 24.545148654161835, 'bid': 7.97, 'currency': 'USD'}
+Type of nth_price: {'rate': 6.820925943601977, 'diff': -5.91, 'diff7d': 3.12, 'ts': 1675679760, 'marketCapUsd': 5198973369.821366, 'availableSupply': 762209326.5354977, 'volume24h': 149174574.38400862, 'volDiff1': 17.076013074821276, 'volDiff7': 44.44428318500891, 'volDiff30': 132.7665859476332, 'diff30d': 24.545148654161835, 'bid': 7.97, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 0.999788325193383, 'diff': -0.01, 'diff7d': -0.02, 'ts': 1675679760, 'marketCapUsd': 41965122740.77354, 'availableSupply': 41974007580.71112, 'volume24h': 3109329041.607986, 'volDiff1': 15.502039214243979, 'volDiff7': 4.316414573801524, 'volDiff30': 70.32603863386419, 'diff30d': -0.024035050137612757, 'bid': 1.001, 'currency': 'USD'}
+Type of nth_price: {'rate': 0.999788325193383, 'diff': -0.01, 'diff7d': -0.02, 'ts': 1675679760, 'marketCapUsd': 41965122740.77354, 'availableSupply': 41974007580.71112, 'volume24h': 3109329041.607986, 'volDiff1': 15.502039214243979, 'volDiff7': 4.316414573801524, 'volDiff30': 70.32603863386419, 'diff30d': -0.024035050137612757, 'bid': 1.001, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 0.3093719627142575, 'diff': -8.91, 'diff7d': 53.59, 'ts': 1675679760, 'marketCapUsd': 145262218.0495603, 'availableSupply': 469539051.875, 'volume24h': 27104192.84140411, 'volDiff1': -38.313133788006446, 'volDiff7': 345.43371258561206, 'volDiff30': 138.4971293274881, 'diff30d': 90.21277530949419, 'bid': 1.44, 'currency': 'USD'}
+Type of nth_price: {'rate': 0.3093719627142575, 'diff': -8.91, 'diff7d': 53.59, 'ts': 1675679760, 'marketCapUsd': 145262218.0495603, 'availableSupply': 469539051.875, 'volume24h': 27104192.84140411, 'volDiff1': -38.313133788006446, 'volDiff7': 345.43371258561206, 'volDiff30': 138.4971293274881, 'diff30d': 90.21277530949419, 'bid': 1.44, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 1630.955376552871, 'diff': -2.18, 'diff7d': 2.31, 'ts': 1675679760, 'marketCapUsd': 0, 'availableSupply': 0, 'volume24h': 1154491421.4918864, 'volDiff1': 9.884016192373267, 'volDiff7': 15.829826493380665, 'volDiff30': 138.664553654828, 'diff30d': 28.928995968835636, 'bid': 2872.01, 'currency': 'USD'}
+Type of nth_price: {'rate': 1630.955376552871, 'diff': -2.18, 'diff7d': 2.31, 'ts': 1675679760, 'marketCapUsd': 0, 'availableSupply': 0, 'volume24h': 1154491421.4918864, 'volDiff1': 9.884016192373267, 'volDiff7': 15.829826493380665, 'volDiff30': 138.664553654828, 'diff30d': 28.928995968835636, 'bid': 2872.01, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 689.7575098852602, 'diff': -3.05, 'diff7d': 6.28, 'ts': 1675679760, 'marketCapUsd': 674328349.6337907, 'availableSupply': 977631.03695089, 'volume24h': 34916658.82670212, 'volDiff1': 14.351878446647532, 'volDiff7': 28.232078598740287, 'volDiff30': 76.37991103522464, 'diff30d': 27.446635412555125, 'bid': 1580.77, 'currency': 'USD'}
+Type of nth_price: {'rate': 689.7575098852602, 'diff': -3.05, 'diff7d': 6.28, 'ts': 1675679760, 'marketCapUsd': 674328349.6337907, 'availableSupply': 977631.03695089, 'volume24h': 34916658.82670212, 'volDiff1': 14.351878446647532, 'volDiff7': 28.232078598740287, 'volDiff30': 76.37991103522464, 'diff30d': 27.446635412555125, 'bid': 1580.77, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 0.1592848994926919, 'diff': -10.12, 'diff7d': 2.24, 'ts': 1675679760, 'marketCapUsd': 65922350.84155314, 'availableSupply': 413864409.31632507, 'volume24h': 13942355.31011234, 'volDiff1': 1580.306642822099, 'bid': 0.262457, 'volDiff7': 44949.41145832026, 'volDiff30': 19905.06463422652, 'diff30d': -34.09832222010779, 'currency': 'USD'}
+Type of nth_price: {'rate': 0.1592848994926919, 'diff': -10.12, 'diff7d': 2.24, 'ts': 1675679760, 'marketCapUsd': 65922350.84155314, 'availableSupply': 413864409.31632507, 'volume24h': 13942355.31011234, 'volDiff1': 1580.306642822099, 'bid': 0.262457, 'volDiff7': 44949.41145832026, 'volDiff30': 19905.06463422652, 'diff30d': -34.09832222010779, 'currency': 'USD'}
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:19] "GET /0x9C85C376A50721c75E4E015AC22EfE066dbB73EC HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
