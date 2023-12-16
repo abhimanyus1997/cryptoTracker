@@ -1,34 +1,32 @@
-// Updated function to fetch Bitcoin historical data from CoinGecko API
-async function fetchBitcoinHistoricalData() {
+async function fetchCryptoHistoricalData(cryptoSymbol) {
     try {
-        const response = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7');
+        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoSymbol}/market_chart?vs_currency=usd&days=7`);
         if (!response.ok) {
             throw new Error('Network response was not ok.');
         }
         const data = await response.json();
         return data.prices; // Assuming the 'prices' field contains the historical data
     } catch (error) {
-        console.error('There was a problem fetching Bitcoin historical data:', error);
+        console.error(`There was a problem fetching ${cryptoSymbol} historical data:`, error);
         return null;
     }
 }
 
-// Updated function to update chart area with historical Bitcoin data using ID
-async function updateChartWithBitcoinData() {
-    const chartCanvas = document.getElementById('bitcoin-chart');
-    const bitcoinData = await fetchBitcoinHistoricalData();
+async function updateChartWithCryptoData(cryptoSymbol, chartId, label, backgroundColor, borderColor) {
+    const chartCanvas = document.getElementById(chartId);
+    const cryptoData = await fetchCryptoHistoricalData(cryptoSymbol);
 
-    if (bitcoinData && chartCanvas) {
+    if (cryptoData && chartCanvas) {
         const chart = new Chart(chartCanvas, {
             type: 'line',
             data: {
-                labels: bitcoinData.map(entry => new Date(entry[0]).toLocaleDateString()), // Assuming timestamp is in milliseconds
+                labels: cryptoData.map(entry => new Date(entry[0]).toLocaleDateString()), // Assuming timestamp is in milliseconds
                 datasets: [{
-                    label: 'Bitcoin Price (USD)',
+                    label: `${label} Price (USD)`,
                     fill: true,
-                    data: bitcoinData.map(entry => entry[1]),
-                    backgroundColor: 'rgba(247, 202, 24, 0.3)', // Yellowish background color
-                    borderColor: 'rgba(247, 202, 24, 1)', // Yellowish border color
+                    data: cryptoData.map(entry => entry[1]),
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
                 }]
             },
             options: {
@@ -53,5 +51,8 @@ async function updateChartWithBitcoinData() {
     }
 }
 
-// Call the function to update the chart when the page loads or wherever needed
-updateChartWithBitcoinData();
+// Call the function to update the Bitcoin chart when the page loads or wherever needed
+updateChartWithCryptoData('bitcoin', 'bitcoin-chart', 'Bitcoin', 'rgba(247, 202, 24, 0.3)', 'rgba(247, 202, 24, 1)');
+
+// Call the function to update the Ethereum chart when the page loads or wherever needed
+updateChartWithCryptoData('ethereum', 'ethereum-chart', 'Ethereum', 'rgba(125, 80, 247, 0.3)', 'rgba(125, 80, 247, 1)');

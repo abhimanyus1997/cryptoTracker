@@ -16,6 +16,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"
         integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="js/script.js"></script>
     <script src="js/topcoins.js"></script>
 </head>
@@ -51,19 +55,21 @@
                             <li class="nav-item dropdown no-arrow mx-1">
                                 <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link"
                                         aria-expanded="false" data-bs-toggle="dropdown" href="#"><span
-                                            class="badge bg-danger badge-counter">3+</span><i
+                                            class="badge bg-danger badge-counter">1</span><i
                                             class="fas fa-bell fa-fw"></i></a>
                                     <div class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
                                         <h6 class="dropdown-header">alerts center</h6><a
                                             class="dropdown-item d-flex align-items-center" href="#">
                                             <div class="me-3">
-                                                <div class="bg-primary icon-circle"><i
+                                                <div class="bg-danger icon-circle"><i
                                                         class="fas fa-file-alt text-white"></i></div>
                                             </div>
-                                            <div><span class="small text-gray-500">December 12, 2019</span>
-                                                <p>A new monthly report is ready to download!</p>
+                                            <div><span class="small text-gray-500">Disclaimer</span>
+                                                <p>The data is fetched using Coingecko and Coincap for educational
+                                                    purposes only.
+                                                    Please refrain from using it for financial decisions.</p>
                                             </div>
-                                        </a><a class="dropdown-item d-flex align-items-center" href="#">
+                                            <!-- </a><a class="dropdown-item d-flex align-items-center" href="#">
                                             <div class="me-3">
                                                 <div class="bg-success icon-circle"><i
                                                         class="fas fa-donate text-white"></i></div>
@@ -79,13 +85,14 @@
                                             <div><span class="small text-gray-500">December 2, 2019</span>
                                                 <p>Spending Alert: We've noticed unusually high spending for your
                                                     account.</p>
-                                            </div>
+                                            </div> -->
                                         </a><a class="dropdown-item text-center small text-gray-500" href="#">Show All
                                             Alerts</a>
                                     </div>
                                 </div>
                             </li>
-                            <li class="nav-item dropdown no-arrow mx-1">
+
+                            <!-- <li class="nav-item dropdown no-arrow mx-1">
                                 <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link"
                                         aria-expanded="false" data-bs-toggle="dropdown" href="#"><span
                                             class="badge bg-danger badge-counter">7</span><i
@@ -140,21 +147,22 @@
                                 </div>
                                 <div class="shadow dropdown-list dropdown-menu dropdown-menu-end"
                                     aria-labelledby="alertsDropdown"></div>
-                            </li>
+                            </li> -->
+
                             <div class="d-none d-sm-block topbar-divider"></div>
                             <li class="nav-item dropdown no-arrow">
                                 <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link"
                                         aria-expanded="false" data-bs-toggle="dropdown" href="#"><span
                                             class="d-none d-lg-inline me-2 text-gray-600 small">Abhimanyu</span><img
                                             class="border rounded-circle img-profile"
-                                            src="assets/img/avatars/avatar1.jpeg"></a>
+                                            src="https://avatars.githubusercontent.com/u/20315792?v=4"></a>
                                     <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in"><a
-                                            class="dropdown-item" href="#"><i
-                                                class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profile</a><a
-                                            class="dropdown-item" href="#"><i
-                                                class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Settings</a><a
-                                            class="dropdown-item" href="#"><i
-                                                class="fas fa-list fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Activity
+                                            class="dropdown-item" href="https://github.com/abhimanyus1997"><i
+                                                class="fas fa-github fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Github</a><a
+                                            class="dropdown-item" href="https://www.linkedin.com/in/abhimanyus1997/"><i
+                                                class="fas fa-linkedin-in fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;LinkedIn</a><a
+                                            class="dropdown-item" href="https://abhimanyus1997.github.io/"><i
+                                                class="fas fa-home fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Portfolio
                                             log</a>
                                         <div class="dropdown-divider"></div><a class="dropdown-item" href="#"><i
                                                 class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Logout</a>
@@ -166,18 +174,26 @@
                 </nav>
                 <div class="container-fluid">
                     <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                        <h3 class="text-dark mb-0">cryptoTracker Lite - Dashboard</h3><a
-                            class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#"><i
-                                class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report</a>
+                        <h3 class="text-dark mb-0">cryptoTracker Lite - Dashboard</h3>
+                        <a id="downloadLink" class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button"
+                            href="#">
+                            <i class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report
+                        </a>
                     </div>
+
+
+                    <!-- FIRST ROW -->
+                    <!-- FOR LIVE DATA OF COINS -->
                     <div class="row">
+                        <!-- BTC LIVE -->
                         <div class="col-md-6 col-xl-3 mb-4">
                             <div class="card shadow border-start-primary py-2">
                                 <div class="card-body">
                                     <div class="row align-items-center no-gutters">
                                         <div class="col me-2">
                                             <div class="text-uppercase text-primary fw-bold text-xs mb-1">
-                                                <span>BITCOIN</span></div>
+                                                <span>BITCOIN</span>
+                                            </div>
                                             <div class="text-dark fw-bold h5 mb-0"><span id="valuesBitcoin">$0</span>
                                             </div>
                                         </div>
@@ -193,13 +209,15 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- ETH LIVE -->
                         <div class="col-md-6 col-xl-3 mb-4">
                             <div class="card shadow border-start-success py-2">
                                 <div class="card-body">
                                     <div class="row align-items-center no-gutters">
                                         <div class="col me-2">
                                             <div class="text-uppercase text-success fw-bold text-xs mb-1">
-                                                <span>Etherum</span></div>
+                                                <span>Etherum</span>
+                                            </div>
                                             <div class="text-dark fw-bold h5 mb-0"><span id="valuesEthereum">$0</span>
                                             </div>
                                         </div>
@@ -215,11 +233,56 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Binance Coin (BNB) Chart Column -->
+                        <div class="col-md-6 col-xl-3 mb-4">
+                            <div class="card shadow border-start-info py-2">
+                                <div class="card-body">
+                                    <div class="row align-items-center no-gutters">
+                                        <div class="col me-2">
+                                            <div class="text-uppercase text-info fw-bold text-xs mb-1">
+                                                <span>Binance Coin (BNB)</span>
+                                            </div>
+                                            <div class="text-dark fw-bold h5 mb-0">
+                                                <span id="valuesBNB">$0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <!-- BNB icon -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Solana (SOL) Chart Column -->
+                        <div class="col-md-6 col-xl-3 mb-4">
+                            <div class="card shadow border-start-warning py-2">
+                                <div class="card-body">
+                                    <div class="row align-items-center no-gutters">
+                                        <div class="col me-2">
+                                            <div class="text-uppercase text-warning fw-bold text-xs mb-1">
+                                                <span>Solana (SOL)</span>
+                                            </div>
+                                            <div class="text-dark fw-bold h5 mb-0">
+                                                <span id="valuesSOL">$0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <!-- SOL icon -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
+
                     <div class="row">
 
                         <!-- BITCOIN CHART -->
-                        <div class="col-lg-7 col-xl-8">
+                        <div class="col-lg-6 col-xl-6">
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="fw-bold m-0" style="color:#997404">Bitcoin Price (7 Days)</h6>
@@ -243,7 +306,53 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-5 col-xl-4">
+                        <!-- ETHEREUM CHART -->
+                        <div class="col-lg-6 col-xl-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold m-0" style="color: #4b0082;">Ethereum Price (7 Days)</h6>
+                                    <div class="dropdown no-arrow">
+                                        <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false"
+                                            data-bs-toggle="dropdown" type="button">
+                                            <i class="fas fa-ellipsis-v text-gray-400"></i>
+                                        </button>
+                                        <!-- Dropdown menu content here if needed -->
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-area">
+                                        <canvas id="ethereum-chart" data-bss-chart="{
+                                                &quot;type&quot;:&quot;line&quot;,
+                                                &quot;data&quot;:{
+                                                    &quot;labels&quot;:[],
+                                                    &quot;datasets&quot;:[{
+                                                        &quot;label&quot;:&quot;Ethereum Price&quot;,
+                                                        &quot;fill&quot;:true,
+                                                        &quot;data&quot;:[],
+                                                        &quot;backgroundColor&quot;:&quot;rgba(78, 115, 223, 0.05)&quot;,
+                                                        &quot;borderColor&quot;:&quot;rgba(78, 115, 223, 1)&quot;
+                                                    }]
+                                                },
+                                                &quot;options&quot;:{
+                                                    &quot;maintainAspectRatio&quot;:false,
+                                                    &quot;legend&quot;:{&quot;display&quot;:false},
+                                                    &quot;scales&quot;:{
+                                                        &quot;xAxes&quot;:[{
+                                                            /* x-axis configuration */
+                                                        }],
+                                                        &quot;yAxes&quot;:[{
+                                                            /* y-axis configuration */
+                                                        }]
+                                                    }
+                                                }}">
+                                        </canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- <div class="col-lg-5 col-xl-4">
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="text-primary fw-bold m-0">Revenue Sources</h6>
@@ -271,7 +380,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
+
+
                     </div>
                     <div class="row">
 
@@ -346,7 +457,8 @@
             </div>
             <footer class="bg-white sticky-footer">
                 <div class="container my-auto">
-                    <div class="text-center my-auto copyright"><span>Copyright © cryptoTracker Lite 2023</span></div>
+                    <div class="text-center my-auto copyright"><span>Copyright © cryptoTracker Lite 2023 by
+                            abhimanyus1997</span></div>
                 </div>
             </footer>
         </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
