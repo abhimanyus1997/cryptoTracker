@@ -20,6 +20,6 @@ socket.onmessage = function (event) {
         ethereumValue = newEthereumValue;
     }
 
-    bitcoinDisplay.innerText = `Bitcoin: $${bitcoinValue !== null ? bitcoinValue : 'N/A'}`;
-    ethereumDisplay.innerText = `Ethereum: $${ethereumValue !== null ? ethereumValue : 'N/A'}`;
+    bitcoinDisplay.innerText = `$${bitcoinValue !== null ? bitcoinValue : 'N/A'}`;
+    ethereumDisplay.innerText = `$${ethereumValue !== null ? ethereumValue : 'N/A'}`;
 };

@@ -12,19 +12,40 @@ async function fetchTrendingCoins() {
     }
 }
 
-// Function to display the fetched data in the HTML
-async function displayTrendingCoins() {
+// Function to replace HTML content with dynamically generated elements
+async function replaceCoinListContent() {
     const trendingCoins = await fetchTrendingCoins();
-    const coinList = d3.select('#d3');
+    const coinList = document.getElementById('coin-list');
 
     if (trendingCoins && trendingCoins.coins) {
-        coinList.append('h2').text('Trending Coins');
-        const ul = coinList.append('ul');
-        trendingCoins.coins.forEach((coin) => {
-            ul.append('li').text(`${coin.item.name} - ${coin.item.symbol}`);
-        });
+        for (let i = 0; i < 7 && i < trendingCoins.coins.length; i++) {
+            const coin = trendingCoins.coins[i].item;
+
+            // Create an image tag for each coin's SVG snapshot
+            const coinChart = document.createElement('img');
+            coinChart.setAttribute('src', coin.data.sparkline);
+            coinChart.setAttribute('alt', `${coin.name} Chart`);
+
+            // Create a container div for the coin details and the chart snapshot
+            const coinContainer = document.createElement('div');
+            coinContainer.classList.add('coin-container');
+
+            // Create HTML for each coin details
+            const coinDetails = `
+                <h4 class="small fw-bold" id="coin-${i + 1}">
+                    ${coin.name} (${coin.symbol})<span class="float-end">${coin.data.price}</span>
+                </h4>
+            `;
+
+            // Append the coin details and chart snapshot to the container div
+            coinContainer.innerHTML = coinDetails;
+            coinContainer.appendChild(coinChart);
+
+            // Append the container div to the coinList
+            coinList.appendChild(coinContainer);
+        }
     }
 }
 
-// Call the function to display trending coins when the page loads
-displayTrendingCoins();
+// Call the function to replace content when the page loads
+replaceCoinListContent();
