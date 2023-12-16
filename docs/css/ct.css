@@ -1,20 +1,31 @@
-.chart-container {
+/* CSS for coin list and container */
+.coin-list {
     display: flex;
+    flex-direction: column;
+    /* Set the flex direction to column */
+    gap: 20px;
+    /* Adjust the gap as needed */
 }
 
-.chart {
-    width: 400px;
-    height: 300px;
-    margin: 20px;
+.coin-container {
+    width: 100%;
+    /* Set the width to 100% for a single column layout */
+    padding: 10px;
     border: 1px solid #ccc;
-    position: relative;
+    /* Optional: Add borders or styles for each coin container */
 }
 
-.tooltip {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 5px;
-    border: 1px solid #aaa;
-    pointer-events: none;
-    display: none;
+.coin-container img {
+    width: 100%;
+    /* Stretch the SVG image to the width of its container */
+    display: block;
+    margin-bottom: 10px;
+    /* Optional: Add some space between the image and coin details */
+}
+
+/* Optional: Style the coin details */
+.coin-container h4 {
+    margin: 0;
+    font-size: 16px;
+    /* Add any other desired styles for the coin details */
 }
