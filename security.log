@@ -1,46 +1,133 @@
 werkzeug - WARNING -  * Debugger is active!
-werkzeug - INFO -  * Debugger PIN: 235-458-874
+werkzeug - INFO -  * Debugger PIN: 123-924-305
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:25] "[32mGET / HTTP/1.1[0m" 302 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:25] "GET /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:25] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:25] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:25] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:26] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:26] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:26] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:26] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - ERROR - Incorrect Password
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:30] "POST /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:30] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:30] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:30] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:31] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:31] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:31] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:31] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - CRITICAL - Hash Matched Successfully
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:42] "[32mPOST /login/ HTTP/1.1[0m" 302 -
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:42] "[35m[1mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1[0m" 500 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:42] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:43] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:43] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:43] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:45] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:46] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - ERROR - Incorrect Password
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:49] "POST /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:49] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:49] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:49] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:49] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:50] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:50] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:50] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - ERROR - Incorrect Password
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:53] "POST /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:53] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:53] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:53] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:53] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:54] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:54] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:54] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - ERROR - Incorrect Password
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:56] "POST /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:56] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:56] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:56] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:56] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:57] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:57] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:51:57] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - ERROR - Incorrect Password
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:04] "POST /login/ HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[33mGET /login/assets/img/dogs/image3.jpeg HTTP/1.1[0m" 404 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:05] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+root - CRITICAL - user searched in query
+root - CRITICAL - Hash Matched Successfully
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:09] "[32mPOST /login/ HTTP/1.1[0m" 302 -
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:10] "[35m[1mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1[0m" 500 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:10] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:10] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:10] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:10] "[36mGET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+werkzeug - INFO -  * To enable the debugger you need to enter the security pin:
+werkzeug - INFO -  * Debugger pin code: 123-924-305
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:19] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=printpin&s=16nY2VuX5nvNtC4WyZEI HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:51] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?__debugger__=yes&cmd=pinauth&pin=123-924-305&s=16nY2VuX5nvNtC4WyZEI HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:52:58] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?&__debugger__=yes&cmd=erc20&frm=1657898396848&s=16nY2VuX5nvNtC4WyZEI HTTP/1.1" 200 -
+urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:53:17] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?&__debugger__=yes&cmd=ct.getEther()&frm=1657898396848&s=16nY2VuX5nvNtC4WyZEI HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 19:53:17] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5?&__debugger__=yes&cmd=&frm=1657898396848&s=16nY2VuX5nvNtC4WyZEI HTTP/1.1" 200 -
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
 urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 None
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.ethplorer.io:443
 urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/0xd7e9d18153de624713c18b1ca18a238c42033ea5?apiKey=freekey HTTP/1.1" 200 None
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:02] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:03] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:34] "GET /0xd7e9d18153de624713c18b1ca18a238c42033ea5 HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:34] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:34] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:34] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:34] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:35] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:35] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:35] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:35] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:35] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:36] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:14:36] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): etherscan.io:443
 urllib3.connectionpool - DEBUG - https://etherscan.io:443 "GET /address/0x9c85c376a50721c75e4e015ac22efe066dbb73ec HTTP/1.1" 200 None
 urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.ethplorer.io:443
 urllib3.connectionpool - DEBUG - https://api.ethplorer.io:443 "GET /getAddressInfo/0x9c85c376a50721c75e4e015ac22efe066dbb73ec?apiKey=freekey HTTP/1.1" 200 None
-root - DEBUG - nth_price: {'rate': 6.820925943601977, 'diff': -5.91, 'diff7d': 3.12, 'ts': 1675679760, 'marketCapUsd': 5198973369.821366, 'availableSupply': 762209326.5354977, 'volume24h': 149174574.38400862, 'volDiff1': 17.076013074821276, 'volDiff7': 44.44428318500891, 'volDiff30': 132.7665859476332, 'diff30d': 24.545148654161835, 'bid': 7.97, 'currency': 'USD'}
-Type of nth_price: {'rate': 6.820925943601977, 'diff': -5.91, 'diff7d': 3.12, 'ts': 1675679760, 'marketCapUsd': 5198973369.821366, 'availableSupply': 762209326.5354977, 'volume24h': 149174574.38400862, 'volDiff1': 17.076013074821276, 'volDiff7': 44.44428318500891, 'volDiff30': 132.7665859476332, 'diff30d': 24.545148654161835, 'bid': 7.97, 'currency': 'USD'}
-root - DEBUG - nth_price: {'rate': 0.999788325193383, 'diff': -0.01, 'diff7d': -0.02, 'ts': 1675679760, 'marketCapUsd': 41965122740.77354, 'availableSupply': 41974007580.71112, 'volume24h': 3109329041.607986, 'volDiff1': 15.502039214243979, 'volDiff7': 4.316414573801524, 'volDiff30': 70.32603863386419, 'diff30d': -0.024035050137612757, 'bid': 1.001, 'currency': 'USD'}
-Type of nth_price: {'rate': 0.999788325193383, 'diff': -0.01, 'diff7d': -0.02, 'ts': 1675679760, 'marketCapUsd': 41965122740.77354, 'availableSupply': 41974007580.71112, 'volume24h': 3109329041.607986, 'volDiff1': 15.502039214243979, 'volDiff7': 4.316414573801524, 'volDiff30': 70.32603863386419, 'diff30d': -0.024035050137612757, 'bid': 1.001, 'currency': 'USD'}
-root - DEBUG - nth_price: {'rate': 0.3093719627142575, 'diff': -8.91, 'diff7d': 53.59, 'ts': 1675679760, 'marketCapUsd': 145262218.0495603, 'availableSupply': 469539051.875, 'volume24h': 27104192.84140411, 'volDiff1': -38.313133788006446, 'volDiff7': 345.43371258561206, 'volDiff30': 138.4971293274881, 'diff30d': 90.21277530949419, 'bid': 1.44, 'currency': 'USD'}
-Type of nth_price: {'rate': 0.3093719627142575, 'diff': -8.91, 'diff7d': 53.59, 'ts': 1675679760, 'marketCapUsd': 145262218.0495603, 'availableSupply': 469539051.875, 'volume24h': 27104192.84140411, 'volDiff1': -38.313133788006446, 'volDiff7': 345.43371258561206, 'volDiff30': 138.4971293274881, 'diff30d': 90.21277530949419, 'bid': 1.44, 'currency': 'USD'}
-root - DEBUG - nth_price: {'rate': 1630.955376552871, 'diff': -2.18, 'diff7d': 2.31, 'ts': 1675679760, 'marketCapUsd': 0, 'availableSupply': 0, 'volume24h': 1154491421.4918864, 'volDiff1': 9.884016192373267, 'volDiff7': 15.829826493380665, 'volDiff30': 138.664553654828, 'diff30d': 28.928995968835636, 'bid': 2872.01, 'currency': 'USD'}
-Type of nth_price: {'rate': 1630.955376552871, 'diff': -2.18, 'diff7d': 2.31, 'ts': 1675679760, 'marketCapUsd': 0, 'availableSupply': 0, 'volume24h': 1154491421.4918864, 'volDiff1': 9.884016192373267, 'volDiff7': 15.829826493380665, 'volDiff30': 138.664553654828, 'diff30d': 28.928995968835636, 'bid': 2872.01, 'currency': 'USD'}
-root - DEBUG - nth_price: {'rate': 689.7575098852602, 'diff': -3.05, 'diff7d': 6.28, 'ts': 1675679760, 'marketCapUsd': 674328349.6337907, 'availableSupply': 977631.03695089, 'volume24h': 34916658.82670212, 'volDiff1': 14.351878446647532, 'volDiff7': 28.232078598740287, 'volDiff30': 76.37991103522464, 'diff30d': 27.446635412555125, 'bid': 1580.77, 'currency': 'USD'}
-Type of nth_price: {'rate': 689.7575098852602, 'diff': -3.05, 'diff7d': 6.28, 'ts': 1675679760, 'marketCapUsd': 674328349.6337907, 'availableSupply': 977631.03695089, 'volume24h': 34916658.82670212, 'volDiff1': 14.351878446647532, 'volDiff7': 28.232078598740287, 'volDiff30': 76.37991103522464, 'diff30d': 27.446635412555125, 'bid': 1580.77, 'currency': 'USD'}
-root - DEBUG - nth_price: {'rate': 0.1592848994926919, 'diff': -10.12, 'diff7d': 2.24, 'ts': 1675679760, 'marketCapUsd': 65922350.84155314, 'availableSupply': 413864409.31632507, 'volume24h': 13942355.31011234, 'volDiff1': 1580.306642822099, 'bid': 0.262457, 'volDiff7': 44949.41145832026, 'volDiff30': 19905.06463422652, 'diff30d': -34.09832222010779, 'currency': 'USD'}
-Type of nth_price: {'rate': 0.1592848994926919, 'diff': -10.12, 'diff7d': 2.24, 'ts': 1675679760, 'marketCapUsd': 65922350.84155314, 'availableSupply': 413864409.31632507, 'volume24h': 13942355.31011234, 'volDiff1': 1580.306642822099, 'bid': 0.262457, 'volDiff7': 44949.41145832026, 'volDiff30': 19905.06463422652, 'diff30d': -34.09832222010779, 'currency': 'USD'}
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:19] "GET /0x9C85C376A50721c75E4E015AC22EfE066dbB73EC HTTP/1.1" 200 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
-werkzeug - INFO - 127.0.0.1 - - [06/Feb/2023 16:11:20] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+root - DEBUG - nth_price: {'rate': 6.816699036138931, 'diff': 0.09, 'diff7d': 3.85, 'ts': 1675780560, 'marketCapUsd': 5195751581.53063, 'availableSupply': 762209326.5354977, 'volume24h': 107833890.73152122, 'volDiff1': -17.007595338472385, 'volDiff7': 47.76590009387897, 'volDiff30': 138.7631126195133, 'diff30d': 25.1281366182219, 'bid': 7.97, 'currency': 'USD'}
+Type of nth_price: {'rate': 6.816699036138931, 'diff': 0.09, 'diff7d': 3.85, 'ts': 1675780560, 'marketCapUsd': 5195751581.53063, 'availableSupply': 762209326.5354977, 'volume24h': 107833890.73152122, 'volDiff1': -17.007595338472385, 'volDiff7': 47.76590009387897, 'volDiff30': 138.7631126195133, 'diff30d': 25.1281366182219, 'bid': 7.97, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 1.0000781992967036, 'diff': 0, 'diff7d': -0.12, 'ts': 1675780560, 'marketCapUsd': 41870069997.12471, 'availableSupply': 41866796043.118904, 'volume24h': 3111369796.742096, 'volDiff1': 2.747946525704137, 'volDiff7': 2.8236003052636534, 'volDiff30': 72.85957037310436, 'diff30d': 0.007766622133303258, 'bid': 1.001, 'currency': 'USD'}
+Type of nth_price: {'rate': 1.0000781992967036, 'diff': 0, 'diff7d': -0.12, 'ts': 1675780560, 'marketCapUsd': 41870069997.12471, 'availableSupply': 41866796043.118904, 'volume24h': 3111369796.742096, 'volDiff1': 2.747946525704137, 'volDiff7': 2.8236003052636534, 'volDiff30': 72.85957037310436, 'diff30d': 0.007766622133303258, 'bid': 1.001, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 0.30123855103497155, 'diff': 2.57, 'diff7d': 55.35, 'ts': 1675780560, 'marketCapUsd': 141443263.64115933, 'availableSupply': 469539051.875, 'volume24h': 37608469.27846631, 'volDiff1': 22.977625121994265, 'volDiff7': 469.9986662044703, 'volDiff30': 172.91176105964882, 'diff30d': 89.60452993370347, 'bid': 1.44, 'currency': 'USD'}
+Type of nth_price: {'rate': 0.30123855103497155, 'diff': 2.57, 'diff7d': 55.35, 'ts': 1675780560, 'marketCapUsd': 141443263.64115933, 'availableSupply': 469539051.875, 'volume24h': 37608469.27846631, 'volDiff1': 22.977625121994265, 'volDiff7': 469.9986662044703, 'volDiff30': 172.91176105964882, 'diff30d': 89.60452993370347, 'bid': 1.44, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 1639.1197140585753, 'diff': 0.49, 'diff7d': 3.41, 'ts': 1675780560, 'marketCapUsd': 0, 'availableSupply': 0, 'volume24h': 1200845750.519188, 'volDiff1': 7.869431880728413, 'volDiff7': 18.12221902456001, 'volDiff30': 146.02902089927827, 'diff30d': 29.73258291780462, 'bid': 2872.01, 'currency': 'USD'}
+Type of nth_price: {'rate': 1639.1197140585753, 'diff': 0.49, 'diff7d': 3.41, 'ts': 1675780560, 'marketCapUsd': 0, 'availableSupply': 0, 'volume24h': 1200845750.519188, 'volDiff1': 7.869431880728413, 'volDiff7': 18.12221902456001, 'volDiff30': 146.02902089927827, 'diff30d': 29.73258291780462, 'bid': 2872.01, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 728.9834653561231, 'diff': 5.03, 'diff7d': 12.84, 'ts': 1675780560, 'marketCapUsd': 712676861.1561599, 'availableSupply': 977631.03695089, 'volume24h': 35196823.45851827, 'volDiff1': 8.772001307441982, 'volDiff7': 32.533035952728994, 'volDiff30': 67.75965453675414, 'diff30d': 29.755488673524013, 'bid': 1580.77, 'currency': 'USD'}
+Type of nth_price: {'rate': 728.9834653561231, 'diff': 5.03, 'diff7d': 12.84, 'ts': 1675780560, 'marketCapUsd': 712676861.1561599, 'availableSupply': 977631.03695089, 'volume24h': 35196823.45851827, 'volDiff1': 8.772001307441982, 'volDiff7': 32.533035952728994, 'volDiff30': 67.75965453675414, 'diff30d': 29.755488673524013, 'bid': 1580.77, 'currency': 'USD'}
+root - DEBUG - nth_price: {'rate': 0.16445706736046853, 'diff': 2.91, 'diff7d': 5.75, 'ts': 1675780560, 'marketCapUsd': 68062927.04103538, 'availableSupply': 413864409.31632507, 'volume24h': 11653944.2038344, 'volDiff1': 789.6049558495704, 'bid': 0.262457, 'volDiff7': 44949.41145832026, 'volDiff30': 19905.06463422652, 'diff30d': -34.09832222010779, 'currency': 'USD'}
+Type of nth_price: {'rate': 0.16445706736046853, 'diff': 2.91, 'diff7d': 5.75, 'ts': 1675780560, 'marketCapUsd': 68062927.04103538, 'availableSupply': 413864409.31632507, 'volume24h': 11653944.2038344, 'volDiff1': 789.6049558495704, 'bid': 0.262457, 'volDiff7': 44949.41145832026, 'volDiff30': 19905.06463422652, 'diff30d': -34.09832222010779, 'currency': 'USD'}
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:09] "GET /0x9C85C376A50721c75E4E015AC22EfE066dbB73EC HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:09] "[36mGET /static/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:09] "[36mGET /static/css/styles.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:09] "[36mGET /static/fonts/fontawesome5-overrides.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:09] "[36mGET /static/img/avatars/man.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:09] "[36mGET /static/css/animate.min.css HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:10] "[36mGET /static/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:10] "[36mGET /static/js/script.min.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:10] "[36mGET /static/js/chart-parameters.js HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:10] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:10] "[36mGET /static/manifest.json HTTP/1.1[0m" 304 -
+werkzeug - INFO - 127.0.0.1 - - [07/Feb/2023 20:15:10] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
