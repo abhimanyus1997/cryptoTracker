@@ -8,7 +8,7 @@ FILE_NAME = "export_csv.csv"
 base_url = "https://api.ethplorer.io"
 
 
-def getTokensCSV(address: str, export_csv: bool = True, filename : str = FILE_NAME):
+def getTokensCSV(address: str, export_csv: bool = True, filename: str = FILE_NAME):
     """
     Returns no of tokens for an address and saves a CSV
     """
@@ -24,9 +24,9 @@ def getTokensCSV(address: str, export_csv: bool = True, filename : str = FILE_NA
         # Returns zero if no token found or api error
         token_list = []
         return 0
-    #returns no of tokens
+    # returns no of tokens
     no_of_tokens = len(token_list)
-    #code to generate CSV
+    # code to generate CSV
     if export_csv:
         flag = True
         for token in token_list:
@@ -45,7 +45,7 @@ def getTokensCSV(address: str, export_csv: bool = True, filename : str = FILE_NA
     return no_of_tokens
 
 
-def readCSV(filename : str=FILE_NAME):
+def readCSV(filename: str = FILE_NAME):
     """
     Reads CSV and returns tuple of
     return -> (symbols, price, holding, worth in USD)
@@ -56,17 +56,28 @@ def readCSV(filename : str=FILE_NAME):
     # Convert holdings from wei
     holding_list = [bal_wei*1E-18 for bal_wei in list(df.balance)]
     price_list = []
-    value_list =[]
+    value_list = []
     # print(type(price_list_uncleaned))
     for nth_price in price_list_uncleaned:
         if nth_price == 'False' or nth_price == False:
             price_list.append(0)
         else:
             # convert raw string to dict
-            logging.debug(f"nth_price: {nth_price}\nType of nth_price: {nth_price}")
+            logging.debug(
+                f"nth_price: {nth_price}\nType of nth_price: {nth_price}")
             nth_price_dic = eval(nth_price)
             price_list.append(nth_price_dic["rate"])
     value_float = np.multiply(np.array(holding_list), np.array(price_list))
     value_list = ["{:0.2f}".format(x) for x in value_float]
+
+    # New dataframe to store price and holding values
+    sorted_table_name = filename.replace("export-csv", "sorted-csv")
+    COL_SORTED = ["symbol", "price", "holding", "current_value"]
+    data = {"symbol": symbol_list, "price": price_list,
+            "holding": holding_list, "current_value": value_list}
+    sorted_table = pd.DataFrame(data)
+    sorted_table = sorted_table.sort_values(
+        by=["current_value"], ascending=False)
+    sorted_table.to_csv(sorted_table_name)
 
     return symbol_list, price_list, holding_list, value_list
