@@ -1,0 +1,20 @@
+.chart-container {
+    display: flex;
+}
+
+.chart {
+    width: 400px;
+    height: 300px;
+    margin: 20px;
+    border: 1px solid #ccc;
+    position: relative;
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 5px;
+    border: 1px solid #aaa;
+    pointer-events: none;
+    display: none;
+}
