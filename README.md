@@ -2,7 +2,7 @@
 Cryptocurrency Market Tracker using various APIs and Webscrapping
 
 ## Deployed on Railway.app 
-<a href="https://cryptotracker.up.railway.app">Project URL</a>
+<a href="https://cryptotracker.up.railway.app">Project to CryptoTracker Lite</a>
 
 A set of jupyter notebook files that helps you to manage your portfolio
 - **Crypto Dashboard** : Display Users Wallet info
