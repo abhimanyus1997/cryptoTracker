@@ -1,4 +1,4 @@
 {
 
-    "packages": ["arrr"]
+    "packages": ["numpy","pandas"]
 }
