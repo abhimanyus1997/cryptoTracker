@@ -1,4 +1,4 @@
 {
 
-    "packages": ["numpy","pandas"]
+    "packages": ["numpy","pandas","matplotlib"]
 }

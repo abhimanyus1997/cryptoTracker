@@ -1,5 +1,7 @@
-# from pyscript import window, document
+from pyscript import window, document
 
 
-# my_element = document.querySelector("#tableContainer")
-# my_element.innerText = window.location.hostname
+my_element = document.querySelector("#myip")
+my_element.innerText = "Your IP: "+window.location.hostname
+
+
