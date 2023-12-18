@@ -83,19 +83,26 @@
                                                         class="fas fa-upload text-white"></i></div>
                                             </div>
                                             <div>
-                                                <span class="small text-gray-500">Data Uploader</span>
-                                                <form id="myForm">
-                                                    <div class="mb-3">
-                                                        <label for="formFileSm" class="form-label">Upload CSV
-                                                            File</label>
-                                                        <input class="form-control form-control-sm" id="formFileSm"
-                                                            type="file" id="csvFile" accept=".csv">
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-                                                </form>
+                                                <div class="container mt-4">
+                                                    <span class="small text-gray-500">Data
+                                                            Uploader</span>
+                                                    <form id="myForm">
+                                                        <div class="mb-3">
+                                                            <label for="csvFile" class="small form-label">CSV File
+                                                                URL:</label>
+                                                            <input class="form-control form-control-sm" type="url"
+                                                                id="csvFile" placeholder="Enter CSV File URL" required>
+                                                            <div class="invalid-feedback">
+                                                                Please provide a valid CSV File URL.
+                                                            </div>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary btn-sm"
+                                                            id="csvBtn">Submit</button>
+                                                    </form>
+                                                </div>
+
                                             </div>
                                         </div>
-
 
                                         <!-- <a class="dropdown-item d-flex align-items-center" href="#">
                                             <div class="me-3">
@@ -210,6 +217,7 @@
                         </a>
                     </div>
 
+                    <div id="test"> </div>
 
                     <!-- FIRST ROW -->
                     <!-- FOR LIVE DATA OF COINS -->
@@ -307,8 +315,6 @@
 
 
                     </div>
-
-                    <div id="tableContainer">Your Data</div>
 
 
 
@@ -493,7 +499,7 @@
                     <div class="text-center my-auto copyright"><span>Copyright © cryptoTracker Lite 2023 by
                             abhimanyus1997</span>
                     </div>
-                    <div class="text-center my-auto small" id="myip">Fetching IP...</div>
+                    <!-- <div class="text-center my-auto small" id="myip">Fetching IP...</div> -->
                 </div>
             </footer>
         </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
