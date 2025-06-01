@@ -1,18 +1,16 @@
 let selectedCurrency = 'USD';
 const currencySymbols = { USD: '$', INR: '₹', EUR: '€', GBP: '£' };
 let portfolio = [
-    { symbol: 'BTCUSDT', name: 'Bitcoin', ticker: 'BTC', amount: 0.573, purchasePrice: 35000 },
-    { symbol: 'ETHUSDT', name: 'Ethereum', ticker: 'ETH', amount: 5.24, purchasePrice: 1900 },
-    { symbol: 'ADAUSDT', name: 'Cardano', ticker: 'ADA', amount: 1840, purchasePrice: 0.35 },
-    { symbol: 'SOLUSDT', name: 'Solana', ticker: 'SOL', amount: 15.2, purchasePrice: 22 }
+    { symbol: 'ETHUSDT', name: 'Ethereum', ticker: 'ETH', amount: 0.035, purchasePrice: 2197.02 },
+    { symbol: 'AVAXUSDT', name: 'Avalanche', ticker: 'AVAX', amount: 0.816, purchasePrice: 22.08 },
+    { symbol: 'SCRUSDT', name: 'Scroll', ticker: 'SCR', amount: 49.096, purchasePrice: 1.21 }
 ];
 let exchangeRates = { USD: 1 };
 let tradingPairs = [];
 const coinIcons = {
-    'BTCUSDT': 'fa-bitcoin text-yellow-400',
     'ETHUSDT': 'fa-ethereum text-blue-500',
-    'ADAUSDT': 'fa-circle text-blue-400',
-    'SOLUSDT': 'fa-fire text-orange-400'
+    'AVAXUSDT': 'fa-circle text-blue-400',
+    'SCRUSDT': 'fa-fire text-orange-400'
 };
 let availableCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 let perfChart = null;
