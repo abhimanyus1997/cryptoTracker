@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTracker | Advanced Portfolio Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #263238;
+            color: #e0e0e0;
+        }
+
+        .bg-accent {
+            background-color: #9EF01A;
+        }
+
+        .text-accent {
+            color: #9EF01A;
+        }
+
+        .border-accent {
+            border-color: #9EF01A;
+        }
+
+        .card {
+            background-color: #304048;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-striped tbody tr:nth-child(odd) {
+            background-color: #34424e;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #9EF01A;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .glow-hover:hover {
+            box-shadow: 0 0 15px rgba(158, 240, 26, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 px-6 shadow-xl">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fa-brands fa-bitcoin text-accent text-3xl mr-3"></i>
+                <h1 class="text-2xl font-bold text-white">CryptoTracker</h1>
+            </div>
+            <div class="flex space-x-4">
+                <button id="refresh-data"
+                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">
+                    <i class="fas fa-sync mr-2"></i>Refresh Data
+                </button>
+                <button
+                    class="px-4 py-2 rounded-lg border border-accent text-accent font-medium hover:bg-gray-700 transition">
+                    <i class="fas fa-user mr-2"></i>Account
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Portfolio Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-chart-line text-accent text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">Portfolio Value</h3>
+                        <p class="text-2xl font-bold text-white" id="portfolio-value">$0.00</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-accent text-sm" id="portfolio-change"><i class="fas fa-caret-up mr-1"></i>0.0% today
+                </p>
+            </div>
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-coins text-accent text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">Total Holdings</h3>
+                        <p class="text-2xl font-bold text-white" id="total-holdings">0 Assets</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-accent text-sm">Diversified portfolio</p>
+            </div>
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-arrow-trend-up text-accent text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">Best Performer</h3>
+                        <p class="text-2xl font-bold text-white" id="best-performer">--</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-red-400 text-sm" id="worst-performer">--</p>
+            </div>
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-wallet text-accent text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">24h Change</h3>
+                        <p class="text-2xl font-bold text-white" id="change-value">$0.00</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-accent text-sm" id="change-percent"><i class="fas fa-caret-up mr-1"></i>0.0% gain
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Column -->
+            <div class="lg:w-7/12">
+                <!-- Portfolio Overview -->
+                <div class="card p-6 mb-8 fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-white">
+                            <i class="fas fa-chart-pie text-accent mr-3"></i>Portfolio Overview
+                        </h2>
+                        <button id="export-csv" class="text-accent text-sm font-medium flex items-center">
+                            <i class="fas fa-download mr-2"></i> Export CSV
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-700 table-striped" id="portfolio-table">
+                            <thead>
+                                <tr class="text-gray-400 text-sm">
+                                    <th class="py-3 px-4 text-left">Coin</th>
+                                    <th class="py-3 px-4 text-right">Holdings</th>
+                                    <th class="py-3 px-4 text-right">Price</th>
+                                    <th class="py-3 px-4 text-right">Value</th>
+                                    <th class="py-3 px-4 text-right">24h</th>
+                                    <th class="py-3 px-4 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white" id="portfolio-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI Price Prediction -->
+                <div class="card p-6 mb-8 fade-in">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-robot text-accent mr-3"></i>AI Price Prediction
+                    </h2>
+                    <div class="mb-6 p-4 bg-gray-800 rounded-lg border border-accent">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-accent text-lg mr-3 mt-1"></i>
+                            <p class="text-sm text-gray-300">
+                                <span class="font-medium text-accent">Disclaimer:</span> AI predictions are based on
+                                technical analysis and historical data. They do not constitute financial advice and
+                                should not be relied upon for investment decisions. Cryptocurrency markets are highly
+                                volatile and unpredictable. Always do your own research.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-gray-400 mb-2">Select Cryptocurrency</label>
+                            <div class="relative">
+                                <select id="predict-coin"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent">
+                                    <option value="BTCUSDT">Bitcoin (BTC)</option>
+                                    <option value="ETHUSDT" selected>Ethereum (ETH)</option>
+                                    <option value="ADAUSDT">Cardano (ADA)</option>
+                                    <option value="SOLUSDT">Solana (SOL)</option>
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-2">AI Prediction Key</label>
+                            <div class="relative">
+                                <input type="password" id="ai-key" placeholder="Enter your AI key"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4">
+                                    <i class="fas fa-key text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                        <canvas id="predictionChart" height="250"></canvas>
+                    </div>
+                    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center">
+                        <div>
+                            <h4 class="text-lg font-bold text-white mb-1" id="prediction-title">ETH Prediction</h4>
+                            <p class="text-gray-400">Next 30 days forecast based on AI analysis</p>
+                        </div>
+                        <button id="runPrediction"
+                            class="mt-4 sm:mt-0 px-6 py-3 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition flex items-center glow-hover">
+                            <i class="fas fa-bolt mr-2"></i>Run Prediction
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="lg:w-5/12">
+                <!-- Historical Performance -->
+                <div class="card p-6 mb-8 fade-in">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-chart-area text-accent mr-3"></i>Historical Performance
+                    </h2>
+                    <div class="mb-6">
+                        <div class="flex justify-between border-b border-gray-700">
+                            <button class="timeframe-btn py-3 px-4 border-b-2 border-accent font-medium text-accent"
+                                data-timeframe="1M">1M</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="3M">3M</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="6M">6M</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="1Y">1Y</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="All">All</button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 mb-6">
+                        <canvas id="performanceChart" height="300"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-gray-400 text-sm">30D Return</p>
+                            <p class="font-bold text-accent" id="return-30d">+0.0%</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Max Drawdown</p>
+                            <p class="font-bold text-red-400" id="max-drawdown">0.0%</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Volatility</p>
+                            <p class="font-bold text-gray-200" id="volatility">Medium</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manage Holdings & CSV Import -->
+                <div class="space-y-8">
+                    <!-- Add/Edit Holdings -->
+                    <div class="card p-6 fade-in">
+                        <h2 class="text-xl font-bold text-white mb-6">
+                            <i class="fas fa-plus-circle text-accent mr-3"></i>Add Holding
+                        </h2>
+                        <form id="add-holding-form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Cryptocurrency</label>
+                                    <div class="relative">
+                                        <select id="coin-name"
+                                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent">
+                                            <option value="">Select coin</option>
+                                            <option value="BTCUSDT">Bitcoin (BTC)</option>
+                                            <option value="ETHUSDT">Ethereum (ETH)</option>
+                                            <option value="ADAUSDT">Cardano (ADA)</option>
+                                            <option value="SOLUSDT">Solana (SOL)</option>
+                                        </select>
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Amount</label>
+                                    <input type="number" id="coin-amount" placeholder="0.00" step="any"
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Purchase Price ($)</label>
+                                    <input type="number" id="purchase-price" placeholder="0.00"
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Date Acquired</label>
+                                    <input type="date" id="date-acquired"
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                </div>
+                            </div>
+                            <div class="flex space-x-4">
+                                <button type="submit"
+                                    class="flex-1 px-6 py-3 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition glow-hover">
+                                    <i class="fas fa-save mr-2"></i>Add Holding
+                                </button>
+                                <button type="reset"
+                                    class="px-4 py-3 rounded-lg border border-gray-600 text-gray-300 font-medium hover:bg-gray-700 transition">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- CSV Import -->
+                    <div class="card p-6 fade-in">
+                        <h2 class="text-xl font-bold text-white mb-6">
+                            <i class="fas fa-file-import text-accent mr-3"></i>Import from CSV
+                        </h2>
+                        <div class="mb-6 p-6 border-2 border-dashed border-gray-600 rounded-xl bg-gray-800 text-center cursor-pointer hover:border-accent transition"
+                            id="dropzone">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-500 mb-4"></i>
+                            <p class="text-gray-400 mb-2">Drag & drop your CSV file here</p>
+                            <p class="text-gray-500 text-sm">or</p>
+                            <label for="csvFile"
+                                class="mt-4 px-6 py-3 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition inline-block cursor-pointer">
+                                <i class="fas fa-folder-open mr-2"></i>Browse Files
+                            </label>
+                            <input type="file" id="csvFile" accept=".csv" class="hidden">
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between items-center">
+                            <div>
+                                <p class="text-gray-400 text-sm">Supported formats: Coinbase, Binance, Kraken</p>
+                            </div>
+                            <button
+                                class="mt-4 sm:mt-0 px-6 py-3 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition glow-hover">
+                                <i class="fas fa-cog mr-2"></i>Import Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-6 mt-8 border-t border-gray-800">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>© 2025 CryptoTracker. All rights reserved. Cryptocurrency investments are subject to high market risk.
+            </p>
+            <p class="mt-2">Data is provided for informational purposes only and not intended as trading advice.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Portfolio data
+        let portfolio = [
+            { symbol: 'BTCUSDT', name: 'Bitcoin', ticker: 'BTC', amount: 0.573, purchasePrice: 35000 },
+            { symbol: 'ETHUSDT', name: 'Ethereum', ticker: 'ETH', amount: 5.24, purchasePrice: 1900 },
+            { symbol: 'ADAUSDT', name: 'Cardano', ticker: 'ADA', amount: 1840, purchasePrice: 0.35 },
+            { symbol: 'SOLUSDT', name: 'Solana', ticker: 'SOL', amount: 15.2, purchasePrice: 22 }
+        ];
+
+        // Icon mapping for coins
+        const coinIcons = {
+            'BTCUSDT': 'fa-bitcoin text-yellow-400',
+            'ETHUSDT': 'fa-ethereum text-purple-400',
+            'ADAUSDT': 'fa-circle text-blue-400',
+            'SOLUSDT': 'fa-fire text-orange-400'
+        };
+
+        // Fetch real-time prices from Binance API
+        async function fetchPrices() {
+            try {
+                const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
+                const prices = response.data.reduce((acc, item) => {
+                    acc[item.symbol] = parseFloat(item.price);
+                    return acc;
+                }, {});
+                updatePortfolio(prices);
+                updateSummary(prices);
+            } catch (error) {
+                console.error('Error fetching prices:', error);
+            }
+        }
+
+        // Update portfolio table with real-time prices
+        function updatePortfolio(prices) {
+            const tbody = document.getElementById('portfolio-body');
+            tbody.innerHTML = '';
+            portfolio.forEach((holding, index) => {
+                const price = prices[holding.symbol] || holding.purchasePrice;
+                const value = holding.amount * price;
+                const change24h = prices[holding.symbol] ? ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(1) : 0;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-4 px-4">
+                        <div class="flex items-center">
+                            <div class="bg-gray-600 rounded-full p-2 mr-3">
+                                <i class="fab ${coinIcons[holding.symbol]} text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium">${holding.name}</div>
+                                <div class="text-gray-500 text-sm">${holding.ticker}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-4 text-right">${holding.amount.toFixed(3)}</td>
+                    <td class="py-4 px-4 text-right">$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="py-4 px-4 text-right font-medium">$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="py-4 px-4 text-right ${change24h >= 0 ? 'text-accent' : 'text-red-400'}">${change24h >= 0 ? '+' : ''}${change24h}%</td>
+                    <td class="py-4 px-4 text-center">
+                        <button class="text-blue-400 mr-2 hover:text-blue-300" onclick="editHolding(${index})"><i class="fas fa-edit"></i></button>
+                        <button class="text-red-400 hover:text-red-300" onclick="removeHolding(${index})"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update summary cards
+        function updateSummary(prices) {
+            const totalValue = portfolio.reduce((sum, holding) => sum + holding.amount * (prices[holding.symbol] || holding.purchasePrice), 0);
+            const changes = portfolio.map(holding => {
+                const price = prices[holding.symbol] || holding.purchasePrice;
+                return ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(1);
+            });
+            const best = Math.max(...changes);
+            const worst = Math.min(...changes);
+            const bestCoin = portfolio[changes.indexOf(best.toString())]?.name || '--';
+            const worstCoin = portfolio[changes.indexOf(worst.toString())]?.name || '--';
+            const totalChange = portfolio.reduce((sum, holding) => {
+                const price = prices[holding.symbol] || holding.purchasePrice;
+                return sum + (price - holding.purchasePrice) * holding.amount;
+            }, 0);
+
+            document.getElementById('portfolio-value').textContent = `$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('portfolio-change').innerHTML = `<i class="fas fa-caret-${totalChange >= 0 ? 'up' : 'down'} mr-1"></i>${(totalChange / totalValue * 100).toFixed(1)}% today`;
+            document.getElementById('portfolio-change').className = `mt-3 text-${totalChange >= 0 ? 'accent' : 'red-400'} text-sm`;
+            document.getElementById('total-holdings').textContent = `${portfolio.length} Assets`;
+            document.getElementById('best-performer').textContent = `${bestCoin} ${best >= 0 ? '+' : ''}${best}%`;
+            document.getElementById('worst-performer').textContent = `${worstCoin} ${worst >= 0 ? '+' : ''}${worst}%`;
+            document.getElementById('change-value').textContent = `${totalChange >= 0 ? '+' : '-'}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('change-percent').innerHTML = `<i class="fas fa-caret-${totalChange >= 0 ? 'up' : 'down'} mr-1"></i>${(totalChange / totalValue * 100).toFixed(1)}% gain`;
+            document.getElementById('change-percent').className = `mt-3 text-${totalChange >= 0 ? 'accent' : 'red-400'} text-sm`;
+        }
+
+        // Historical Performance Chart
+        let perfChart;
+        async function initPerformanceChart(timeframe = '1M') {
+            let interval, limit;
+            switch (timeframe) {
+                case '1M': interval = '1h'; limit = 24 * 30; break;
+                case '3M': interval = '4h'; limit = 24 * 30 * 3 / 4; break;
+                case '6M': interval = '12h'; limit = 24 * 30 * 6 / 12; break;
+                case '1Y': interval = '1d'; limit = 365; break;
+                case 'All': interval = '1w'; limit = 104; break;
+                default: interval = '1h'; limit = 24 * 30;
+            }
+
+            try {
+                const totalValues = [];
+                const labels = [];
+                for (const holding of portfolio) {
+                    const response = await axios.get('https://api.binance.com/api/v3/klines', {
+                        params: { symbol: holding.symbol, interval, limit }
+                    });
+                    const klines = response.data;
+                    const values = klines.map(kline => holding.amount * parseFloat(kline[4]));
+                    if (totalValues.length === 0) {
+                        totalValues.push(...values);
+                        labels.push(...klines.map((_, i) => {
+                            const date = new Date();
+                            date.setHours(date.getHours() - i * (interval === '1h' ? 1 : interval === '4h' ? 4 : interval === '12h' ? 12 : interval === '1d' ? 24 : 24 * 7));
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        }));
+                    } else {
+                        totalValues.forEach((val, i) => totalValues[i] += values[i]);
+                    }
+                }
+
+                const perfCtx = document.getElementById('performanceChart').getContext('2d');
+                const gradient = perfCtx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(158, 240, 26, 0.3)');
+                gradient.addColorStop(1, 'rgba(158, 240, 26, 0)');
+
+                if (perfChart) perfChart.destroy();
+                perfChart = new Chart(perfCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels.reverse(),
+                        datasets: [{
+                            label: 'Portfolio Value ($)',
+                            data: totalValues.reverse(),
+                            borderColor: '#9EF01A',
+                            backgroundColor: gradient,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#9EF01A',
+                            pointRadius: 3,
+                            pointHoverRadius: 6,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    callback: value => '$' + (value / 1000).toFixed(0) + 'k'
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                titleColor: '#e2e8f0',
+                                bodyColor: '#e2e8f0',
+                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderWidth: 1,
+                                padding: 12,
+                                boxPadding: 4
+                            }
+                        }
+                    }
+                });
+
+                // Update metrics
+                const returns = ((totalValues[totalValues.length - 1] - totalValues[0]) / totalValues[0] * 100).toFixed(1);
+                const maxDrawdown = Math.min(...totalValues.map((val, i) => i > 0 ? (val - totalValues[i - 1]) / totalValues[i - 1] * 100 : 0)).toFixed(1);
+                document.getElementById('return-30d').textContent = `${returns >= 0 ? '+' : ''}${returns}%`;
+                document.getElementById('return-30d').className = `font-bold text-${returns >= 0 ? 'accent' : 'red-400'}`;
+                document.getElementById('max-drawdown').textContent = `${maxDrawdown}%`;
+                document.getElementById('volatility').textContent = Math.abs(parseFloat(returns)) > 10 ? 'High' : Math.abs(parseFloat(returns)) > 5 ? 'Medium' : 'Low';
+            } catch (error) {
+                console.error('Error fetching historical data:', error);
+            }
+        }
+
+        // Add holding
+        document.getElementById('add-holding-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const symbol = document.getElementById('coin-name').value;
+            const amount = parseFloat(document.getElementById('coin-amount').value);
+            const purchasePrice = parseFloat(document.getElementById('purchase-price').value);
+            if (symbol && amount > 0 && purchasePrice > 0) {
+                const name = symbol.replace('USDT', '');
+                const ticker = name.substring(0, 3).toUpperCase();
+                portfolio.push({ symbol, name, ticker, amount, purchasePrice });
+                await fetchPrices();
+                await initPerformanceChart();
+                this.reset();
+            }
+        });
+
+        // Remove holding
+        function removeHolding(index) {
+            portfolio.splice(index, 1);
+            fetchPrices();
+            initPerformanceChart();
+        }
+
+        // Edit holding (placeholder)
+        function editHolding(index) {
+            const holding = portfolio[index];
+            document.getElementById('coin-name').value = holding.symbol;
+            document.getElementById('coin-amount').value = holding.amount;
+            document.getElementById('purchase-price').value = holding.purchasePrice;
+            document.getElementById('date-acquired').value = new Date().toISOString().split('T')[0];
+            removeHolding(index);
+        }
+
+        // Export CSV
+        document.getElementById('export-csv').addEventListener('click', function () {
+            const csv = ['Symbol,Name,Ticker,Amount,Purchase Price'];
+            portfolio.forEach(holding => {
+                csv.push(`${holding.symbol},${holding.name},${holding.ticker},${holding.amount},${holding.purchasePrice}`);
+            });
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'portfolio.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Prediction Chart (mock)
+        const predCtx = document.getElementById('predictionChart').getContext('2d');
+        const predChart = new Chart(predCtx, {
+            type: 'line',
+            data: {
+                labels: ['Now', '1D', '3D', '7D', '15D', '30D'],
+                datasets: [{
+                    label: 'Predicted Price',
+                    data: [0, null, null, null, null, null],
+                    borderColor: '#9EF01A',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#9EF01A',
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // Run AI prediction (mock)
+        document.getElementById('runPrediction').addEventListener('click', async function () {
+            const coin = document.getElementById('predict-coin').value;
+            const aiKey = document.getElementById('ai-key').value;
+            if (!aiKey) {
+                alert('Please enter an AI key.');
+                return;
+            }
+            this.innerHTML = '<div class="loading-spinner mr-2"></div> Running prediction...';
+            this.disabled = true;
+            try {
+                const response = await axios.get('https://api.binance.com/api/v3/ticker/price', { params: { symbol: coin } });
+                const currentPrice = parseFloat(response.data.price);
+                // Mock prediction (replace with FastAPI endpoint)
+                const predictedData = [currentPrice, currentPrice * 1.02, currentPrice * 1.05, currentPrice * 1.08, currentPrice * 1.12, currentPrice * 1.2];
+                predChart.data.datasets[0].data = predictedData;
+                predChart.data.datasets[0].borderDash = [];
+                predChart.update();
+                document.getElementById('prediction-title').textContent = `${coin.replace('USDT', '')} Prediction`;
+                this.innerHTML = '<i class="fas fa-check mr-2"></i> Prediction Complete';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-bolt mr-2"></i>Run Prediction';
+                    this.disabled = false;
+                }, 3000);
+            } catch (error) {
+                console.error('Error fetching prediction data:', error);
+                this.innerHTML = '<i class="fas fa-times mr-2"></i> Error';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-bolt mr-2"></i>Run Prediction';
+                    this.disabled = false;
+                }, 3000);
+            }
+        });
+
+        // CSV Import
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('csvFile');
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async function () {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                dropzone.innerHTML = `
+                    <i class="fas fa-file-csv text-accent text-3xl mb-4"></i>
+                    <p class="text-gray-300 font-medium">${fileName}</p>
+                    <p class="text-gray-500 mt-2">Click to select a different file</p>
+                `;
+                const reader = new FileReader();
+                reader.onload = async function (e) {
+                    const text = e.target.result;
+                    const lines = text.split('\n').slice(1);
+                    for (const line of lines) {
+                        const [symbol, name, ticker, amount, purchasePrice] = line.split(',');
+                        if (symbol && amount && purchasePrice) {
+                            portfolio.push({
+                                symbol: symbol.trim(),
+                                name: name.trim(),
+                                ticker: ticker.trim(),
+                                amount: parseFloat(amount),
+                                purchasePrice: parseFloat(purchasePrice)
+                            });
+                        }
+                    }
+                    await fetchPrices();
+                    await initPerformanceChart();
+                    dropzone.innerHTML = `
+                        <i class="fas fa-check-circle text-accent text-3xl mb-4"></i>
+                        <p class="text-gray-300 font-medium">Processed Successfully!</p>
+                        <p class="text-gray-500 mt-2">${lines.length} holdings imported from CSV</p>
+                    `;
+                };
+                reader.readAsText(this.files[0]);
+            }
+        });
+
+        // Timeframe buttons
+        document.querySelectorAll('.timeframe-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.timeframe-btn').forEach(b => {
+                    b.classList.remove('border-accent', 'text-accent');
+                    b.classList.add('text-gray-400', 'hover:text-white');
+                    b.classList.remove('border-b-2');
+                });
+                this.classList.add('border-b-2', 'border-accent', 'text-accent');
+                this.classList.remove('text-gray-400', 'hover:text-white');
+                initPerformanceChart(this.dataset.timeframe);
+            });
+        });
+
+        // Refresh data
+        document.getElementById('refresh-data').addEventListener('click', async function () {
+            this.innerHTML = '<div class="loading-spinner mr-2"></div> Refreshing...';
+            this.disabled = true;
+            await fetchPrices();
+            await initPerformanceChart();
+            this.innerHTML = '<i class="fas fa-sync mr-2"></i>Refresh Data';
+            this.disabled = false;
+        });
+
+        // Initial load
+        fetchPrices();
+        initPerformanceChart();
+    </script>
+</body>
+
+</html>
