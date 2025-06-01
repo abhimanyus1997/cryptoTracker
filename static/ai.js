@@ -144,12 +144,23 @@ availableModels.forEach((modelId) => {
     option.textContent = modelId;
     document.getElementById("model-selection").appendChild(option);
 });
+
+
 document.getElementById("model-selection").value = selectedModel;
 document.getElementById("download").addEventListener("click", function () {
     initializeWebLLMEngine().then(() => {
         document.getElementById("send").disabled = false;
     });
 });
+
+// // Start downloading the default model in the background on page load
+// window.addEventListener("load", function () {
+//     initializeWebLLMEngine().then(() => {
+//         console.log("Default model loaded in background.");
+//         document.getElementById("send").disabled = false;
+//     });
+// });
+
 document.getElementById("send").addEventListener("click", function () {
     onMessageSend();
 });
