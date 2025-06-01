@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -40,12 +40,12 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
-        .table-striped tbody tr:nth-child(odd) {
+        .table-striped tbody tr:nth-child(even) {
             background-color: #34424e;
         }
 
         .fade-in {
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.5s ease-out;
         }
 
         @keyframes fadeIn {
@@ -61,11 +61,11 @@
         }
 
         .loading-spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0);
             border-radius: 50%;
-            border-top: 3px solid #9EF01A;
-            width: 30px;
-            height: 30px;
+            border-top: 2px solid #9EF01A;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
         }
 
@@ -93,7 +93,16 @@
                 <i class="fa-brands fa-bitcoin text-accent text-3xl mr-3"></i>
                 <h1 class="text-2xl font-bold text-white">CryptoTracker</h1>
             </div>
-            <div class="flex space-x-4">
+            <div class="flex space-x-4 items-center">
+                <div class="relative">
+                    <select id="currency-selector"
+                        class="bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent">
+                        <option value="USD">USD ($)</option>
+                        <option value="INR">INR (₹)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                    </select>
+                </div>
                 <button id="refresh-data"
                     class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">
                     <i class="fas fa-sync mr-2"></i>Refresh Data
@@ -213,12 +222,7 @@
                             <label class="block text-gray-400 mb-2">Select Cryptocurrency</label>
                             <div class="relative">
                                 <select id="predict-coin"
-                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent">
-                                    <option value="BTCUSDT">Bitcoin (BTC)</option>
-                                    <option value="ETHUSDT" selected>Ethereum (ETH)</option>
-                                    <option value="ADAUSDT">Cardano (ADA)</option>
-                                    <option value="SOLUSDT">Solana (SOL)</option>
-                                </select>
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent"></select>
                                 <div
                                     class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
                                     <i class="fas fa-chevron-down"></i>
@@ -241,7 +245,7 @@
                     </div>
                     <div class="mt-6 flex flex-col sm:flex-row justify-between items-center">
                         <div>
-                            <h4 class="text-lg font-bold text-white mb-1" id="prediction-title">ETH Prediction</h4>
+                            <h4 class="text-lg font-bold text-white mb-1" id="prediction-title">Prediction</h4>
                             <p class="text-gray-400">Next 30 days forecast based on AI analysis</p>
                         </div>
                         <button id="runPrediction"
@@ -305,13 +309,7 @@
                                     <label class="block text-gray-400 mb-2">Cryptocurrency</label>
                                     <div class="relative">
                                         <select id="coin-name"
-                                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent">
-                                            <option value="">Select coin</option>
-                                            <option value="BTCUSDT">Bitcoin (BTC)</option>
-                                            <option value="ETHUSDT">Ethereum (ETH)</option>
-                                            <option value="ADAUSDT">Cardano (ADA)</option>
-                                            <option value="SOLUSDT">Solana (SOL)</option>
-                                        </select>
+                                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent"></select>
                                         <div
                                             class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
                                             <i class="fas fa-chevron-down"></i>
@@ -320,14 +318,14 @@
                                 </div>
                                 <div>
                                     <label class="block text-gray-400 mb-2">Amount</label>
-                                    <input type="number" id="coin-amount" placeholder="0.00" step="any"
+                                    <input type="number" id="coin-amount" step="any" min="0" placeholder="0.00"
                                         class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label class="block text-gray-400 mb-2">Purchase Price ($)</label>
-                                    <input type="number" id="purchase-price" placeholder="0.00"
+                                    <label class="block text-gray-400 mb-2">Purchase Price</label>
+                                    <input type="number" id="purchase-price" step="any" min="0" placeholder="0.00"
                                         class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
                                 </div>
                                 <div>
@@ -389,23 +387,136 @@
     </footer>
 
     <script>
-        // Portfolio data
+        // Configuration
+        let selectedCurrency = 'USD';
+        const currencySymbols = { USD: '$', INR: '₹', EUR: '€', GBP: '£' };
         let portfolio = [
             { symbol: 'BTCUSDT', name: 'Bitcoin', ticker: 'BTC', amount: 0.573, purchasePrice: 35000 },
             { symbol: 'ETHUSDT', name: 'Ethereum', ticker: 'ETH', amount: 5.24, purchasePrice: 1900 },
             { symbol: 'ADAUSDT', name: 'Cardano', ticker: 'ADA', amount: 1840, purchasePrice: 0.35 },
             { symbol: 'SOLUSDT', name: 'Solana', ticker: 'SOL', amount: 15.2, purchasePrice: 22 }
         ];
-
-        // Icon mapping for coins
+        let exchangeRates = { USD: 1 };
+        let tradingPairs = [];
         const coinIcons = {
             'BTCUSDT': 'fa-bitcoin text-yellow-400',
-            'ETHUSDT': 'fa-ethereum text-purple-400',
+            'ETHUSDT': 'fa-ethereum text-blue-500',
             'ADAUSDT': 'fa-circle text-blue-400',
             'SOLUSDT': 'fa-fire text-orange-400'
         };
+        let availableCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 
-        // Fetch real-time prices from Binance API
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Fetch exchange rates
+        async function fetchExchangeRates(date = 'latest') {
+            try {
+                const url = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${date}/v1/currencies/inr.json`;
+                const response = await axios.get(url);
+                const inrRates = response.data.inr;
+                // Convert INR-based rates to USD-based
+                exchangeRates = Object.keys(inrRates).reduce((acc, curr) => {
+                    acc[curr.toUpperCase()] = 1 / inrRates[curr];
+                    return acc;
+                }, {});
+                const usdRate = exchangeRates['USD'] || 1;
+                for (let curr of Object.keys(exchangeRates)) {
+                    exchangeRates[curr] = exchangeRates[curr] / usdRate;
+                }
+                availableCurrencies = Object.keys(exchangeRates).sort();
+                populateCurrencySelector();
+                return exchangeRates;
+            } catch (error) {
+                console.error('Error fetching exchange rates:', error);
+                return exchangeRates;
+            }
+        }
+
+        // Populate currency selector
+        function populateCurrencySelector() {
+            const selector = document.getElementById('currency-selector');
+            selector.innerHTML = '';
+            const priorityCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
+            priorityCurrencies.forEach(curr => {
+                if (availableCurrencies.includes(curr)) {
+                    selector.innerHTML += `<option value="${curr}">${curr} (${currencySymbols[curr] || curr})</option>`;
+                }
+            });
+            availableCurrencies.forEach(curr => {
+                if (!priorityCurrencies.includes(curr)) {
+                    selector.innerHTML += `<option value="${curr}">${curr}</option>`;
+                }
+            });
+            selector.value = availableCurrencies.includes(selectedCurrency) ? selectedCurrency : 'USD';
+            selectedCurrency = selector.value;
+        }
+
+        // Fetch trading pairs from Binance
+        async function fetchTradingPairs() {
+            try {
+                const response = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
+                tradingPairs = response.data.symbols
+                    .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
+                    .slice(0, 500)
+                    .map(s => ({
+                        symbol: s.symbol,
+                        name: s.baseAsset,
+                        ticker: s.baseAsset
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+                populateCoinDropdowns();
+            } catch (error) {
+                console.error('Error fetching trading pairs:', error);
+            }
+        }
+
+        // Populate coin dropdowns
+        function populateCoinDropdowns() {
+            const coinSelect = document.getElementById('coin-name');
+            const predictSelect = document.getElementById('predict-coin');
+            coinSelect.innerHTML = '<option value="">Select coin</option>';
+            predictSelect.innerHTML = '';
+            tradingPairs.forEach(pair => {
+                coinSelect.innerHTML += `<option value="${pair.symbol}">${pair.name} (${pair.ticker})</option>`;
+                predictSelect.innerHTML += `<option value="${pair.symbol}">${pair.name} (${pair.ticker})</option>`;
+            });
+            predictSelect.value = 'ETHUSDT';
+            document.getElementById('prediction-title').textContent = 'ETH Prediction';
+        }
+
+        // Fetch historical price from Binance
+        async function fetchHistoricalPrice(symbol, date) {
+            try {
+                const timestamp = new Date(date).getTime();
+                const response = await axios.get('https://api.binance.com/api/v3/klines', {
+                    params: {
+                        symbol,
+                        interval: '1d',
+                        startTime: timestamp,
+                        endTime: timestamp + 24 * 60 * 60 * 1000,
+                        limit: 1
+                    }
+                });
+                const priceUSD = response.data[0] ? parseFloat(response.data[0][4]) : null;
+                if (priceUSD && selectedCurrency !== 'USD') {
+                    const rates = await fetchExchangeRates(date.split('T')[0]);
+                    return priceUSD * (rates[selectedCurrency] || 1);
+                }
+                return priceUSD;
+            } catch (error) {
+                console.error('Error fetching historical price:', error);
+                return null;
+            }
+        }
+
+        // Fetch real-time prices from Binance
         async function fetchPrices() {
             try {
                 const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
@@ -413,6 +524,7 @@
                     acc[item.symbol] = parseFloat(item.price);
                     return acc;
                 }, {});
+                await fetchExchangeRates();
                 updatePortfolio(prices);
                 updateSummary(prices);
             } catch (error) {
@@ -420,34 +532,42 @@
             }
         }
 
-        // Update portfolio table with real-time prices
+        // Format currency
+        function formatCurrency(value, currency) {
+            const rate = exchangeRates[currency] || 1;
+            const converted = value * rate;
+            return `${currencySymbols[currency] || ''}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+        }
+
+        // Update portfolio table
         function updatePortfolio(prices) {
             const tbody = document.getElementById('portfolio-body');
             tbody.innerHTML = '';
             portfolio.forEach((holding, index) => {
-                const price = prices[holding.symbol] || holding.purchasePrice;
-                const value = holding.amount * price;
-                const change24h = prices[holding.symbol] ? ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(1) : 0;
+                const priceUSD = prices[holding.symbol] || holding.purchasePrice;
+                const valueUSD = holding.amount * priceUSD;
+                const change24h = prices[holding.symbol] ? ((priceUSD - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2) : 0;
+                const iconClass = coinIcons[holding.symbol] || 'fa-circle text-gray-400';
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="py-4 px-4">
                         <div class="flex items-center">
                             <div class="bg-gray-600 rounded-full p-2 mr-3">
-                                <i class="fab ${coinIcons[holding.symbol]} text-lg"></i>
+                                <i class="fas ${iconClass} text-lg"></i>
                             </div>
                             <div>
-                                <div class="font-medium">${holding.name}</div>
+                                <div class="font-semibold">${holding.name}</div>
                                 <div class="text-gray-500 text-sm">${holding.ticker}</div>
                             </div>
                         </div>
                     </td>
-                    <td class="py-4 px-4 text-right">${holding.amount.toFixed(3)}</td>
-                    <td class="py-4 px-4 text-right">$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td class="py-4 px-4 text-right font-medium">$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="py-4 px-4 text-right">${holding.amount.toFixed(8)}</td>
+                    <td class="py-4 px-4 text-right">${formatCurrency(priceUSD, selectedCurrency)}</td>
+                    <td class="py-4 px-4 text-right font-medium">${formatCurrency(valueUSD, selectedCurrency)}</td>
                     <td class="py-4 px-4 text-right ${change24h >= 0 ? 'text-accent' : 'text-red-400'}">${change24h >= 0 ? '+' : ''}${change24h}%</td>
                     <td class="py-4 px-4 text-center">
-                        <button class="text-blue-400 mr-2 hover:text-blue-300" onclick="editHolding(${index})"><i class="fas fa-edit"></i></button>
-                        <button class="text-red-400 hover:text-red-300" onclick="removeHolding(${index})"><i class="fas fa-trash-alt"></i></button>
+                        <button class="text-blue-400 mr-2 hover:text-blue-500" onclick="editHolding(${index})"><i class="fas fa-edit"></i></button>
+                        <button class="text-red-400 hover:text-red-500" onclick="removeHolding(${index})"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -456,29 +576,35 @@
 
         // Update summary cards
         function updateSummary(prices) {
-            const totalValue = portfolio.reduce((sum, holding) => sum + holding.amount * (prices[holding.symbol] || holding.purchasePrice), 0);
+            const totalValueUSD = portfolio.reduce((sum, holding) => sum + holding.amount * (prices[holding.symbol] || holding.purchasePrice), 0);
             const changes = portfolio.map(holding => {
-                const price = prices[holding.symbol] || holding.purchasePrice;
-                return ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(1);
+                const priceUSD = prices[holding.symbol] || holding.purchasePrice;
+                return ((priceUSD - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2);
             });
-            const best = Math.max(...changes);
-            const worst = Math.min(...changes);
-            const bestCoin = portfolio[changes.indexOf(best.toString())]?.name || '--';
-            const worstCoin = portfolio[changes.indexOf(worst.toString())]?.name || '--';
-            const totalChange = portfolio.reduce((sum, holding) => {
-                const price = prices[holding.symbol] || holding.purchasePrice;
-                return sum + (price - holding.purchasePrice) * holding.amount;
+            const bestValue = Math.max(...changes);
+            const worstValue = Math.min(...changes);
+            const bestCoin = portfolio[changes.indexOf(bestValue.toString())]?.name || '--';
+            const worstCoin = portfolio[changes.indexOf(worstValue.toString())]?.name || '--';
+            const totalChangeUSD = portfolio.reduce((sum, holding) => {
+                const priceUSD = prices[holding.symbol] || holding.purchasePrice;
+                return sum + (priceUSD - holding.purchasePrice) * holding.amount;
             }, 0);
 
-            document.getElementById('portfolio-value').textContent = `$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            document.getElementById('portfolio-change').innerHTML = `<i class="fas fa-caret-${totalChange >= 0 ? 'up' : 'down'} mr-1"></i>${(totalChange / totalValue * 100).toFixed(1)}% today`;
-            document.getElementById('portfolio-change').className = `mt-3 text-${totalChange >= 0 ? 'accent' : 'red-400'} text-sm`;
-            document.getElementById('total-holdings').textContent = `${portfolio.length} Assets`;
-            document.getElementById('best-performer').textContent = `${bestCoin} ${best >= 0 ? '+' : ''}${best}%`;
-            document.getElementById('worst-performer').textContent = `${worstCoin} ${worst >= 0 ? '+' : ''}${worst}%`;
-            document.getElementById('change-value').textContent = `${totalChange >= 0 ? '+' : '-'}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            document.getElementById('change-percent').innerHTML = `<i class="fas fa-caret-${totalChange >= 0 ? 'up' : 'down'} mr-1"></i>${(totalChange / totalValue * 100).toFixed(1)}% gain`;
-            document.getElementById('change-percent').className = `mt-3 text-${totalChange >= 0 ? 'accent' : 'red-400'} text-sm`;
+            document.getElementById('portfolio-value').textContent = formatCurrency(totalValueUSD, selectedCurrency);
+            document.getElementById('portfolio-change').innerHTML = `
+                <i class="fas fa-caret-${totalChangeUSD >= 0 ? 'up' : 'down'} mr-1"></i>
+                ${(totalChangeUSD / totalValueUSD * 100).toFixed(2)}% today
+            `;
+            document.getElementById('portfolio-change').className = `mt-3 text-${totalChangeUSD >= 0 ? 'accent' : 'red-400'} text-sm`;
+            document.getElementById('total-holdings').textContent = `${portfolio.length} assets`;
+            document.getElementById('best-performer').textContent = `${bestCoin} ${bestValue >= 0 ? '+' : ''}${bestValue}%`;
+            document.getElementById('worst-performer').textContent = `${worstCoin} ${worstValue >= 0 ? '+' : ''}${worstValue}%`;
+            document.getElementById('change-value').textContent = `${totalChangeUSD >= 0 ? '+' : '-'}${formatCurrency(Math.abs(totalChangeUSD), selectedCurrency)}`;
+            document.getElementById('change-percent').innerHTML = `
+                <i class="fas fa-caret-${totalChangeUSD >= 0 ? 'up' : 'down'} mr-1"></i>
+                ${(totalChangeUSD / totalValueUSD * 100).toFixed(2)}% gain
+            `;
+            document.getElementById('change-percent').className = `mt-3 text-${totalChangeUSD >= 0 ? 'accent' : 'red-400'} text-sm`;
         }
 
         // Historical Performance Chart
@@ -495,30 +621,38 @@
             }
 
             try {
-                const totalValues = [];
+                const totalValuesUSD = [];
                 const labels = [];
                 for (const holding of portfolio) {
                     const response = await axios.get('https://api.binance.com/api/v3/klines', {
                         params: { symbol: holding.symbol, interval, limit }
                     });
                     const klines = response.data;
-                    const values = klines.map(kline => holding.amount * parseFloat(kline[4]));
-                    if (totalValues.length === 0) {
-                        totalValues.push(...values);
+                    const valuesUSD = klines.map(kline => holding.amount * parseFloat(kline[4]));
+                    if (labels.length === 0) {
+                        totalValuesUSD.push(...valuesUSD);
                         labels.push(...klines.map((_, i) => {
                             const date = new Date();
-                            date.setHours(date.getHours() - i * (interval === '1h' ? 1 : interval === '4h' ? 4 : interval === '12h' ? 12 : interval === '1d' ? 24 : 24 * 7));
-                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            date.setHours(
+                                date.getHours() - i * (
+                                    interval === '1h' ? 1 :
+                                        interval === '4h' ? 4 :
+                                            interval === '12h' ? 12 :
+                                                interval === '1d' ? 24 : 168
+                                )
+                            );
+                            return date.toLocaleString('en-US', { month: 'short', day: 'numeric' });
                         }));
                     } else {
-                        totalValues.forEach((val, i) => totalValues[i] += values[i]);
+                        totalValuesUSD.forEach((val, i) => totalValuesUSD[i] += valuesUSD[i]);
                     }
                 }
 
+                const totalValues = totalValuesUSD.map(value => value * (exchangeRates[selectedCurrency] || 1));
                 const perfCtx = document.getElementById('performanceChart').getContext('2d');
                 const gradient = perfCtx.createLinearGradient(0, 0, 0, 300);
                 gradient.addColorStop(0, 'rgba(158, 240, 26, 0.3)');
-                gradient.addColorStop(1, 'rgba(158, 240, 26, 0)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
                 if (perfChart) perfChart.destroy();
                 perfChart = new Chart(perfCtx, {
@@ -526,14 +660,14 @@
                     data: {
                         labels: labels.reverse(),
                         datasets: [{
-                            label: 'Portfolio Value ($)',
+                            label: `Portfolio Value (${selectedCurrency})`,
                             data: totalValues.reverse(),
                             borderColor: '#9EF01A',
                             backgroundColor: gradient,
                             borderWidth: 2,
                             pointBackgroundColor: '#9EF01A',
-                            pointRadius: 3,
-                            pointHoverRadius: 6,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
                             tension: 0.3,
                             fill: true
                         }]
@@ -543,10 +677,10 @@
                         maintainAspectRatio: false,
                         scales: {
                             y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
                                 ticks: {
                                     color: '#94a3b8',
-                                    callback: value => '$' + (value / 1000).toFixed(0) + 'k'
+                                    callback: value => `${currencySymbols[selectedCurrency] || selectedCurrency}${value.toFixed(0)}`
                                 }
                             },
                             x: {
@@ -557,10 +691,10 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                backgroundColor: 'rgba(30, 41, 45, 0.8)',
                                 titleColor: '#e2e8f0',
                                 bodyColor: '#e2e8f0',
-                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderColor: '#4b5e6e',
                                 borderWidth: 1,
                                 padding: 12,
                                 boxPadding: 4
@@ -569,9 +703,8 @@
                     }
                 });
 
-                // Update metrics
-                const returns = ((totalValues[totalValues.length - 1] - totalValues[0]) / totalValues[0] * 100).toFixed(1);
-                const maxDrawdown = Math.min(...totalValues.map((val, i) => i > 0 ? (val - totalValues[i - 1]) / totalValues[i - 1] * 100 : 0)).toFixed(1);
+                const returns = ((totalValues[totalValues.length - 1] - totalValues[0]) / totalValues[0] * 100).toFixed(2);
+                const maxDrawdown = Math.min(...totalValues.map((val, i) => i > 0 ? (val - totalValues[i - 1]) / totalValues[i - 1] * 100 : 0)).toFixed(2);
                 document.getElementById('return-30d').textContent = `${returns >= 0 ? '+' : ''}${returns}%`;
                 document.getElementById('return-30d').className = `font-bold text-${returns >= 0 ? 'accent' : 'red-400'}`;
                 document.getElementById('max-drawdown').textContent = `${maxDrawdown}%`;
@@ -582,56 +715,88 @@
         }
 
         // Add holding
-        document.getElementById('add-holding-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        document.getElementById('add-holding-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
             const symbol = document.getElementById('coin-name').value;
             const amount = parseFloat(document.getElementById('coin-amount').value);
-            const purchasePrice = parseFloat(document.getElementById('purchase-price').value);
-            if (symbol && amount > 0 && purchasePrice > 0) {
-                const name = symbol.replace('USDT', '');
-                const ticker = name.substring(0, 3).toUpperCase();
+            let purchasePrice = parseFloat(document.getElementById('purchase-price').value);
+            const dateAcquired = document.getElementById('date-acquired').value;
+
+            if (symbol && !isNaN(amount) && amount > 0 && !isNaN(purchasePrice) && purchasePrice > 0) {
+                if (selectedCurrency !== 'USD') {
+                    purchasePrice /= (exchangeRates[selectedCurrency] || 1);
+                }
+                const name = tradingPairs.find(p => p.symbol === symbol)?.name || symbol.replace('USDT', '');
+                const ticker = tradingPairs.find(p => p.symbol === symbol)?.ticker || name.substring(0, 3).toUpperCase();
                 portfolio.push({ symbol, name, ticker, amount, purchasePrice });
                 await fetchPrices();
                 await initPerformanceChart();
                 this.reset();
+            } else {
+                alert('Please enter valid values for coin, amount, and purchase price.');
             }
         });
 
+        // Auto-fetch purchase price
+        const updatePurchasePrice = debounce(async () => {
+            const symbol = document.getElementById('coin-name').value;
+            const date = document.getElementById('date-acquired').value;
+            if (symbol && date) {
+                const price = await fetchHistoricalPrice(symbol, date);
+                if (price !== null) {
+                    document.getElementById('purchase-price').value = price.toFixed(2);
+                } else {
+                    document.getElementById('purchase-price').value = '';
+                    alert('Historical price not available for the selected date.');
+                }
+            }
+        }, 500);
+
+        document.getElementById('coin-name').addEventListener('change', updatePurchasePrice);
+        document.getElementById('date-acquired').addEventListener('change', updatePurchasePrice);
+        document.getElementById('currency-selector').addEventListener('change', async function () {
+            selectedCurrency = this.value;
+            await fetchPrices();
+            await initPerformanceChart();
+            updatePurchasePrice();
+        });
+
         // Remove holding
-        function removeHolding(index) {
+        async function removeHolding(index) {
             portfolio.splice(index, 1);
-            fetchPrices();
-            initPerformanceChart();
+            await fetchPrices();
+            await initPerformanceChart();
         }
 
-        // Edit holding (placeholder)
-        function editHolding(index) {
+        // Edit holding
+        async function editHolding(index) {
             const holding = portfolio[index];
             document.getElementById('coin-name').value = holding.symbol;
             document.getElementById('coin-amount').value = holding.amount;
-            document.getElementById('purchase-price').value = holding.purchasePrice;
+            document.getElementById('purchase-price').value = (holding.purchasePrice * (exchangeRates[selectedCurrency] || 1)).toFixed(2);
             document.getElementById('date-acquired').value = new Date().toISOString().split('T')[0];
-            removeHolding(index);
+            await removeHolding(index);
+            updatePurchasePrice();
         }
 
-        // Export CSV
+        // Export to CSV
         document.getElementById('export-csv').addEventListener('click', function () {
             const csv = ['Symbol,Name,Ticker,Amount,Purchase Price'];
             portfolio.forEach(holding => {
-                csv.push(`${holding.symbol},${holding.name},${holding.ticker},${holding.amount},${holding.purchasePrice}`);
+                csv.push(`${holding.symbol},${holding.name},${holding.ticker},${holding.amount.toFixed(8)},${holding.purchasePrice.toFixed(2)}`);
             });
             const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'portfolio.csv';
+            a.download = 'portfolio-data.csv';
             a.click();
             URL.revokeObjectURL(url);
         });
 
-        // Prediction Chart (mock)
-        const predCtx = document.getElementById('predictionChart').getContext('2d');
-        const predChart = new Chart(predCtx, {
+        // Prediction Chart (Mock)
+        const predChartContext = document.getElementById('predictionChart').getContext('2d');
+        const predChart = new Chart(predChartContext, {
             type: 'line',
             data: {
                 labels: ['Now', '1D', '3D', '7D', '15D', '30D'],
@@ -651,8 +816,17 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: value => `${currencySymbols[selectedCurrency] || selectedCurrency}${value.toFixed(2)}`
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' }
+                    }
                 },
                 plugins: {
                     legend: { display: false },
@@ -673,25 +847,26 @@
             this.disabled = true;
             try {
                 const response = await axios.get('https://api.binance.com/api/v3/ticker/price', { params: { symbol: coin } });
-                const currentPrice = parseFloat(response.data.price);
-                // Mock prediction (replace with FastAPI endpoint)
-                const predictedData = [currentPrice, currentPrice * 1.02, currentPrice * 1.05, currentPrice * 1.08, currentPrice * 1.12, currentPrice * 1.2];
+                const currentPriceUSD = parseFloat(response.data.price);
+                const predictedDataUSD = [currentPriceUSD, currentPriceUSD * 1.01, currentPriceUSD * 1.03, currentPriceUSD * 1.07, currentPriceUSD * 1.10, currentPriceUSD * 1.15];
+                const predictedData = predictedDataUSD.map(pUSD => pUSD * (exchangeRates[selectedCurrency] || 1));
                 predChart.data.datasets[0].data = predictedData;
                 predChart.data.datasets[0].borderDash = [];
                 predChart.update();
-                document.getElementById('prediction-title').textContent = `${coin.replace('USDT', '')} Prediction`;
+                const coinName = tradingPairs.find(p => p.symbol === coin)?.name || coin.replace('USDT', '');
+                document.getElementById('prediction-title').textContent = `${coinName} Prediction`;
                 this.innerHTML = '<i class="fas fa-check mr-2"></i> Prediction Complete';
                 setTimeout(() => {
-                    this.innerHTML = '<i class="fas fa-bolt mr-2"></i>Run Prediction';
+                    this.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run Prediction';
                     this.disabled = false;
-                }, 3000);
+                }, 2000);
             } catch (error) {
                 console.error('Error fetching prediction data:', error);
                 this.innerHTML = '<i class="fas fa-times mr-2"></i> Error';
                 setTimeout(() => {
-                    this.innerHTML = '<i class="fas fa-bolt mr-2"></i>Run Prediction';
+                    this.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run Prediction';
                     this.disabled = false;
-                }, 3000);
+                }, 2000);
             }
         });
 
@@ -704,20 +879,20 @@
                 const fileName = this.files[0].name;
                 dropzone.innerHTML = `
                     <i class="fas fa-file-csv text-accent text-3xl mb-4"></i>
-                    <p class="text-gray-300 font-medium">${fileName}</p>
-                    <p class="text-gray-500 mt-2">Click to select a different file</p>
+                    <p class="text-gray-300 mb-2">${fileName}</p>
+                    <p class="text-gray-600 text-sm">Click to select another file</p>
                 `;
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     const text = e.target.result;
-                    const lines = text.split('\n').slice(1);
+                    const lines = text.split('\n').slice(1).filter(line => line.trim());
                     for (const line of lines) {
-                        const [symbol, name, ticker, amount, purchasePrice] = line.split(',');
+                        const [symbol, name, ticker, amount, purchasePrice] = line.split(',').map(s => s.trim());
                         if (symbol && amount && purchasePrice) {
                             portfolio.push({
-                                symbol: symbol.trim(),
-                                name: name.trim(),
-                                ticker: ticker.trim(),
+                                symbol,
+                                name,
+                                ticker,
                                 amount: parseFloat(amount),
                                 purchasePrice: parseFloat(purchasePrice)
                             });
@@ -727,8 +902,8 @@
                     await initPerformanceChart();
                     dropzone.innerHTML = `
                         <i class="fas fa-check-circle text-accent text-3xl mb-4"></i>
-                        <p class="text-gray-300 font-medium">Processed Successfully!</p>
-                        <p class="text-gray-500 mt-2">${lines.length} holdings imported from CSV</p>
+                        <p class="text-gray-300 mb-2">Processed Successfully!</p>
+                        <p class="text-gray-600 text-sm">${lines.length} holdings imported</p>
                     `;
                 };
                 reader.readAsText(this.files[0]);
@@ -739,12 +914,11 @@
         document.querySelectorAll('.timeframe-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.timeframe-btn').forEach(b => {
-                    b.classList.remove('border-accent', 'text-accent');
-                    b.classList.add('text-gray-400', 'hover:text-white');
-                    b.classList.remove('border-b-2');
+                    b.classList.remove('border-accent', 'text-accent', 'border-b-2');
+                    b.classList.add('text-gray-400');
                 });
                 this.classList.add('border-b-2', 'border-accent', 'text-accent');
-                this.classList.remove('text-gray-400', 'hover:text-white');
+                this.classList.remove('text-gray-400');
                 initPerformanceChart(this.dataset.timeframe);
             });
         });
@@ -755,11 +929,12 @@
             this.disabled = true;
             await fetchPrices();
             await initPerformanceChart();
-            this.innerHTML = '<i class="fas fa-sync mr-2"></i>Refresh Data';
+            this.innerHTML = '<i class="fas fa-sync mr-2"></i> Refresh Data';
             this.disabled = false;
         });
 
         // Initial load
+        fetchTradingPairs();
         fetchPrices();
         initPerformanceChart();
     </script>
