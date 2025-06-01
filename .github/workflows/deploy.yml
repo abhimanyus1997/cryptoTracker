@@ -1,0 +1,49 @@
+# GitHub Actions workflow to deploy 'frontend-lite/' from 'dev' branch to GitHub Pages
+name: Deploy frontend-lite to GitHub Pages
+
+on:
+  # Trigger deployment when changes are pushed to the 'dev' branch
+  push:
+    branches: ["dev"]
+
+  # Allow manual deployment from the GitHub Actions UI
+  workflow_dispatch:
+
+# Required permissions to publish to GitHub Pages
+permissions:
+  contents: read       # Read repo contents
+  pages: write         # Publish to GitHub Pages
+  id-token: write      # Authenticate to GitHub Pages
+
+# Ensure only one deploy job runs at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages  # Target deployment environment
+      url: ${{ steps.deployment.outputs.page_url }}  # Exposes the deployed page URL
+
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      # Step 1: Checkout code from the 'dev' branch
+      - name: Checkout the dev branch
+        uses: actions/checkout@v4
+
+      # Step 2: Set up GitHub Pages deployment
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Step 3: Upload only the 'frontend-lite' folder for deployment
+      - name: Upload frontend-lite directory
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'frontend-lite'  # Folder to deploy
+
+      # Step 4: Deploy the uploaded files to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
