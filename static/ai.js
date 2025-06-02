@@ -15,7 +15,7 @@ that crypto is volatile and they should do their own research.`,
 ];
 
 const availableModels = webllm.prebuiltAppConfig.model_list.map((m) => m.model_id);
-let selectedModel = "Llama-3.1-8B-Instruct-q4f32_1-1k";
+let selectedModel = "SmolLM2-135M-lnstruct-qOf16-ML";
 
 // Callback function for initializing progress
 function updateEngineInitProgressCallback(report) {
@@ -102,20 +102,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 500); // Check every 500ms
 });
 
-function formatPortfolioData() {
-    if (!window.portfolio || window.portfolio.length === 0) {
-        return "No portfolio data available.";
-    }
+function getPortfolioSummaryWithPrices(prices) {
+    let summary = `Here is your updated portfolio:\n\n`;
+    summary += "| Symbol   | Name         | Ticker | Amount      | Purchase | Current | P/L (%) |\n";
+    summary += "|----------|--------------|--------|-------------|----------|---------|---------|\n";
 
-    let portfolioStr = "Here is the user's current cryptocurrency portfolio:\n\n";
-    portfolioStr += "| Symbol   | Name         | Ticker | Amount      | Purchase Price (USDT) |\n";
-    portfolioStr += "|----------|--------------|--------|-------------|-----------------------|\n";
-
-    window.portfolio.forEach(holding => {
-        portfolioStr += `| ${holding.symbol.padEnd(8)} | ${holding.name.padEnd(12)} | ${holding.ticker.padEnd(6)} | ${holding.amount.toFixed(8).padEnd(11)} | ${holding.purchasePrice.toFixed(2).padEnd(21)} |\n`;
+    portfolio.forEach(holding => {
+        const price = prices[holding.symbol] || holding.purchasePrice;
+        const roi = ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2);
+        summary += `| ${holding.symbol.padEnd(8)} | ${holding.name.padEnd(12)} | ${holding.ticker.padEnd(6)} | ${holding.amount.toFixed(8).padEnd(11)} | $${holding.purchasePrice.toFixed(2).padEnd(8)} | $${price.toFixed(2).padEnd(7)} | ${roi.padStart(6)}% |\n`;
     });
 
-    return portfolioStr;
+    return summary;
 }
 
 /*************** UI logic ***************/
@@ -254,3 +252,7 @@ document.getElementById("ai-chat-close")?.addEventListener("click", () =>
 );
 
 document.getElementById("send").addEventListener("click", onMessageSend);
+
+document.getElementById('ai-chat-toggle-mobile').addEventListener('click', function () {
+    document.getElementById('ai-chat-modal').classList.remove('hidden');
+});
