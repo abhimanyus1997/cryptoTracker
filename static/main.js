@@ -133,6 +133,8 @@ async function fetchPrices() {
         updatePortfolio(prices);
         updateSummary(prices);
         console.log("Prices fetched successfully");
+        console.log("Trading Pair Price:", response);
+
     } catch (error) {
         console.error('Error fetching prices:', error);
     }
@@ -144,14 +146,59 @@ function formatCurrency(value, currency) {
     return `${currencySymbols[currency] || ''}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
-function updatePortfolio(prices) {
+async function fetchKlineData(market = 'ETHUSDT', tickInterval = '1d') {
+    console.log(`Fetching kline data for ${market} with interval ${tickInterval}...`);
+    try {
+        const url = `https://api.binance.com/api/v3/klines?symbol=${market}&interval=${tickInterval}`;
+        const response = await axios.get(url);
+        const data = response.data;
+        console.log("Kline data:", data);
+        return data;
+    } catch (error) {
+        console.error(`Error fetching kline data for ${market}:`, error);
+        return null;
+    }
+}
+
+async function fetchYesterdayPrice(symbol) {
+    console.log(`Fetching yesterday's price for ${symbol}...`);
+    try {
+        const yesterday = new Date();
+        yesterday.setHours(yesterday.getHours() - 24); // Approximately 24 hours ago from now (11:38 PM IST, June 2, 2025)
+        const timestamp = yesterday.getTime();
+        const response = await axios.get('https://api.binance.com/api/v3/klines', {
+            params: {
+                symbol,
+                interval: '1h', // 1-hour interval to match Python code
+                startTime: timestamp,
+                endTime: timestamp + 60 * 60 * 1000, // Cover 1 hour
+                limit: 1 // Get the most recent kline from ~24 hours ago
+            }
+        });
+        const yesterdayPriceUSD = response.data[0] ? parseFloat(response.data[0][4]) : null; // Closing price
+        console.log(`Yesterday's price for ${symbol}: ${yesterdayPriceUSD}`);
+        return yesterdayPriceUSD;
+    } catch (error) {
+        console.error(`Error fetching yesterday's price for ${symbol}:`, error);
+        return null;
+    }
+}
+
+async function updatePortfolio(prices) {
     console.log("Updating portfolio...");
     const tbody = document.getElementById('portfolio-body');
     tbody.innerHTML = '';
-    portfolio.forEach((holding, index) => {
-        const priceUSD = prices[holding.symbol] || holding.purchasePrice;
+
+    for (const [index, holding] of portfolio.entries()) {
+        const priceUSD = prices[holding.symbol] || holding.purchasePrice; // Current price or fallback to purchasePrice
+        const yesterdayPriceUSD = await fetchYesterdayPrice(holding.symbol); // Fetch price from ~24 hours ago
         const valueUSD = holding.amount * priceUSD;
-        const change24h = prices[holding.symbol] ? ((priceUSD - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2) : 0;
+
+        // Calculate 24-hour change: ((currentPrice - yesterdayPrice) / yesterdayPrice) * 100
+        const change24h = (yesterdayPriceUSD && priceUSD !== holding.purchasePrice)
+            ? ((priceUSD - yesterdayPriceUSD) / yesterdayPriceUSD * 100).toFixed(2)
+            : 0; // Fallback to 0 if yesterday's price is unavailable or no new price data
+
         const iconClass = coinIcons[holding.symbol] || 'fa-circle text-gray-400';
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -176,7 +223,7 @@ function updatePortfolio(prices) {
             </td>
         `;
         tbody.appendChild(row);
-    });
+    }
     console.log("Portfolio updated");
 }
 
