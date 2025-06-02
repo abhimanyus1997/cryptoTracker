@@ -5,7 +5,6 @@ let portfolio = [
     { symbol: 'AVAXUSDT', name: 'Avalanche', ticker: 'AVAX', amount: 0.816, purchasePrice: 22.08 },
     { symbol: 'SCRUSDT', name: 'Scroll', ticker: 'SCR', amount: 49.096, purchasePrice: 1.21 }
 ];
-let exchangeRates = { USD: 1 };
 let tradingPairs = [];
 const coinIcons = {
     'ETHUSDT': 'fa-ethereum text-blue-500',
@@ -16,7 +15,7 @@ let availableCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 let perfChart = null;
 let predChart = null;
 
-console.log("Portfolio initialized", portfolio);
+console.log("Portfolio initialized:", portfolio);
 
 function debounce(func, wait) {
     let timeout;
@@ -29,46 +28,27 @@ function debounce(func, wait) {
     };
 }
 
-async function fetchExchangeRates(date = 'latest') {
-    console.log("Fetching exchange rates...");
-    try {
-        const url = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${date}/v1/currencies/inr.json`;
-        const response = await axios.get(url);
-        const inrRates = response.data.inr;
-        exchangeRates = Object.keys(inrRates).reduce((acc, curr) => {
-            acc[curr.toUpperCase()] = 1 / inrRates[curr];
-            return acc;
-        }, {});
-        const usdRate = exchangeRates.USD || 1;
-        for (let curr of Object.keys(exchangeRates)) {
-            exchangeRates[curr] = exchangeRates[curr] / usdRate;
-        }
-        availableCurrencies = Object.keys(exchangeRates).sort();
-        populateCurrencySelector();
-        console.log("Exchange rates fetched:", exchangeRates);
-        return exchangeRates;
-    } catch (error) {
-        console.error('Error fetching exchange rates:', error);
-        return exchangeRates;
-    }
-}
-
 function populateCurrencySelector() {
     const selector = document.getElementById('currency-selector');
-    selector.innerHTML = '';
-    const priorityCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
-    priorityCurrencies.forEach(curr => {
-        if (availableCurrencies.includes(curr)) {
-            selector.innerHTML += `<option value="${curr}">${curr} (${currencySymbols[curr] || curr})</option>`;
-        }
-    });
-    availableCurrencies.forEach(curr => {
-        if (!priorityCurrencies.includes(curr)) {
-            selector.innerHTML += `<option value="${curr}">${curr}</option>`;
-        }
-    });
-    selector.value = availableCurrencies.includes(selectedCurrency) ? selectedCurrency : 'USD';
-    selectedCurrency = selector.value;
+    const selectorMobile = document.getElementById('currency-selector-mobile');
+    const populate = (sel) => {
+        sel.innerHTML = '';
+        const priorityCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
+        priorityCurrencies.forEach(curr => {
+            if (availableCurrencies.includes(curr)) {
+                sel.innerHTML += `<option value="${curr}">${curr} (${currencySymbols[curr] || curr})</option>`;
+            }
+        });
+        availableCurrencies.forEach(curr => {
+            if (!priorityCurrencies.includes(curr)) {
+                sel.innerHTML += `<option value="${curr}">${curr}</option>`;
+            }
+        });
+        sel.value = availableCurrencies.includes(selectedCurrency) ? selectedCurrency : 'USD';
+    };
+    if (selector) populate(selector);
+    if (selectorMobile) populate(selectorMobile);
+    selectedCurrency = selector ? selector.value : (selectorMobile ? selectorMobile.value : 'USD');
     console.log("Currency selector populated, selected:", selectedCurrency);
 }
 
@@ -108,13 +88,9 @@ async function fetchHistoricalPrice(symbol, date) {
         const response = await axios.get('https://api.binance.com/api/v3/klines', {
             params: { symbol, interval: '1d', startTime: timestamp, endTime: timestamp + 24 * 60 * 60 * 1000, limit: 1 }
         });
-        const priceUSD = response.data[0] ? parseFloat(response.data[0][4]) : null;
-        if (priceUSD && selectedCurrency !== 'USD') {
-            const rates = await fetchExchangeRates(date.split('T')[0]);
-            return priceUSD * (rates[selectedCurrency] || 1);
-        }
-        console.log(`Historical price for ${symbol} on ${date}: ${priceUSD}`);
-        return priceUSD;
+        const price = response.data[0] ? parseFloat(response.data[0][4]) : null;
+        console.log(`Historical price for ${symbol} on ${date}: ${price}`);
+        return price;
     } catch (error) {
         console.error('Error fetching historical price:', error);
         return null;
@@ -129,55 +105,36 @@ async function fetchPrices() {
             acc[item.symbol] = parseFloat(item.price);
             return acc;
         }, {});
-        await fetchExchangeRates();
-        updatePortfolio(prices);
-        updateSummary(prices);
+        await updatePortfolio(prices);
+        await updateSummary(prices);
         console.log("Prices fetched successfully");
-        console.log("Trading Pair Price:", response);
-
     } catch (error) {
         console.error('Error fetching prices:', error);
     }
 }
 
-function formatCurrency(value, currency) {
-    const rate = exchangeRates[currency] || 1;
-    const converted = value * rate;
-    return `${currencySymbols[currency] || ''}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
-}
-
-async function fetchKlineData(market = 'ETHUSDT', tickInterval = '1d') {
-    console.log(`Fetching kline data for ${market} with interval ${tickInterval}...`);
-    try {
-        const url = `https://api.binance.com/api/v3/klines?symbol=${market}&interval=${tickInterval}`;
-        const response = await axios.get(url);
-        const data = response.data;
-        console.log("Kline data:", data);
-        return data;
-    } catch (error) {
-        console.error(`Error fetching kline data for ${market}:`, error);
-        return null;
-    }
+function formatCurrency(value) {
+    return `${currencySymbols[selectedCurrency] || selectedCurrency}${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 async function fetchYesterdayPrice(symbol) {
     console.log(`Fetching yesterday's price for ${symbol}...`);
     try {
         const yesterday = new Date();
-        yesterday.setHours(yesterday.getHours() - 24); // Approximately 24 hours ago from now (11:38 PM IST, June 2, 2025)
+        yesterday.setHours(yesterday.getHours() - 24);
         const timestamp = yesterday.getTime();
         const response = await axios.get('https://api.binance.com/api/v3/klines', {
             params: {
                 symbol,
-                interval: '1h', // 1-hour interval to match Python code
+                interval: '1h',
                 startTime: timestamp,
-                endTime: timestamp + 60 * 60 * 1000, // Cover 1 hour
-                limit: 1 // Get the most recent kline from ~24 hours ago
+                endTime: timestamp + 60 * 60 * 1000,
+                limit: 1
             }
         });
-        const yesterdayPriceUSD = response.data[0] ? parseFloat(response.data[0][4]) : null; // Closing price
-        console.log(`Yesterday's price for ${symbol}: ${yesterdayPriceUSD}`);
-        return yesterdayPriceUSD;
+        const yesterdayPrice = response.data[0] ? parseFloat(response.data[0][4]) : null;
+        console.log(`Yesterday's price for ${symbol}: ${yesterdayPrice}`);
+        return yesterdayPrice;
     } catch (error) {
         console.error(`Error fetching yesterday's price for ${symbol}:`, error);
         return null;
@@ -190,14 +147,16 @@ async function updatePortfolio(prices) {
     tbody.innerHTML = '';
 
     for (const [index, holding] of portfolio.entries()) {
-        const priceUSD = prices[holding.symbol] || holding.purchasePrice; // Current price or fallback to purchasePrice
-        const yesterdayPriceUSD = await fetchYesterdayPrice(holding.symbol); // Fetch price from ~24 hours ago
-        const valueUSD = holding.amount * priceUSD;
-
-        // Calculate 24-hour change: ((currentPrice - yesterdayPrice) / yesterdayPrice) * 100
-        const change24h = (yesterdayPriceUSD && priceUSD !== holding.purchasePrice)
-            ? ((priceUSD - yesterdayPriceUSD) / yesterdayPriceUSD * 100).toFixed(2)
-            : 0; // Fallback to 0 if yesterday's price is unavailable or no new price data
+        const price = prices[holding.symbol] || holding.purchasePrice;
+        const yesterdayPrice = await fetchYesterdayPrice(holding.symbol);
+        const value = holding.amount * price;
+        const profitLossPercent = price !== holding.purchasePrice
+            ? ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2)
+            : 0;
+        const profitLossAmount = (price - holding.purchasePrice) * holding.amount;
+        const change24h = (yesterdayPrice && price !== holding.purchasePrice)
+            ? ((price - yesterdayPrice) / yesterdayPrice * 100).toFixed(2)
+            : 0;
 
         const iconClass = coinIcons[holding.symbol] || 'fa-circle text-gray-400';
         const row = document.createElement('tr');
@@ -214,9 +173,15 @@ async function updatePortfolio(prices) {
                 </div>
             </td>
             <td class="py-4 px-4 text-right">${holding.amount.toFixed(8)}</td>
-            <td class="py-4 px-4 text-right">${formatCurrency(priceUSD, selectedCurrency)}</td>
-            <td class="py-4 px-4 text-right font-medium">${formatCurrency(valueUSD, selectedCurrency)}</td>
+            <td class="py-4 px-4 text-right">${formatCurrency(price)}</td>
+            <td class="py-4 px-4 text-right font-medium">${formatCurrency(value)}</td>
             <td class="py-4 px-4 text-right ${change24h >= 0 ? 'text-accent' : 'text-red-400'}">${change24h >= 0 ? '+' : ''}${change24h}%</td>
+            <td class="py-4 px-4 text-right">
+                <span class="${profitLossPercent >= 0 ? 'text-accent' : 'text-red-400'}"
+                      title="${formatCurrency(profitLossAmount)}">
+                    ${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent}%
+                </span>
+            </td>
             <td class="py-4 px-4 text-center">
                 <button class="text-blue-400 mr-2 hover:text-blue-500" onclick="editHolding(${index})"><i class="fas fa-edit"></i></button>
                 <button class="text-red-400 hover:text-red-500" onclick="removeHolding(${index})"><i class="fas fa-trash"></i></button>
@@ -227,36 +192,70 @@ async function updatePortfolio(prices) {
     console.log("Portfolio updated");
 }
 
-function updateSummary(prices) {
+async function updateSummary(prices) {
     console.log("Updating summary...");
-    const totalValueUSD = portfolio.reduce((sum, holding) => sum + holding.amount * (prices[holding.symbol] || holding.purchasePrice), 0);
-    const changes = portfolio.map(holding => {
-        const priceUSD = prices[holding.symbol] || holding.purchasePrice;
-        return ((priceUSD - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2);
-    });
-    const bestValue = Math.max(...changes);
-    const worstValue = Math.min(...changes);
-    const bestCoin = portfolio[changes.indexOf(bestValue.toString())]?.name || '--';
-    const worstCoin = portfolio[changes.indexOf(worstValue.toString())]?.name || '--';
-    const totalChangeUSD = portfolio.reduce((sum, holding) => {
-        const priceUSD = prices[holding.symbol] || holding.purchasePrice;
-        return sum + (priceUSD - holding.purchasePrice) * holding.amount;
-    }, 0);
-    document.getElementById('portfolio-value').textContent = formatCurrency(totalValueUSD, selectedCurrency);
+    let totalValue = 0;
+    let totalValueYesterday = 0;
+    let totalPurchaseValue = 0;
+    const changes24h = [];
+    let bestCoin = '--';
+    let bestChange = 0;
+    let worstCoin = '--';
+    let worstChange = 0;
+
+    for (const holding of portfolio) {
+        const price = prices[holding.symbol] || holding.purchasePrice;
+        const yesterdayPrice = await fetchYesterdayPrice(holding.symbol);
+        const value = holding.amount * price;
+        const purchaseValue = holding.amount * holding.purchasePrice;
+        totalValue += value;
+        totalPurchaseValue += purchaseValue;
+
+        if (yesterdayPrice) {
+            totalValueYesterday += holding.amount * yesterdayPrice;
+            const change24h = ((price - yesterdayPrice) / yesterdayPrice * 100).toFixed(2);
+            changes24h.push({ name: holding.name, change: parseFloat(change24h) });
+        } else {
+            changes24h.push({ name: holding.name, change: 0 });
+        }
+    }
+
+    if (changes24h.length > 0) {
+        const best = changes24h.reduce((max, item) => item.change > max.change ? item : max, changes24h[0]);
+        const worst = changes24h.reduce((min, item) => item.change < min.change ? item : min, changes24h[0]);
+        bestCoin = best.name;
+        bestChange = best.change;
+        worstCoin = worst.name;
+        worstChange = worst.change;
+    }
+
+    const change24h = totalValue - totalValueYesterday;
+    const change24hPercent = totalValueYesterday > 0 ? (change24h / totalValueYesterday * 100).toFixed(2) : 0;
+    const totalProfitPercent = totalPurchaseValue > 0 ? ((totalValue - totalPurchaseValue) / totalPurchaseValue * 100).toFixed(2) : 0;
+
+    document.getElementById('portfolio-value').textContent = formatCurrency(totalValue);
     document.getElementById('portfolio-change').innerHTML = `
-        <i class="fas fa-caret-${totalChangeUSD >= 0 ? 'up' : 'down'} mr-1"></i>
-        ${(totalChangeUSD / totalValueUSD * 100).toFixed(2)}% today
+        <i class="fas fa-caret-${totalProfitPercent >= 0 ? 'up' : 'down'} mr-1"></i>
+        ${totalProfitPercent >= 0 ? '+' : ''}${totalProfitPercent}% overall
     `;
-    document.getElementById('portfolio-change').className = `mt-3 text-${totalChangeUSD >= 0 ? 'accent' : 'red-400'} text-sm`;
-    document.getElementById('total-holdings').textContent = `${portfolio.length} assets`;
-    document.getElementById('best-performer').textContent = `${bestCoin} ${bestValue >= 0 ? '+' : ''}${bestValue}%`;
-    document.getElementById('worst-performer').textContent = `${worstCoin} ${worstValue >= 0 ? '+' : ''}${worstValue}%`;
-    document.getElementById('change-value').textContent = `${totalChangeUSD >= 0 ? '+' : '-'}${formatCurrency(Math.abs(totalChangeUSD), selectedCurrency)}`;
+    document.getElementById('portfolio-change').classList.remove('text-accent', 'text-red-400');
+    document.getElementById('portfolio-change').classList.add(`text-${totalProfitPercent >= 0 ? 'accent' : 'red-400'}`);
+    document.getElementById('total-holdings').textContent = `${portfolio.length} Assets`;
+    document.getElementById('best-performer').textContent = `${bestCoin} ${bestChange >= 0 ? '+' : ''}${bestChange}%`;
+    document.getElementById('best-performer').classList.remove('text-accent', 'text-red-400');
+    document.getElementById('best-performer').classList.add(`text-${bestChange >= 0 ? 'accent' : 'red-400'}`);
+    document.getElementById('worst-performer').textContent = `${worstCoin} ${worstChange >= 0 ? '+' : ''}${worstChange}%`;
+    document.getElementById('worst-performer').classList.remove('text-accent', 'text-red-400');
+    document.getElementById('worst-performer').classList.add(`text-${worstChange >= 0 ? 'accent' : 'red-400'}`);
+    document.getElementById('change-value').textContent = formatCurrency(change24h);
+    document.getElementById('change-value').classList.remove('text-accent', 'text-red-400');
+    document.getElementById('change-value').classList.add(`text-${change24h >= 0 ? 'accent' : 'red-400'}`);
     document.getElementById('change-percent').innerHTML = `
-        <i class="fas fa-caret-${totalChangeUSD >= 0 ? 'up' : 'down'} mr-1"></i>
-        ${(totalChangeUSD / totalValueUSD * 100).toFixed(2)}% gain
+        <i class="fas fa-caret-${change24h >= 0 ? 'up' : 'down'} mr-1"></i>
+        ${change24hPercent >= 0 ? '+' : ''}${change24hPercent}% today
     `;
-    document.getElementById('change-percent').className = `mt-3 text-${totalChangeUSD >= 0 ? 'accent' : 'red-400'} text-sm`;
+    document.getElementById('change-percent').classList.remove('text-accent', 'text-red-400');
+    document.getElementById('change-percent').classList.add(`text-${change24h >= 0 ? 'accent' : 'red-400'}`);
     console.log("Summary updated");
 }
 
@@ -272,26 +271,25 @@ async function initPerformanceChart(timeframe = '1M') {
         default: interval = '1h'; limit = 24 * 30;
     }
     try {
-        const totalValuesUSD = [];
+        const totalValues = [];
         const labels = [];
         for (const holding of portfolio) {
             const response = await axios.get('https://api.binance.com/api/v3/klines', {
                 params: { symbol: holding.symbol, interval, limit }
             });
             const klines = response.data;
-            const valuesUSD = klines.map(kline => holding.amount * parseFloat(kline[4]));
+            const values = klines.map(kline => holding.amount * parseFloat(kline[4]));
             if (labels.length === 0) {
-                totalValuesUSD.push(...valuesUSD);
+                totalValues.push(...values);
                 labels.push(...klines.map((_, i) => {
                     const date = new Date();
                     date.setHours(date.getHours() - i * (interval === '1h' ? 1 : interval === '4h' ? 4 : interval === '12h' ? 12 : interval === '1d' ? 24 : 168));
                     return date.toLocaleString('en-US', { month: 'short', day: 'numeric' });
                 }));
             } else {
-                totalValuesUSD.forEach((val, i) => totalValuesUSD[i] += valuesUSD[i]);
+                totalValues.forEach((val, i) => totalValues[i] += values[i]);
             }
         }
-        const totalValues = totalValuesUSD.map(value => value * (exchangeRates[selectedCurrency] || 1));
         const perfCtx = document.getElementById('performanceChart').getContext('2d');
         const gradient = perfCtx.createLinearGradient(0, 0, 0, 300);
         gradient.addColorStop(0, 'rgba(158, 240, 26, 0.3)');
@@ -344,15 +342,15 @@ async function initPerformanceChart(timeframe = '1M') {
                 }
             }
         });
-        const returns = ((totalValues[totalValues.length - 1] - totalValues[0]) / totalValues[0] * 100).toFixed(2);
-        const maxDrawdown = Math.min(...totalValues.map((val, i) => i > 0 ? (val - totalValues[i - 1]) / totalValues[i - 1] * 100 : 0)).toFixed(2);
+        const returns = totalValues.length > 1 ? ((totalValues[totalValues.length - 1] - totalValues[0]) / totalValues[0] * 100).toFixed(2) : 0;
         document.getElementById('return-30d').textContent = `${returns >= 0 ? '+' : ''}${returns}%`;
-        document.getElementById('return-30d').className = `font-bold text-${returns >= 0 ? 'accent' : 'red-400'}`;
-        document.getElementById('max-drawdown').textContent = `${maxDrawdown}%`;
+        document.getElementById('return-30d').classList.remove('text-accent', 'text-red-400');
+        document.getElementById('return-30d').classList.add(`text-${returns >= 0 ? 'accent' : 'red-400'}`);
+        document.getElementById('max-drawdown').textContent = '0.0%'; // Placeholder, requires actual calculation
         document.getElementById('volatility').textContent = Math.abs(parseFloat(returns)) > 10 ? 'High' : Math.abs(parseFloat(returns)) > 5 ? 'Medium' : 'Low';
         console.log("Performance chart initialized");
     } catch (error) {
-        console.error('Error fetching historical data:', error);
+        console.error('Error initializing performance chart:', error);
     }
 }
 
@@ -368,7 +366,7 @@ async function editHolding(index) {
     const holding = portfolio[index];
     document.getElementById('coin-name').value = holding.symbol;
     document.getElementById('coin-amount').value = holding.amount;
-    document.getElementById('purchase-price').value = (holding.purchasePrice * (exchangeRates[selectedCurrency] || 1)).toFixed(2);
+    document.getElementById('purchase-price').value = holding.purchasePrice.toFixed(2);
     document.getElementById('date-acquired').value = new Date().toISOString().split('T')[0];
     await removeHolding(index);
     updatePurchasePrice();
@@ -390,10 +388,40 @@ const updatePurchasePrice = debounce(async () => {
     }
 }, 500);
 
+async function fetchCryptoNews() {
+    try {
+        const response = await axios.get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
+        console.log("Crypto News: ", response);
+        const articles = response.data.Data.slice(0, 6);
+        const newsFeed = document.getElementById('news-feed');
+        newsFeed.innerHTML = '';
+
+        articles.forEach(article => {
+            const card = document.createElement('div');
+            card.className = 'news-card';
+
+            const imageUrl = article.imageurl || 'https://via.placeholder.com/300x160.png?text=No+Image';
+            card.innerHTML = `
+                <div class="news-thumbnail" style="background-image: url('${imageUrl}')"></div>
+                <div class="p-4">
+                    <h3 class="news-title">${article.title}</h3>
+                    <p class="news-source">Source: ${article.source}</p>
+                    <p class="news-excerpt">${article.body.substring(0, 150)}...</p>
+                    <a href="${article.url}" target="_blank" class="mt-2 inline-block text-accent hover:underline">Read more</a>
+                </div>
+            `;
+            newsFeed.appendChild(card);
+        });
+
+        document.getElementById('news-section').classList.remove('hidden');
+    } catch (error) {
+        console.error("Error fetching crypto news:", error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM fully loaded");
 
-    // Initialize prediction chart
     const predChartContext = document.getElementById('predictionChart').getContext('2d');
     predChart = new Chart(predChartContext, {
         type: 'line',
@@ -401,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: ['Now', '1D', '3D', '7D', '15D', '30D'],
             datasets: [{
                 label: 'Predicted Price',
-                data: [0, null, null, null, null, null],
+                data: [0, 0, 0, 0, 0, 0],
                 borderColor: '#9EF01A',
                 borderWidth: 2,
                 pointBackgroundColor: '#9EF01A',
@@ -435,7 +463,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     console.log("Prediction chart initialized");
 
-    // Event listeners
     document.getElementById('menu-toggle')?.addEventListener('click', function () {
         console.log("Hamburger menu clicked");
         const mobileMenu = document.getElementById('mobile-menu');
@@ -459,24 +486,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    document.getElementById('currency-selector')?.addEventListener('change', async function () {
-        selectedCurrency = this.value;
+    const updateCurrency = async () => {
+        selectedCurrency = document.getElementById('currency-selector')?.value || document.getElementById('currency-selector-mobile')?.value || 'USD';
         console.log("Currency changed to:", selectedCurrency);
         await fetchPrices();
         await initPerformanceChart();
         updatePurchasePrice();
-    });
+    };
+
+    document.getElementById('currency-selector')?.addEventListener('change', updateCurrency);
+    document.getElementById('currency-selector-mobile')?.addEventListener('change', updateCurrency);
 
     document.getElementById('add-holding-form')?.addEventListener('submit', async function (event) {
         event.preventDefault();
         const symbol = document.getElementById('coin-name').value;
         const amount = parseFloat(document.getElementById('coin-amount').value);
-        let purchasePrice = parseFloat(document.getElementById('purchase-price').value);
+        const purchasePrice = parseFloat(document.getElementById('purchase-price').value);
         const dateAcquired = document.getElementById('date-acquired').value;
         if (symbol && !isNaN(amount) && amount > 0 && !isNaN(purchasePrice) && purchasePrice > 0) {
-            if (selectedCurrency !== 'USD') {
-                purchasePrice /= (exchangeRates[selectedCurrency] || 1);
-            }
             const name = tradingPairs.find(p => p.symbol === symbol)?.name || symbol.replace('USDT', '');
             const ticker = tradingPairs.find(p => p.symbol === symbol)?.ticker || name.substring(0, 3).toUpperCase();
             portfolio.push({ symbol, name, ticker, amount, purchasePrice });
@@ -485,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function () {
             this.reset();
             console.log("Holding added:", { symbol, name, ticker, amount, purchasePrice });
         } else {
-            alert('Please enter valid values for coin, amount, and purchase price.');
+            alert('Please enter valid values for coin, amount, and price.');
             console.log("Invalid holding data");
         }
     });
@@ -494,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('date-acquired')?.addEventListener('change', updatePurchasePrice);
 
     document.getElementById('refresh-data')?.addEventListener('click', async function () {
-        console.log("Refreshing data...");
+        console.log("Fetching...");
         this.innerHTML = '<div class="loading-spinner mr-2"></div> Refreshing...';
         this.disabled = true;
         await fetchPrices();
@@ -505,8 +532,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('export-csv')?.addEventListener('click', function () {
-        console.log("Exporting portfolio to CSV...");
-        const csv = ['Symbol,Name,Ticker,Amount,Purchase Price'];
+        console.log("Exporting portfolio...");
+        const csv = ['Symbol,Name,Ticker,Amount,PurchasePrice'];
         portfolio.forEach(holding => {
             csv.push(`${holding.symbol},${holding.name},${holding.ticker},${holding.amount.toFixed(8)},${holding.purchasePrice.toFixed(2)}`);
         });
@@ -514,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'portfolio-data.csv';
+        a.download = 'portfolio.csv';
         a.click();
         URL.revokeObjectURL(url);
         console.log("Portfolio exported");
@@ -533,27 +560,26 @@ document.addEventListener('DOMContentLoaded', function () {
         this.disabled = true;
         try {
             const response = await axios.get('https://api.binance.com/api/v3/ticker/price', { params: { symbol: coin } });
-            const currentPriceUSD = parseFloat(response.data.price);
-            const predictedDataUSD = [currentPriceUSD, currentPriceUSD * 1.01, currentPriceUSD * 1.03, currentPriceUSD * 1.07, currentPriceUSD * 1.10, currentPriceUSD * 1.15];
-            const predictedData = predictedDataUSD.map(pUSD => pUSD * (exchangeRates[selectedCurrency] || 1));
+            const currentPrice = parseFloat(response.data.price);
+            const predictedData = [currentPrice, currentPrice * 1.01, currentPrice * 1.03, currentPrice * 1.07, currentPrice * 1.10, currentPrice * 1.15];
             predChart.data.datasets[0].data = predictedData;
             predChart.data.datasets[0].borderDash = [];
             predChart.update();
             const coinName = tradingPairs.find(p => p.symbol === coin)?.name || coin.replace('USDT', '');
             document.getElementById('prediction-title').textContent = `${coinName} Prediction`;
             this.innerHTML = '<i class="fas fa-check mr-2"></i> Prediction Complete';
-            console.log("Prediction completed for:", coinName);
+            console.log("Prediction completed successfully");
             setTimeout(() => {
                 this.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run Prediction';
                 this.disabled = false;
-            }, 2000);
-        } catch (error) {
-            console.error('Error fetching prediction data:', error);
+            }, 1000);
+        } catch (e) {
+            console.error('Prediction failed:', e);
             this.innerHTML = '<i class="fas fa-times mr-2"></i> Error';
             setTimeout(() => {
                 this.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run Prediction';
                 this.disabled = false;
-            }, 2000);
+            }, 1000);
         }
     });
 
@@ -608,5 +634,6 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchPrices().then(() => initPerformanceChart());
         console.log("Initial data loaded");
     });
-});
 
+    fetchCryptoNews();
+});

@@ -3,7 +3,7 @@ import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 /*************** WebLLM logic ***************/
 const messages = [
     {
-        content: `You are a crypto financial AI analyst create by Abhimanyu Singh, specializing in cryptocurrency markets.
+        content: `You are a crypto financial AI analyst created by Abhimanyu Singh, specializing in cryptocurrency markets.
 You provide data-driven insights on crypto prices, market trends, portfolio optimization,
 risk management, and technical analysis. You explain concepts clearly, back up opinions
 with data when possible, and avoid giving direct financial advice. Always remind users
@@ -12,14 +12,12 @@ that crypto is volatile and they should do their own research.`,
     },
 ];
 
-const availableModels = webllm.prebuiltAppConfig.model_list.map(
-    (m) => m.model_id,
-);
+const availableModels = webllm.prebuiltAppConfig.model_list.map((m) => m.model_id);
 let selectedModel = "Llama-3.1-8B-Instruct-q4f32_1-1k";
 
 // Callback function for initializing progress
 function updateEngineInitProgressCallback(report) {
-    console.log("initialize", report.progress);
+    console.log("Initializing model:", report.progress);
     document.getElementById("download-status").textContent = report.text;
 }
 
@@ -31,21 +29,25 @@ async function initializeWebLLMEngine() {
     document.getElementById("download-status").classList.remove("hidden");
     selectedModel = document.getElementById("model-selection").value;
     const config = {
-        temperature: 1.0,
-        top_p: 1,
+        temperature: 0.8,
+        top_p: 0.9,
+        max_tokens: 512,
     };
     await engine.reload(selectedModel, config);
+    document.getElementById("send").disabled = false;
 }
 
 async function streamingGenerating(messages, onUpdate, onFinish, onError) {
     try {
         let curMessage = "";
         let usage;
+
         const completion = await engine.chat.completions.create({
             stream: true,
             messages,
             stream_options: { include_usage: true },
         });
+
         for await (const chunk of completion) {
             const curDelta = chunk.choices[0]?.delta.content;
             if (curDelta) {
@@ -56,7 +58,8 @@ async function streamingGenerating(messages, onUpdate, onFinish, onError) {
             }
             onUpdate(curMessage);
         }
-        const finalMessage = await engine.getMessage();
+
+        const finalMessage = curMessage; // Final message from stream
         onFinish(finalMessage, usage);
     } catch (err) {
         onError(err);
@@ -70,18 +73,15 @@ function onMessageSend() {
         content: input,
         role: "user",
     };
-    if (input.length === 0) {
-        return;
-    }
+    if (!input) return;
+
     document.getElementById("send").disabled = true;
 
     messages.push(message);
     appendMessage(message);
 
     document.getElementById("user-input").value = "";
-    document
-        .getElementById("user-input")
-        .setAttribute("placeholder", "Generating...");
+    document.getElementById("user-input").setAttribute("placeholder", "Generating...");
 
     const aiMessage = {
         content: "typing...",
@@ -106,17 +106,46 @@ function onMessageSend() {
         messages,
         updateLastMessage,
         onFinishGenerating,
-        console.error,
+        console.error
     );
+}
+
+function escapeMarkdown(text) {
+    return text.replace(/([_*\[\]()`~>#+\-=|{}!])/g, "\\$1");
+}
+
+function renderMarkdown(text) {
+    // Escape HTML to prevent injection
+    const escapedText = escapeMarkdown(text);
+
+    // Bold: **text**
+    let html = escapedText.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    // Italic: *text*
+    html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+    // Code block: ```lang\n...\n```
+    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, "<pre><code class='language-$1'>$2</code></pre>");
+
+    // Inline code: `code`
+    html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+
+    // Unordered list: - item
+    html = html.replace(/^-\s(.+)$/gm, "<ul><li>$1</li></ul>");
+
+    // Links: [text](url)
+    html = html.replace(/$$([^$$]+)$$$([^$$]+)$$/g, "<a href='$2' target='_blank'>$1</a>");
+
+    return html;
 }
 
 function appendMessage(message) {
     const chatBox = document.getElementById("chat-box");
     const container = document.createElement("div");
     container.classList.add("message-container");
+
     const newMessage = document.createElement("div");
     newMessage.classList.add("message");
-    newMessage.textContent = message.content;
 
     if (message.role === "user") {
         container.classList.add("user");
@@ -124,17 +153,22 @@ function appendMessage(message) {
         container.classList.add("assistant");
     }
 
+    // Render markdown into HTML
+    newMessage.innerHTML = renderMarkdown(message.content);
     container.appendChild(newMessage);
     chatBox.appendChild(container);
-    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
 }
 
 function updateLastMessage(content) {
-    const messageDoms = document
-        .getElementById("chat-box")
-        .querySelectorAll(".message");
-    const lastMessageDom = messageDoms[messageDoms.length - 1];
-    lastMessageDom.textContent = content;
+    const chatBox = document.getElementById("chat-box");
+    const messageContainers = chatBox.querySelectorAll(".message-container");
+    const lastContainer = messageContainers[messageContainers.length - 1];
+    const lastMessage = lastContainer.querySelector(".message");
+
+    if (lastMessage) {
+        lastMessage.innerHTML = renderMarkdown(content);
+    }
 }
 
 /*************** UI binding ***************/
@@ -145,22 +179,23 @@ availableModels.forEach((modelId) => {
     document.getElementById("model-selection").appendChild(option);
 });
 
-
 document.getElementById("model-selection").value = selectedModel;
+
 document.getElementById("download").addEventListener("click", function () {
     initializeWebLLMEngine().then(() => {
         document.getElementById("send").disabled = false;
     });
 });
 
-// // Start downloading the default model in the background on page load
-// window.addEventListener("load", function () {
-//     initializeWebLLMEngine().then(() => {
-//         console.log("Default model loaded in background.");
-//         document.getElementById("send").disabled = false;
-//     });
-// });
+document.getElementById("ai-chat-toggle")?.addEventListener("click", openModal);
+document.getElementById("ai-chat-toggle-mobile")?.addEventListener("click", openModal);
 
-document.getElementById("send").addEventListener("click", function () {
-    onMessageSend();
-});
+function openModal() {
+    document.getElementById("ai-chat-modal").classList.remove("hidden");
+}
+
+document.getElementById("ai-chat-close")?.addEventListener("click", () =>
+    document.getElementById("ai-chat-modal").classList.add("hidden")
+);
+
+document.getElementById("send").addEventListener("click", onMessageSend);

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/yfinance@0.0.6/dist/index.min.js"></script>
     <script src="./static/main.js"></script>
     <link href="./static/style.css" rel="stylesheet">
 </head>
@@ -24,15 +25,6 @@
             </div>
             <!-- Desktop Menu -->
             <div class="hidden md:flex space-x-4 items-center">
-                <div class="relative">
-                    <select id="currency-selector"
-                        class="bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent">
-                        <option value="USD">USD ($)</option>
-                        <option value="INR">INR (₹)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                    </select>
-                </div>
                 <button id="refresh-data"
                     class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">
                     <i class="fas fa-sync mr-2"></i>Refresh Data
@@ -63,18 +55,25 @@
                     class="px-4 py-2 rounded-lg border border-accent text-accent font-medium hover:bg-gray-700 transition">
                     <i class="fas fa-user mr-2"></i>Account
                 </button>
-                <button id="ai-chat-toggle-mobile"
-                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition glow-hover">
-                    <i class="fas fa-robot mr-2"></i>AI Chat
-                </button>
             </div>
         </div>
     </nav>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container mx-auto px-4">
+            <a href="#news-section" id="news-breadcrumb">Latest Crypto News</a>
+        </div>
+    </div>
+
+    <button id="ai-chat-toggle-mobile"
+        class="fixed bottom-6 right-6 z-50 px-4 py-4 rounded-full bg-accent text-gray-900 shadow-lg hover:bg-opacity-90 transition glow-hover lg:hidden flex items-center justify-center w-14 h-14">
+        <i class="fas fa-robot text-xl"></i>
+    </button>
 
     <!-- AI Chat Modal -->
     <div id="ai-chat-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
-        <div class="card p-4 w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-xl relative"> <button id="ai-chat-close"
-                class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <div class="card p-4 w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-xl relative">
+            <button id="ai-chat-close" class="absolute top-4 right-4 text-gray-400 hover:text-white">
                 <i class="fas fa-times text-xl"></i>
             </button>
             <h2 class="text-xl font-bold text-white mb-6">
@@ -82,7 +81,9 @@
             </h2>
             <div class="download-container mb-4">
                 <select id="model-selection"
-                    class="bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent"></select>
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent sm:text-sm">
+                </select>
+
                 <button id="download"
                     class="ml-2 px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">Download</button>
             </div>
@@ -182,6 +183,7 @@
                                     <th class="py-3 px-4 text-right">Price</th>
                                     <th class="py-3 px-4 text-right">Value</th>
                                     <th class="py-3 px-4 text-right">24h</th>
+                                    <th class="py-3 px-4 text-right">Profit/Loss %</th>
                                     <th class="py-3 px-4 text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -237,7 +239,6 @@
                             <h4 class="text-lg font-bold text-white mb-1" id="prediction-title">Prediction</h4>
                             <p class="text-gray-400">Next 30 days forecast based on AI analysis</p>
                         </div>
-                        <!-- Updated Run Prediction Button -->
                         <button id="runPrediction"
                             class="mt-4 sm:mt-0 px-6 py-3 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition flex items-center glow-hover opacity-50 cursor-not-allowed sm:flex"
                             disabled>
@@ -369,6 +370,14 @@
         </div>
     </div>
 
+    <!-- Crypto News Section (Moved to Bottom) -->
+    <div id="news-section" class="container mx-auto px-4 py-8 hidden">
+        <h2 class="text-xl font-bold text-white mb-6">
+            <i class="fas fa-newspaper text-accent mr-3"></i>Latest Crypto News
+        </h2>
+        <div id="news-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
     <footer class="py-6 mt-8 border-t border-gray-800">
         <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
             <p>© 2025 CryptoTracker. All rights reserved. Cryptocurrency investments are subject to high market risk.
@@ -376,7 +385,6 @@
             <p class="mt-2">Data is provided for informational purposes only and not intended as trading advice.</p>
         </div>
     </footer>
-
 
     <script src="./static/ai.js" type="module"></script>
 </body>
