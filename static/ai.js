@@ -1,5 +1,7 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
+console.log("🧠 ai.js loaded");
+
 /*************** WebLLM logic ***************/
 const messages = [
     {
@@ -66,16 +68,87 @@ async function streamingGenerating(messages, onUpdate, onFinish, onError) {
     }
 }
 
+/*************** Portfolio Formatting Logic ***************/
+document.addEventListener("DOMContentLoaded", function () {
+    // Wait for the portfolio to be available
+    const checkPortfolio = setInterval(() => {
+        if (window.portfolio && window.portfolio.length > 0) {
+            clearInterval(checkPortfolio);
+            console.log("✅ Portfolio is ready:", window.portfolio);
+
+            // Now initialize AI UI bindings
+            availableModels.forEach((modelId) => {
+                const option = document.createElement("option");
+                option.value = modelId;
+                option.textContent = modelId;
+                document.getElementById("model-selection").appendChild(option);
+            });
+
+            document.getElementById("model-selection").value = selectedModel;
+
+            document.getElementById("download").addEventListener("click", function () {
+                initializeWebLLMEngine().then(() => {
+                    document.getElementById("send").disabled = false;
+                });
+            });
+
+            document.getElementById("ai-chat-toggle")?.addEventListener("click", openModal);
+            document.getElementById("ai-chat-toggle-mobile")?.addEventListener("click", openModal);
+            document.getElementById("ai-chat-close")?.addEventListener("click", () =>
+                document.getElementById("ai-chat-modal").classList.add("hidden")
+            );
+            document.getElementById("send").addEventListener("click", onMessageSend);
+        }
+    }, 500); // Check every 500ms
+});
+
+function formatPortfolioData() {
+    if (!window.portfolio || window.portfolio.length === 0) {
+        return "No portfolio data available.";
+    }
+
+    let portfolioStr = "Here is the user's current cryptocurrency portfolio:\n\n";
+    portfolioStr += "| Symbol   | Name         | Ticker | Amount      | Purchase Price (USDT) |\n";
+    portfolioStr += "|----------|--------------|--------|-------------|-----------------------|\n";
+
+    window.portfolio.forEach(holding => {
+        portfolioStr += `| ${holding.symbol.padEnd(8)} | ${holding.name.padEnd(12)} | ${holding.ticker.padEnd(6)} | ${holding.amount.toFixed(8).padEnd(11)} | ${holding.purchasePrice.toFixed(2).padEnd(21)} |\n`;
+    });
+
+    return portfolioStr;
+}
+
 /*************** UI logic ***************/
 function onMessageSend() {
     const input = document.getElementById("user-input").value.trim();
-    const message = {
-        content: input,
-        role: "user",
-    };
     if (!input) return;
 
-    document.getElementById("send").disabled = true;
+    console.log("📥 User Input:", input);
+    console.log("📊 Current Portfolio:", window.portfolio);
+
+    let messageContent = input;
+
+    // Always include portfolio data in the prompt
+    const portfolioData = formatPortfolioData();  // This returns the Markdown-style table
+    console.log("📊 Sending full portfolio data:\n", portfolioData);
+
+    // Build the final prompt with clear instructions
+    messageContent = `
+You are a crypto financial analyst AI created by Abhimanyu Singh.
+Below is the user's current cryptocurrency portfolio:
+
+${portfolioData}
+
+User Query: ${input}
+
+Please analyze the query and use the portfolio data as needed.
+If the query involves calculations (e.g., ROI, profit/loss, performance), make sure to compute those using the provided values.
+`;
+
+    const message = {
+        content: messageContent,
+        role: "user",
+    };
 
     messages.push(message);
     appendMessage(message);
@@ -89,18 +162,7 @@ function onMessageSend() {
     };
     appendMessage(aiMessage);
 
-    const onFinishGenerating = (finalMessage, usage) => {
-        const signedMessage = `${finalMessage}\n\n— Abhimanyu's Bot | AI Crypto Financial Analyst\n*For informational purposes only.*`;
-        updateLastMessage(signedMessage);
-        document.getElementById("send").disabled = false;
-        const usageText =
-            `prompt_tokens: ${usage.prompt_tokens}, ` +
-            `completion_tokens: ${usage.completion_tokens}, ` +
-            `prefill: ${usage.extra.prefill_tokens_per_s.toFixed(4)} tokens/sec, ` +
-            `decoding: ${usage.extra.decode_tokens_per_s.toFixed(4)} tokens/sec`;
-        document.getElementById("chat-stats").classList.remove("hidden");
-        document.getElementById("chat-stats").textContent = usageText;
-    };
+    document.getElementById("send").disabled = true;
 
     streamingGenerating(
         messages,
@@ -110,34 +172,23 @@ function onMessageSend() {
     );
 }
 
-function escapeMarkdown(text) {
-    return text.replace(/([_*\[\]()`~>#+\-=|{}!])/g, "\\$1");
+function onFinishGenerating(finalMessage, usage) {
+    const signedMessage = `${finalMessage}\n\n— Abhimanyu's Bot | AI Crypto Financial Analyst\n*For informational purposes only.*`;
+    updateLastMessage(signedMessage);
+    document.getElementById("send").disabled = false;
+    const usageText =
+        `prompt_tokens: ${usage.prompt_tokens}, ` +
+        `completion_tokens: ${usage.completion_tokens}, ` +
+        `prefill: ${usage.extra.prefill_tokens_per_s.toFixed(4)} tokens/sec, ` +
+        `decoding: ${usage.extra.decode_tokens_per_s.toFixed(4)} tokens/sec`;
+    document.getElementById("chat-stats").classList.remove("hidden");
+    document.getElementById("chat-stats").textContent = usageText;
 }
 
 function renderMarkdown(text) {
-    // Escape HTML to prevent injection
-    const escapedText = escapeMarkdown(text);
-
-    // Bold: **text**
-    let html = escapedText.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-
-    // Italic: *text*
-    html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-
-    // Code block: ```lang\n...\n```
-    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, "<pre><code class='language-$1'>$2</code></pre>");
-
-    // Inline code: `code`
-    html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
-
-    // Unordered list: - item
-    html = html.replace(/^-\s(.+)$/gm, "<ul><li>$1</li></ul>");
-
-    // Links: [text](url)
-    html = html.replace(/$$([^$$]+)$$$([^$$]+)$$/g, "<a href='$2' target='_blank'>$1</a>");
-
-    return html;
+    return marked.parse(text); // Marked safely converts Markdown to HTML
 }
+
 
 function appendMessage(message) {
     const chatBox = document.getElementById("chat-box");
@@ -191,7 +242,11 @@ document.getElementById("ai-chat-toggle")?.addEventListener("click", openModal);
 document.getElementById("ai-chat-toggle-mobile")?.addEventListener("click", openModal);
 
 function openModal() {
-    document.getElementById("ai-chat-modal").classList.remove("hidden");
+    initializeWebLLMEngine().then(() => {
+        document.getElementById("ai-chat-modal").classList.remove("hidden");
+    }).catch(err => {
+        console.error("Failed to initialize WebLLM engine:", err);
+    });
 }
 
 document.getElementById("ai-chat-close")?.addEventListener("click", () =>

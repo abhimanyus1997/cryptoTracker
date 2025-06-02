@@ -15,7 +15,13 @@ let availableCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 let perfChart = null;
 let predChart = null;
 
+// Expose portfolio globally for Ai.js to access
+window.portfolio = portfolio;
+
+
 console.log("Portfolio initialized:", portfolio);
+console.log("✅ main.js loaded");
+console.log("📦 Portfolio set globally:", window.portfolio);
 
 function debounce(func, wait) {
     let timeout;
@@ -26,6 +32,30 @@ function debounce(func, wait) {
             func.apply(this, args);
         }, wait);
     };
+}
+
+function getPortfolioSummaryText(prices) {
+    let summary = "Current Portfolio Summary:\n";
+    let totalValue = 0;
+
+    portfolio.forEach(holding => {
+        const price = prices[holding.symbol] || holding.purchasePrice;
+        const value = holding.amount * price;
+        totalValue += value;
+
+        summary += `
+- ${holding.name} (${holding.ticker})
+  Amount: ${holding.amount.toFixed(8)}
+  Current Price: ${formatCurrency(price)}
+  Value: ${formatCurrency(value)}
+  Purchase Price: ${formatCurrency(holding.purchasePrice)}
+  Profit/Loss: ${((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2)}%
+\n`;
+    });
+
+    summary += `Total Portfolio Value: ${formatCurrency(totalValue)}\n`;
+
+    return summary;
 }
 
 function populateCurrencySelector() {
