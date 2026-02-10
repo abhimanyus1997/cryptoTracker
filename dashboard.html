@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTracker | Advanced Portfolio Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/yfinance@0.0.6/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="./static/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="branding">
+                <i class="fa-brands fa-bitcoin text-accent text-2xl"></i>
+                <span>CryptoTracker</span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="#portfolio-section" class="nav-item">
+                <i class="fas fa-wallet"></i> Portfolio
+            </a>
+            <button id="ai-chat-toggle" class="nav-item w-full text-left">
+                <i class="fas fa-robot"></i> AI Chat
+            </button>
+            <a href="#news-section" class="nav-item">
+                <i class="fas fa-newspaper"></i> Market News
+            </a>
+            <button id="settings-toggle" class="nav-item mt-auto w-full text-left">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Mobile Header -->
+        <header class="md:hidden flex justify-between items-center mb-6">
+            <div class="branding text-white">
+                <i class="fa-brands fa-bitcoin text-accent text-2xl mr-2"></i>
+                <span class="font-bold text-lg">CryptoTracker</span>
+            </div>
+            <button id="menu-toggle" class="text-white p-2 focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </header>
+
+        <!-- Desktop Header / Toolbar -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+                <p class="text-gray-400 text-sm">Welcome back to your portfolio overview</p>
+            </div>
+            <div class="flex gap-3">
+                <button id="refresh-data"
+                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center">
+                    <i class="fas fa-sync mr-2"></i>Refresh
+                </button>
+                <button
+                    class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 font-medium hover:bg-gray-700 transition flex items-center bg-gray-800">
+                    <i class="fas fa-user-circle mr-2"></i>Account
+                </button>
+            </div>
+        </div>
+
+        <!-- Portfolio Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 fade-in">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">Net Worth</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="portfolio-value">$0.00</h3>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2">
+                        <i class="fa-solid fa-chart-line text-accent text-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <p id="portfolio-change"
+                        class="text-accent font-medium flex items-center bg-accent/10 px-2 py-0.5 rounded">
+                        <i class="fas fa-caret-up mr-1"></i>0.0%
+                    </p>
+                    <span class="text-gray-500 ml-2">vs yesterday</span>
+                </div>
+            </div>
+
+            <div class="card p-6 fade-in" style="animation-delay: 0.1s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">Total Assets</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="total-holdings">0</h3>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2">
+                        <i class="fa-solid fa-coins text-blue-400 text-lg"></i>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-400">
+                    Across all wallets
+                </div>
+            </div>
+
+            <div class="card p-6 fade-in" style="animation-delay: 0.2s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">Best Performer</p>
+                        <h3 class="text-xl font-bold text-white mt-1 truncate" id="best-performer">--</h3>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2">
+                        <i class="fa-solid fa-arrow-trend-up text-green-400 text-lg"></i>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-400 truncate">
+                    Worst: <span id="worst-performer" class="text-red-400">--</span>
+                </div>
+            </div>
+
+            <div class="card p-6 fade-in" style="animation-delay: 0.3s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">24h Profit/Loss</p>
+                        <h3 class="text-2xl font-bold text-white mt-1" id="change-value">$0.00</h3>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-2">
+                        <i class="fa-solid fa-sack-dollar text-yellow-400 text-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <p id="change-percent"
+                        class="text-accent font-medium flex items-center bg-accent/10 px-2 py-0.5 rounded">
+                        <i class="fas fa-caret-up mr-1"></i>0.0%
+                    </p>
+                    <span class="text-gray-500 ml-2">Realized PnL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts & Tables Layout -->
+        <div class="flex flex-col xl:flex-row gap-6">
+            <!-- Left Column: Holdings Table -->
+            <div class="xl:w-2/3">
+                <div class="card mb-6 fade-in" id="portfolio-section">
+                    <div
+                        class="p-6 border-b border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-layer-group text-accent mr-2"></i>Holdings
+                        </h2>
+                        <button id="export-csv"
+                            class="text-sm text-gray-300 hover:text-white flex items-center bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded transition">
+                            <i class="fas fa-download mr-2"></i> Export CSV
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="min-w-full" id="portfolio-table">
+                            <thead>
+                                <tr>
+                                    <th>Asset</th>
+                                    <th class="text-right">Balance</th>
+                                    <th class="text-right">Price</th>
+                                    <th class="text-right">Value</th>
+                                    <th class="text-right">24h Change</th>
+                                    <th class="text-right">ROI</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white" id="portfolio-body">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI Prediction Block -->
+                <div class="card p-6 mb-6 fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white">
+                            <i class="fas fa-brain text-accent mr-2"></i>AI Forecast
+                        </h2>
+                        <span class="bg-accent/10 text-accent text-xs font-bold px-2 py-1 rounded">BETA</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-gray-500 text-xs mb-1 uppercase tracking-wide">Target Asset</label>
+                            <div class="relative">
+                                <select id="predict-coin"
+                                    class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:outline-none focus:border-accent text-sm"></select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-500 text-xs mb-1 uppercase tracking-wide">API Access
+                                Key</label>
+                            <input type="password" id="ai-key" placeholder="Enter key..."
+                                class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2.5 px-3 text-white focus:outline-none focus:border-accent text-sm">
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700/50 mb-4 h-64">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="text-white font-bold" id="prediction-title">ETH Prediction</h4>
+                            <p class="text-gray-500 text-xs">30-day technical projection</p>
+                        </div>
+                        <button id="runPrediction"
+                            class="px-5 py-2 rounded-lg bg-accent text-gray-900 font-bold text-sm hover:bg-opacity-90 transition opacity-80"
+                            disabled>
+                            <i class="fas fa-bolt mr-2"></i>Analyze
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Performance & Tools -->
+            <div class="xl:w-1/3 space-y-6">
+                <!-- Historical Chart -->
+                <div class="card p-6 fade-in">
+                    <h2 class="text-lg font-bold text-white mb-4">Performance</h2>
+                    <div class="flex space-x-2 mb-4 overflow-x-auto pb-2 noscroll">
+                        <button
+                            class="timeframe-btn text-xs font-bold py-1 px-3 bg-gray-700 rounded text-gray-300 hover:bg-gray-600 active-timeframe"
+                            data-timeframe="1M">1M</button>
+                        <button
+                            class="timeframe-btn text-xs font-bold py-1 px-3 bg-transparent rounded text-gray-500 hover:text-white"
+                            data-timeframe="3M">3M</button>
+                        <button
+                            class="timeframe-btn text-xs font-bold py-1 px-3 bg-transparent rounded text-gray-500 hover:text-white"
+                            data-timeframe="1Y">1Y</button>
+                        <button
+                            class="timeframe-btn text-xs font-bold py-1 px-3 bg-transparent rounded text-gray-500 hover:text-white"
+                            data-timeframe="All">ALL</button>
+                    </div>
+                    <div class="h-48">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="flex justify-between mt-4 pt-4 border-t border-gray-700">
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs">30D Return</p>
+                            <p class="text-accent font-bold" id="return-30d">--</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs">Drawdown</p>
+                            <p class="text-red-400 font-bold" id="max-drawdown">--</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-gray-500 text-xs">Volatility</p>
+                            <p class="text-gray-300 font-bold" id="volatility">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Holding Form -->
+                <div class="card p-6 fade-in">
+                    <h2 class="text-lg font-bold text-white mb-4">
+                        <i class="fas fa-plus text-accent mr-2"></i>Quick Add
+                    </h2>
+                    <form id="add-holding-form" class="space-y-4">
+                        <div>
+                            <label class="block text-gray-500 text-xs mb-1">Asset</label>
+                            <select id="coin-name"
+                                class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 px-3 text-white text-sm focus:border-accent"></select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-gray-500 text-xs mb-1">Amount</label>
+                                <input type="number" id="coin-amount" step="any" placeholder="0.00"
+                                    class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 px-3 text-white text-sm focus:border-accent">
+                            </div>
+                            <div>
+                                <label class="block text-gray-500 text-xs mb-1">Buy Price</label>
+                                <input type="number" id="purchase-price" step="any" placeholder="$0.00"
+                                    class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 px-3 text-white text-sm focus:border-accent">
+                            </div>
+                        </div>
+                        <input type="date" id="date-acquired"
+                            class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 px-3 text-white text-sm focus:border-accent mb-2">
+
+                        <button type="submit"
+                            class="w-full py-2 rounded-lg bg-accent text-gray-900 font-bold text-sm hover:bg-opacity-90 transition">
+                            Add Transaction
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Import CSV -->
+                <div class="card p-5 fade-in border-dashed border-2 border-gray-700 bg-transparent hover:border-accent/50 transition cursor-pointer group"
+                    id="dropzone">
+                    <div class="text-center">
+                        <i class="fas fa-file-csv text-3xl text-gray-600 group-hover:text-accent mb-2 transition"></i>
+                        <p class="text-gray-400 text-sm font-medium">Import CSV Portfolio</p>
+                        <p class="text-gray-600 text-xs mt-1">Drag file or click to browse</p>
+                        <input type="file" id="csvFile" accept=".csv" class="hidden">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- News Section -->
+        <div id="news-section" class="mt-8 pt-8 border-t border-gray-800">
+            <h2 class="text-xl font-bold text-white mb-6">Market Intelligence</h2>
+            <div id="news-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <footer class="mt-12 py-6 text-center text-gray-500 text-xs border-t border-gray-800/50">
+            <p>&copy; 2026 CryptoTracker. Professional Grade Analytics.</p>
+        </footer>
+    </main>
+
+    <!-- Floating AI Chat Button (Mobile) -->
+    <button id="ai-chat-toggle-mobile"
+        class="fixed bottom-6 right-6 z-40 px-4 py-4 rounded-full bg-accent text-gray-900 shadow-xl shadow-accent/20 hover:scale-110 transition md:hidden flex items-center justify-center w-14 h-14">
+        <i class="fas fa-robot text-xl"></i>
+    </button>
+
+    <!-- AI Chat Modal -->
+    <div id="ai-chat-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[60]">
+        <div class="card w-full max-w-lg h-[600px] flex flex-col relative shadow-2xl mx-4">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/50 rounded-t-xl">
+                <h2 class="text-lg font-bold text-white flex items-center">
+                    <i class="fas fa-robot text-accent mr-2"></i>AI Assistant
+                </h2>
+                <button id="ai-chat-close" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-4 flex-1 overflow-y-auto bg-gray-900/50">
+                <!-- Settings/Provider Selection -->
+                <div class="mb-4 bg-gray-800 p-3 rounded-lg border border-gray-700">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-gray-500 text-xs uppercase">AI Provider</label>
+                        <button id="chat-settings-btn" class="text-xs text-accent hover:underline"><i
+                                class="fas fa-cog mr-1"></i>Keys</button>
+                    </div>
+                    <select id="ai-provider"
+                        class="w-full bg-gray-700 border border-gray-600 rounded text-white text-sm py-1.5 px-3 focus:outline-none">
+                        <option value="gemini">Google Gemini 2.5 (Recommended)</option>
+                        <option value="groq">Groq (Ultra Fast)</option>
+                        <option value="webllm">WebLLM (Local)</option>
+                    </select>
+
+                    <div id="webllm-controls" class="mt-3 hidden">
+                        <div class="flex gap-2">
+                            <select id="model-selection"
+                                class="flex-1 bg-gray-700 border border-gray-600 rounded text-white text-xs"></select>
+                            <button id="download"
+                                class="px-3 py-1 bg-accent text-gray-900 text-xs font-bold rounded">Load</button>
+                        </div>
+                        <p id="download-status" class="text-xs text-accent mt-1 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div id="chat-box" class="space-y-3">
+                    <div class="message-container assistant">
+                        <div class="message">Hello! I'm your AI Crypto Analyst. Ask me about your portfolio or market
+                            trends.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t border-gray-700 bg-gray-800/50 rounded-b-xl">
+                <div class="flex gap-2">
+                    <input type="text" id="user-input" placeholder="Type your question..."
+                        class="flex-1 bg-gray-700 border border-gray-600 rounded-lg py-2.5 px-4 text-white focus:border-accent">
+                    <button id="send"
+                        class="px-4 py-2 bg-accent text-gray-900 rounded-lg hover:bg-opacity-90 transition">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[70]">
+        <div class="card w-full max-w-md relative shadow-2xl mx-4 p-6 bg-gray-800 border border-gray-700">
+            <button id="settings-close" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <h2 class="text-xl font-bold text-white mb-6">Settings</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Gemini API Key</label>
+                    <input type="password" id="gemini-key" placeholder="Enter Gemini API Key"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Groq API Key</label>
+                    <input type="password" id="groq-key" placeholder="Enter Groq API Key"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none">
+                </div>
+                <!-- AI Key for Prediction (Reusing similar ID if needed or unifying) -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Prediction Model Key (Optional)</label>
+                    <input type="password" id="ai-key-settings" placeholder="Prediction specific key if different"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none">
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button id="save-settings"
+                    class="px-4 py-2 bg-accent text-gray-900 font-bold rounded-lg hover:bg-opacity-90 transition">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./static/main.js"></script>
+    <script src="./static/ai.js" type="module"></script>
+</body>
+
+</html>

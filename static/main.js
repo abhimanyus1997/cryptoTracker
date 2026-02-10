@@ -107,8 +107,14 @@ function populateCoinDropdowns() {
         coinSelect.innerHTML += `<option value="${pair.symbol}">${pair.name} (${pair.ticker})</option>`;
         predictSelect.innerHTML += `<option value="${pair.symbol}">${pair.name} (${pair.ticker})</option>`;
     });
+
+    // Add listener for prediction updates
+    predictSelect.addEventListener('change', (e) => {
+        updatePredictionChart(e.target.value);
+    });
+
     predictSelect.value = 'ETHUSDT';
-    document.getElementById('prediction-title').textContent = 'ETH Prediction';
+    updatePredictionChart('ETHUSDT'); // Initial load
     console.log("Coin dropdowns populated");
 }
 
@@ -129,6 +135,29 @@ async function fetchHistoricalPrice(symbol, date) {
 
 async function fetchPrices() {
     console.log("Fetching prices...");
+
+    // Portfolio & Summary Skeletons on initial load
+    const tbody = document.getElementById('portfolio-body');
+    if (!tbody.hasChildNodes() || tbody.children.length === 0) {
+        tbody.innerHTML = Array(3).fill(0).map(() => `
+            <tr>
+                <td class="py-4 px-4"><div class="flex items-center"><div class="skeleton w-10 h-10 rounded-full mr-3"></div><div class="space-y-1"><div class="skeleton skeleton-text w-24"></div><div class="skeleton skeleton-text w-16"></div></div></div></td>
+                <td class="py-4 px-4"><div class="skeleton skeleton-text w-full"></div></td>
+                <td class="py-4 px-4"><div class="skeleton skeleton-text w-full"></div></td>
+                <td class="py-4 px-4"><div class="skeleton skeleton-text w-full"></div></td>
+                <td class="py-4 px-4"><div class="skeleton skeleton-text w-full"></div></td>
+                <td class="py-4 px-4"><div class="skeleton skeleton-text w-full"></div></td>
+                <td class="py-4 px-4 text-center"><div class="skeleton skeleton-text w-8 mx-auto"></div></td>
+            </tr>
+        `).join('');
+
+        // Add skeleton classes to summary cards if they are showing placeholders
+        ['portfolio-value', 'change-value', 'change-percent'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('skeleton', 'text-transparent', 'rounded');
+        });
+    }
+
     try {
         const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
         const prices = response.data.reduce((acc, item) => {
@@ -264,26 +293,20 @@ async function updateSummary(prices) {
     const totalProfitPercent = totalPurchaseValue > 0 ? ((totalValue - totalPurchaseValue) / totalPurchaseValue * 100).toFixed(2) : 0;
 
     document.getElementById('portfolio-value').textContent = formatCurrency(totalValue);
+    document.getElementById('portfolio-value').classList.remove('skeleton', 'text-transparent');
+
     document.getElementById('portfolio-change').innerHTML = `
         <i class="fas fa-caret-${totalProfitPercent >= 0 ? 'up' : 'down'} mr-1"></i>
         ${totalProfitPercent >= 0 ? '+' : ''}${totalProfitPercent}% overall
     `;
-    document.getElementById('portfolio-change').classList.remove('text-accent', 'text-red-400');
-    document.getElementById('portfolio-change').classList.add(`text-${totalProfitPercent >= 0 ? 'accent' : 'red-400'}`);
-    document.getElementById('total-holdings').textContent = `${portfolio.length} Assets`;
-    document.getElementById('best-performer').textContent = `${bestCoin} ${bestChange >= 0 ? '+' : ''}${bestChange}%`;
-    document.getElementById('best-performer').classList.remove('text-accent', 'text-red-400');
-    document.getElementById('best-performer').classList.add(`text-${bestChange >= 0 ? 'accent' : 'red-400'}`);
-    document.getElementById('worst-performer').textContent = `${worstCoin} ${worstChange >= 0 ? '+' : ''}${worstChange}%`;
-    document.getElementById('worst-performer').classList.remove('text-accent', 'text-red-400');
-    document.getElementById('worst-performer').classList.add(`text-${worstChange >= 0 ? 'accent' : 'red-400'}`);
     document.getElementById('change-value').textContent = formatCurrency(change24h);
-    document.getElementById('change-value').classList.remove('text-accent', 'text-red-400');
-    document.getElementById('change-value').classList.add(`text-${change24h >= 0 ? 'accent' : 'red-400'}`);
+    document.getElementById('change-value').classList.remove('skeleton', 'text-transparent');
+
     document.getElementById('change-percent').innerHTML = `
         <i class="fas fa-caret-${change24h >= 0 ? 'up' : 'down'} mr-1"></i>
         ${change24hPercent >= 0 ? '+' : ''}${change24hPercent}% today
     `;
+    document.getElementById('change-percent').classList.remove('skeleton', 'text-transparent');
     document.getElementById('change-percent').classList.remove('text-accent', 'text-red-400');
     document.getElementById('change-percent').classList.add(`text-${change24h >= 0 ? 'accent' : 'red-400'}`);
     console.log("Summary updated");
@@ -418,27 +441,117 @@ const updatePurchasePrice = debounce(async () => {
     }
 }, 500);
 
+// Linear Regression Calculation
+function calculateLinearRegression(prices) {
+    const n = prices.length;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumXX = 0;
+
+    for (let i = 0; i < n; i++) {
+        sumX += i;
+        sumY += prices[i];
+        sumXY += i * prices[i];
+        sumXX += i * i;
+    }
+
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+
+    return { slope, intercept };
+}
+
+async function updatePredictionChart(symbol) {
+    console.log(`Updating prediction chart for ${symbol}...`);
+    try {
+        // Fetch 30 days of history
+        const response = await axios.get('https://api.binance.com/api/v3/klines', {
+            params: { symbol, interval: '1d', limit: 30 }
+        });
+        const history = response.data.map(k => parseFloat(k[4])); // Close prices
+        const { slope, intercept } = calculateLinearRegression(history);
+
+        // Project next 7 days
+        const labels = [];
+        const data = [];
+        const today = new Date();
+
+        // Add last historical point as starting point
+        labels.push('Today');
+        data.push(history[history.length - 1]);
+
+        for (let i = 1; i <= 7; i++) {
+            const futureIndex = history.length - 1 + i;
+            const predictedPrice = slope * futureIndex + intercept;
+            data.push(predictedPrice);
+
+            const futureDate = new Date(today);
+            futureDate.setDate(today.getDate() + i);
+            labels.push(futureDate.toLocaleString('en-US', { weekday: 'short' }));
+        }
+
+        // Update Chart
+        if (predChart) {
+            predChart.data.labels = labels;
+            predChart.data.datasets[0].data = data;
+            predChart.data.datasets[0].label = `Predicted Price (${symbol})`;
+            predChart.update();
+        }
+
+        // Update Title
+        document.getElementById('prediction-title').textContent = `${symbol.replace('USDT', '')} 7-Day Forecast`;
+
+    } catch (error) {
+        console.error("Error updating prediction chart:", error);
+    }
+}
+
 async function fetchCryptoNews() {
     try {
+        const newsFeed = document.getElementById('news-feed');
+        // Show Skeletons if empty
+        if (!newsFeed.hasChildNodes() || newsFeed.children.length === 0) {
+            newsFeed.innerHTML = Array(4).fill(0).map(() => `
+                <div class="news-card animate-pulse">
+                    <div class="flex gap-4 p-3">
+                        <div class="skeleton w-20 h-20 rounded-lg"></div>
+                        <div class="flex-1 space-y-2 py-1">
+                            <div class="skeleton skeleton-text w-3/4"></div>
+                            <div class="skeleton skeleton-text w-1/2"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         const response = await axios.get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
         console.log("Crypto News: ", response);
-        const articles = response.data.Data.slice(0, 6);
-        const newsFeed = document.getElementById('news-feed');
-        newsFeed.innerHTML = '';
+        const articles = response.data.Data.slice(0, 12); // More articles for list view
+        newsFeed.innerHTML = ''; // Clear skeletons
 
         articles.forEach(article => {
             const card = document.createElement('div');
             card.className = 'news-card';
 
-            const imageUrl = article.imageurl || 'https://via.placeholder.com/300x160.png?text=No+Image';
+            // Format time (e.g., "4 hours ago")
+            const published = new Date(article.published_on * 1000);
+            const timeAgo = Math.floor((new Date() - published) / 3600000);
+            const timeString = timeAgo > 0 ? `${timeAgo}h ago` : 'Just now';
+            const imageUrl = article.imageurl || 'https://via.placeholder.com/80?text=News';
+
             card.innerHTML = `
-                <div class="news-thumbnail" style="background-image: url('${imageUrl}')"></div>
-                <div class="p-4">
-                    <h3 class="news-title">${article.title}</h3>
-                    <p class="news-source">Source: ${article.source}</p>
-                    <p class="news-excerpt">${article.body.substring(0, 150)}...</p>
-                    <a href="${article.url}" target="_blank" class="mt-2 inline-block text-accent hover:underline">Read more</a>
-                </div>
+                <a href="${article.url}" target="_blank" class="flex gap-4 hover:bg-white/5 p-3 rounded-lg transition duration-200 group">
+                    <div class="news-thumbnail flex-shrink-0 w-20 h-20 rounded-lg bg-cover bg-center border border-gray-700 group-hover:border-accent/30 transition" style="background-image: url('${imageUrl}')"></div>
+                    <div class="flex flex-col justify-center">
+                        <h3 class="news-title text-sm font-semibold text-white group-hover:text-accent transition leading-tight mb-1">${article.title}</h3>
+                        <div class="news-meta text-xs text-gray-500 flex items-center gap-2">
+                            <span class="news-source text-gray-400">${article.source}</span>
+                            <span>•</span>
+                            <span>${timeString}</span>
+                        </div>
+                    </div>
+                </a>
             `;
             newsFeed.appendChild(card);
         });
@@ -493,10 +606,57 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     console.log("Prediction chart initialized");
 
+    // Settings Modal Logic
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsToggle = document.getElementById('settings-toggle');
+    const settingsClose = document.getElementById('settings-close');
+    const saveSettingsvBtn = document.getElementById('save-settings');
+    const chatSettingsBtn = document.getElementById('chat-settings-btn'); // From Chat Modal
+
+    function openSettings() {
+        settingsModal?.classList.remove('hidden');
+    }
+
+    function closeSettings() {
+        settingsModal?.classList.add('hidden');
+    }
+
+    settingsToggle?.addEventListener('click', openSettings);
+    settingsClose?.addEventListener('click', closeSettings);
+    saveSettingsvBtn?.addEventListener('click', () => {
+        // Validation or saving logic could go here if not handled by ai.js
+        closeSettings();
+        // Optional: Trigger a notification
+        alert('Settings Saved!');
+    });
+
+    chatSettingsBtn?.addEventListener('click', () => {
+        document.getElementById('ai-chat-modal').classList.add('hidden');
+        openSettings();
+    });
+
+    // Close on outside click
+    settingsModal?.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeSettings();
+    });
+
     document.getElementById('menu-toggle')?.addEventListener('click', function () {
-        console.log("Hamburger menu clicked");
-        const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenu.classList.toggle('hidden');
+        console.log("Sidebar toggle clicked");
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('open');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function (event) {
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+
+        if (window.innerWidth <= 768 &&
+            sidebar.classList.contains('open') &&
+            !sidebar.contains(event.target) &&
+            !menuToggle.contains(event.target)) {
+            sidebar.classList.remove('open');
+        }
     });
 
     document.getElementById('ai-chat-toggle')?.addEventListener('click', function () {
