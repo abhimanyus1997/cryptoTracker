@@ -2,521 +2,416 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Dashboard - cryptoTracker Lite</title>
-    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/ct.css">
-    <!-- Load d3.js v5 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"
-        integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
-        integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <script src="js/topcoins.js"></script>
-
-    <!-- Pyscript Integration -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTracker | Advanced Portfolio Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/yfinance@0.0.6/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="./static/main.js"></script>
+    <link href="./static/style.css" rel="stylesheet">
 </head>
 
-<body id="page-top">
-    <div id="d3"></div>
-    <div id="wrapper">
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <nav class="navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
-                    <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3"
-                            id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button>
-                        <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
-                            <div class="input-group"><input class="bg-light form-control border-0 small" type="text"
-                                    placeholder="Search for ..."><button class="btn btn-primary py-0" type="button"><i
-                                        class="fas fa-search"></i></button></div>
-                        </form>
-                        <ul class="navbar-nav flex-nowrap ms-auto">
-                            <li class="nav-item dropdown d-sm-none no-arrow"><a class="dropdown-toggle nav-link"
-                                    aria-expanded="false" data-bs-toggle="dropdown" href="#"><i
-                                        class="fas fa-search"></i></a>
-                                <div class="dropdown-menu dropdown-menu-end p-3 animated--grow-in"
-                                    aria-labelledby="searchDropdown">
-                                    <form class="me-auto navbar-search w-100">
-                                        <div class="input-group"><input class="bg-light form-control border-0 small"
-                                                type="text" placeholder="Search for ...">
-                                            <div class="input-group-append"><button class="btn btn-primary py-0"
-                                                    type="button"><i class="fas fa-search"></i></button></div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </li>
-                            <li class="nav-item dropdown no-arrow mx-1">
-                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link"
-                                        aria-expanded="false" data-bs-toggle="dropdown" href="#"><span
-                                            class="badge bg-danger badge-counter">1</span><i
-                                            class="fas fa-bell fa-fw"></i></a>
-                                    <div class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
-                                        <h6 class="dropdown-header">alerts center</h6><a
-                                            class="dropdown-item d-flex align-items-center" href="#">
-                                            <div class="me-3">
-                                                <div class="bg-danger icon-circle"><i
-                                                        class="fas fa-file-alt text-white"></i></div>
-                                            </div>
-                                            <div><span class="small text-gray-500">Disclaimer</span>
-                                                <p>The data is fetched using Coingecko and Coincap for educational
-                                                    purposes only.
-                                                    Please refrain from using it for financial decisions.</p>
-                                            </div>
-                                        </a>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 px-6 shadow-xl">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fa-brands fa-bitcoin text-accent text-3xl mr-3"></i>
+                <h1 class="text-2xl font-bold text-white">CryptoTracker</h1>
+            </div>
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-4 items-center">
+                <button id="refresh-data"
+                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">
+                    <i class="fas fa-sync mr-2"></i>Refresh Data
+                </button>
+                <button
+                    class="px-4 py-2 rounded-lg border border-accent text-accent font-medium hover:bg-gray-700 transition">
+                    <i class="fas fa-user mr-2"></i>Account
+                </button>
+                <button id="ai-chat-toggle"
+                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition glow-hover">
+                    <i class="fas fa-robot mr-2"></i>AI Chat
+                </button>
+            </div>
+            <!-- Mobile Menu Toggle -->
+            <button id="menu-toggle"
+                class="md:hidden px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <!-- Collapsible Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden absolute top-full left-0 w-full bg-gray-800 p-4 hidden">
+            <div class="flex flex-col space-y-2">
+                <button id="refresh-data-mobile"
+                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">
+                    <i class="fas fa-sync mr-2"></i>Refresh Data
+                </button>
+                <button id="account-mobile"
+                    class="px-4 py-2 rounded-lg border border-accent text-accent font-medium hover:bg-gray-700 transition">
+                    <i class="fas fa-user mr-2"></i>Account
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container mx-auto px-4">
+            <a href="#news-section" id="news-breadcrumb">Latest Crypto News</a>
+        </div>
+    </div>
 
-                                        <!-- CSV Uploader -->
-                                        <div class="dropdown-item d-flex align-items-center">
-                                            <div class="me-3">
-                                                <div class="bg-success icon-circle"><i
-                                                        class="fas fa-upload text-white"></i></div>
-                                            </div>
-                                            <div>
-                                                <div class="container mt-4">
-                                                    <span class="small text-gray-500">Data
-                                                            Uploader</span>
-                                                    <form id="myForm">
-                                                        <div class="mb-3">
-                                                            <label for="csvFile" class="small form-label">CSV File
-                                                                URL:</label>
-                                                            <input class="form-control form-control-sm" type="url"
-                                                                id="csvFile" placeholder="Enter CSV File URL" required>
-                                                            <div class="invalid-feedback">
-                                                                Please provide a valid CSV File URL.
-                                                            </div>
-                                                        </div>
-                                                        <button type="submit" class="btn btn-primary btn-sm"
-                                                            id="csvBtn">Submit</button>
-                                                    </form>
-                                                </div>
+    <button id="ai-chat-toggle-mobile"
+        class="fixed bottom-6 right-6 z-50 px-4 py-4 rounded-full bg-accent text-gray-900 shadow-lg hover:bg-opacity-90 transition glow-hover lg:hidden flex items-center justify-center w-14 h-14">
+        <i class="fas fa-robot text-xl"></i>
+    </button>
 
-                                            </div>
-                                        </div>
+    <!-- AI Chat Modal -->
+    <div id="ai-chat-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+        <div class="card p-4 w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-xl relative">
+            <button id="ai-chat-close" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h2 class="text-xl font-bold text-white mb-6">
+                <i class="fas fa-robot text-accent mr-3"></i>AI Crypto Assistant
+            </h2>
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm mb-2">Select AI Provider</label>
+                <select id="ai-provider"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent sm:text-sm">
+                    <option value="gemini">Google Gemini (Cloud)</option>
+                    <option value="groq">Groq (Cloud - Fast)</option>
+                    <option value="webllm" selected>WebLLM (Local - Privacy Focused)</option>
+                </select>
+            </div>
 
-                                        <!-- <a class="dropdown-item d-flex align-items-center" href="#">
-                                            <div class="me-3">
-                                                <div class="bg-warning icon-circle"><i
-                                                        class="fas fa-exclamation-triangle text-white"></i></div>
-                                            </div>
-                                            <div><span class="small text-gray-500">December 2, 2019</span>
-                                                <p>Spending Alert: We've noticed unusually high spending for your
-                                                    account.</p>
-                                            </div> </a> -->
-                                        <a class="dropdown-item text-center small text-gray-500" href="#">
-                                            <py-script>
-                                                import sys
-                                                from pyscript import display
-                                                import pyodide_js
-                                                version_number = sys.version.split()[0]
-                                                display(f"Powered by Pyscript v {pyodide_js.version}")
-                                                display(f"Based on Python v{version_number}")
-                                            </py-script>
-                                        </a>
-                                    </div>
-                                </div>
-                            </li>
+            <!-- API Key Inputs (Hidden by default) -->
+            <div id="gemini-key-container" class="mb-4 hidden">
+                <label class="block text-gray-400 text-sm mb-2">Gemini API Key</label>
+                <input type="password" id="gemini-key" placeholder="Enter Gemini API Key"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent sm:text-sm">
+            </div>
 
+            <div id="groq-key-container" class="mb-4 hidden">
+                <label class="block text-gray-400 text-sm mb-2">Groq API Key</label>
+                <input type="password" id="groq-key" placeholder="Enter Groq API Key"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent sm:text-sm">
+            </div>
 
-                            <!-- <li class="nav-item dropdown no-arrow mx-1">
-                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link"
-                                        aria-expanded="false" data-bs-toggle="dropdown" href="#"><span
-                                            class="badge bg-danger badge-counter">7</span><i
-                                            class="fas fa-envelope fa-fw"></i></a>
-                                    <div class="dropdown-menu dropdown-menu-end dropdown-list animated--grow-in">
-                                        <h6 class="dropdown-header">alerts center</h6><a
-                                            class="dropdown-item d-flex align-items-center" href="#">
-                                            <div class="dropdown-list-image me-3"><img class="rounded-circle"
-                                                    src="assets/img/avatars/avatar4.jpeg">
-                                                <div class="bg-success status-indicator"></div>
-                                            </div>
-                                            <div class="fw-bold">
-                                                <div class="text-truncate"><span>Hi there! I am wondering if you can
-                                                        help me with a problem I've been having.</span></div>
-                                                <p class="small text-gray-500 mb-0">Emily Fowler - 58m</p>
-                                            </div>
-                                        </a><a class="dropdown-item d-flex align-items-center" href="#">
-                                            <div class="dropdown-list-image me-3"><img class="rounded-circle"
-                                                    src="assets/img/avatars/avatar2.jpeg">
-                                                <div class="status-indicator"></div>
-                                            </div>
-                                            <div class="fw-bold">
-                                                <div class="text-truncate"><span>I have the photos that you ordered last
-                                                        month!</span></div>
-                                                <p class="small text-gray-500 mb-0">Jae Chun - 1d</p>
-                                            </div>
-                                        </a><a class="dropdown-item d-flex align-items-center" href="#">
-                                            <div class="dropdown-list-image me-3"><img class="rounded-circle"
-                                                    src="assets/img/avatars/avatar3.jpeg">
-                                                <div class="bg-warning status-indicator"></div>
-                                            </div>
-                                            <div class="fw-bold">
-                                                <div class="text-truncate"><span>Last month's report looks great, I am
-                                                        very happy with the progress so far, keep up the good
-                                                        work!</span></div>
-                                                <p class="small text-gray-500 mb-0">Morgan Alvarez - 2d</p>
-                                            </div>
-                                        </a><a class="dropdown-item d-flex align-items-center" href="#">
-                                            <div class="dropdown-list-image me-3"><img class="rounded-circle"
-                                                    src="assets/img/avatars/avatar5.jpeg">
-                                                <div class="bg-success status-indicator"></div>
-                                            </div>
-                                            <div class="fw-bold">
-                                                <div class="text-truncate"><span>Am I a good boy? The reason I ask is
-                                                        because someone told me that people say this to all dogs, even
-                                                        if they aren't good...</span></div>
-                                                <p class="small text-gray-500 mb-0">Chicken the Dog · 2w</p>
-                                            </div>
-                                        </a><a class="dropdown-item text-center small text-gray-500" href="#">Show All
-                                            Alerts</a>
-                                    </div>
-                                </div>
-                                <div class="shadow dropdown-list dropdown-menu dropdown-menu-end"
-                                    aria-labelledby="alertsDropdown"></div>
-                            </li> -->
+            <div id="webllm-controls" class="download-container mb-4">
+                <select id="model-selection"
+                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-accent sm:text-sm"
+                    value="SmolLM2-135M-lnstruct-qOf16-ML">
+                </select>
 
-                            <div class="d-none d-sm-block topbar-divider"></div>
-                            <li class="nav-item dropdown no-arrow">
-                                <div class="nav-item dropdown no-arrow"><a class="dropdown-toggle nav-link"
-                                        aria-expanded="false" data-bs-toggle="dropdown" href="#"><span
-                                            class="d-none d-lg-inline me-2 text-gray-600 small">Abhimanyu</span><img
-                                            class="border rounded-circle img-profile"
-                                            src="https://avatars.githubusercontent.com/u/20315792?v=4"></a>
-                                    <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in"><a
-                                            class="dropdown-item" href="https://github.com/abhimanyus1997"><i
-                                                class="fas fa-github fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Github</a><a
-                                            class="dropdown-item" href="https://www.linkedin.com/in/abhimanyus1997/"><i
-                                                class="fas fa-linkedin-in fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;LinkedIn</a><a
-                                            class="dropdown-item" href="https://abhimanyus1997.github.io/"><i
-                                                class="fas fa-home fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Portfolio
-                                            log</a>
-                                        <div class="dropdown-divider"></div><a class="dropdown-item" href="#"><i
-                                                class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Logout</a>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
+                <button id="download"
+                    class="ml-2 px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition">Download</button>
+            </div>
+            <p id="download-status" class="text-gray-400 text-sm mb-4 hidden"></p>
+            <div class="chat-container">
+                <div id="chat-box"
+                    class="chat-box bg-gray-800 rounded-lg p-4 max-h-96 overflow-y-auto border border-gray-700"></div>
+                <div id="chat-stats" class="chat-stats text-gray-400 text-sm mt-2 hidden"></div>
+                <div class="chat-input-container mt-4 flex">
+                    <input type="text" id="user-input"
+                        placeholder="Ask about crypto prices, trends, or portfolio tips..."
+                        class="flex-1 bg-gray-700 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:border-accent">
+                    <button id="send"
+                        class="ml-2 px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition"
+                        disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Portfolio Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-chart-line text-accent text-xl"></i>
                     </div>
-                </nav>
-                <div class="container-fluid">
-                    <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                        <h3 class="text-dark mb-0">cryptoTracker Lite - Dashboard</h3>
-                        <a id="downloadLink" class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button"
-                            href="#">
-                            <i class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report
-                        </a>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">Portfolio Value</h3>
+                        <p class="text-2xl font-bold text-white" id="portfolio-value">$0.00</p>
                     </div>
-
-                    <div id="test"> </div>
-
-                    <!-- FIRST ROW -->
-                    <!-- FOR LIVE DATA OF COINS -->
-                    <div class="row">
-                        <!-- BTC LIVE -->
-                        <div class="col-md-6 col-xl-3 mb-4">
-                            <div class="card shadow border-start-primary py-2">
-                                <div class="card-body">
-                                    <div class="row align-items-center no-gutters">
-                                        <div class="col me-2">
-                                            <div class="text-uppercase text-primary fw-bold text-xs mb-1">
-                                                <span>BITCOIN</span>
-                                            </div>
-                                            <div class="text-dark fw-bold h5 mb-0"><span id="valuesBitcoin">$0</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto"><svg xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="-64 0 512 512" width="1em" height="1em" fill="currentColor"
-                                                class="fa-2x text-gray-300" style="font-size: 30px;">
-                                                <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
-                                                <path
-                                                    d="M310.204 242.638c27.73-14.18 45.377-39.39 41.28-81.3-5.358-57.351-52.458-76.573-114.85-81.929V0h-48.528v77.203c-12.605 0-25.525.315-38.444.63V0h-48.528v79.409c-17.842.539-38.622.276-97.37 0v51.678c38.314-.678 58.417-3.14 63.023 21.427v217.429c-2.925 19.492-18.524 16.685-53.255 16.071L3.765 443.68c88.481 0 97.37.315 97.37.315V512h48.528v-67.06c13.234.315 26.154.315 38.444.315V512h48.528v-68.005c81.299-4.412 135.647-24.894 142.895-101.467 5.671-61.446-23.32-88.862-69.326-99.89zM150.608 134.553c27.415 0 113.126-8.507 113.126 48.528 0 54.515-85.71 48.212-113.126 48.212v-96.74zm0 251.776V279.821c32.772 0 133.127-9.138 133.127 53.255-.001 60.186-100.355 53.253-133.127 53.253z">
-                                                </path>
-                                            </svg></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- ETH LIVE -->
-                        <div class="col-md-6 col-xl-3 mb-4">
-                            <div class="card shadow border-start-success py-2">
-                                <div class="card-body">
-                                    <div class="row align-items-center no-gutters">
-                                        <div class="col me-2">
-                                            <div class="text-uppercase text-success fw-bold text-xs mb-1">
-                                                <span>Etherum</span>
-                                            </div>
-                                            <div class="text-dark fw-bold h5 mb-0"><span id="valuesEthereum">$0</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto"><svg xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="-96 0 512 512" width="1em" height="1em" fill="currentColor"
-                                                class="fa-2x text-gray-300">
-                                                <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
-                                                <path
-                                                    d="M311.9 260.8L160 353.6 8 260.8 160 0l151.9 260.8zM160 383.4L8 290.6 160 512l152-221.4-152 92.8z">
-                                                </path>
-                                            </svg></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Binance Coin (BNB) Chart Column -->
-                        <div class="col-md-6 col-xl-3 mb-4">
-                            <div class="card shadow border-start-info py-2">
-                                <div class="card-body">
-                                    <div class="row align-items-center no-gutters">
-                                        <div class="col me-2">
-                                            <div class="text-uppercase text-info fw-bold text-xs mb-1">
-                                                <span>Binance Coin (BNB)</span>
-                                            </div>
-                                            <div class="text-dark fw-bold h5 mb-0">
-                                                <span id="valuesBNB">$0</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <!-- BNB icon -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Solana (SOL) Chart Column -->
-                        <div class="col-md-6 col-xl-3 mb-4">
-                            <div class="card shadow border-start-warning py-2">
-                                <div class="card-body">
-                                    <div class="row align-items-center no-gutters">
-                                        <div class="col me-2">
-                                            <div class="text-uppercase text-warning fw-bold text-xs mb-1">
-                                                <span>Solana (SOL)</span>
-                                            </div>
-                                            <div class="text-dark fw-bold h5 mb-0">
-                                                <span id="valuesSOL">$0</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <!-- SOL icon -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
+                </div>
+                <p class="mt-3 text-accent text-sm" id="portfolio-change"><i class="fas fa-caret-up mr-1"></i>0.0% today
+                </p>
+            </div>
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-coins text-accent text-xl"></i>
                     </div>
-
-
-
-                    <div class="row">
-
-                        <!-- BITCOIN CHART -->
-                        <div class="col-lg-6 col-xl-6">
-                            <div class="card shadow mb-4">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="fw-bold m-0" style="color:#997404">Bitcoin Price (7 Days)</h6>
-                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle"
-                                            aria-expanded="false" data-bs-toggle="dropdown" type="button"><i
-                                                class="fas fa-ellipsis-v text-gray-400"></i></button>
-                                        <!-- <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
-                                            <p class="text-center dropdown-header">dropdown header:</p><a
-                                                class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item"
-                                                href="#">&nbsp;Another action</a>
-                                            <div class="dropdown-divider"></div><a class="dropdown-item"
-                                                href="#">&nbsp;Something else here</a>
-                                        </div> -->
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-area"><canvas id="bitcoin-chart"
-                                            data-bss-chart="{&quot;type&quot;:&quot;line&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Earnings&quot;,&quot;fill&quot;:true,&quot;data&quot;:[&quot;0&quot;,&quot;10000&quot;,&quot;5000&quot;,&quot;15000&quot;,&quot;10000&quot;,&quot;20000&quot;,&quot;15000&quot;,&quot;25000&quot;],&quot;backgroundColor&quot;:&quot;rgba(78, 115, 223, 0.05)&quot;,&quot;borderColor&quot;:&quot;rgba(78, 115, 223, 1)&quot;}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:false,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;},&quot;scales&quot;:{&quot;xAxes&quot;:[{&quot;gridLines&quot;:{&quot;color&quot;:&quot;rgb(234, 236, 244)&quot;,&quot;zeroLineColor&quot;:&quot;rgb(234, 236, 244)&quot;,&quot;drawBorder&quot;:false,&quot;drawTicks&quot;:false,&quot;borderDash&quot;:[&quot;2&quot;],&quot;zeroLineBorderDash&quot;:[&quot;2&quot;],&quot;drawOnChartArea&quot;:false},&quot;ticks&quot;:{&quot;fontColor&quot;:&quot;#858796&quot;,&quot;fontStyle&quot;:&quot;normal&quot;,&quot;padding&quot;:20}}],&quot;yAxes&quot;:[{&quot;gridLines&quot;:{&quot;color&quot;:&quot;rgb(234, 236, 244)&quot;,&quot;zeroLineColor&quot;:&quot;rgb(234, 236, 244)&quot;,&quot;drawBorder&quot;:false,&quot;drawTicks&quot;:false,&quot;borderDash&quot;:[&quot;2&quot;],&quot;zeroLineBorderDash&quot;:[&quot;2&quot;]},&quot;ticks&quot;:{&quot;fontColor&quot;:&quot;#858796&quot;,&quot;fontStyle&quot;:&quot;normal&quot;,&quot;padding&quot;:20}}]}}}"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- ETHEREUM CHART -->
-                        <div class="col-lg-6 col-xl-6">
-                            <div class="card shadow mb-4">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="fw-bold m-0" style="color: #4b0082;">Ethereum Price (7 Days)</h6>
-                                    <div class="dropdown no-arrow">
-                                        <button class="btn btn-link btn-sm dropdown-toggle" aria-expanded="false"
-                                            data-bs-toggle="dropdown" type="button">
-                                            <i class="fas fa-ellipsis-v text-gray-400"></i>
-                                        </button>
-                                        <!-- Dropdown menu content here if needed -->
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-area">
-                                        <canvas id="ethereum-chart" data-bss-chart="{
-                                                &quot;type&quot;:&quot;line&quot;,
-                                                &quot;data&quot;:{
-                                                    &quot;labels&quot;:[],
-                                                    &quot;datasets&quot;:[{
-                                                        &quot;label&quot;:&quot;Ethereum Price&quot;,
-                                                        &quot;fill&quot;:true,
-                                                        &quot;data&quot;:[],
-                                                        &quot;backgroundColor&quot;:&quot;rgba(78, 115, 223, 0.05)&quot;,
-                                                        &quot;borderColor&quot;:&quot;rgba(78, 115, 223, 1)&quot;
-                                                    }]
-                                                },
-                                                &quot;options&quot;:{
-                                                    &quot;maintainAspectRatio&quot;:false,
-                                                    &quot;legend&quot;:{&quot;display&quot;:false},
-                                                    &quot;scales&quot;:{
-                                                        &quot;xAxes&quot;:[{
-                                                            /* x-axis configuration */
-                                                        }],
-                                                        &quot;yAxes&quot;:[{
-                                                            /* y-axis configuration */
-                                                        }]
-                                                    }
-                                                }}">
-                                        </canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!-- <div class="col-lg-5 col-xl-4">
-                            <div class="card shadow mb-4">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="text-primary fw-bold m-0">Revenue Sources</h6>
-                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle"
-                                            aria-expanded="false" data-bs-toggle="dropdown" type="button"><i
-                                                class="fas fa-ellipsis-v text-gray-400"></i></button>
-                                        <div class="dropdown-menu shadow dropdown-menu-end animated--fade-in">
-                                            <p class="text-center dropdown-header">dropdown header:</p><a
-                                                class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item"
-                                                href="#">&nbsp;Another action</a>
-                                            <div class="dropdown-divider"></div><a class="dropdown-item"
-                                                href="#">&nbsp;Something else here</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-area"><canvas
-                                            data-bss-chart="{&quot;type&quot;:&quot;doughnut&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;Direct&quot;,&quot;Social&quot;,&quot;Referral&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;&quot;,&quot;backgroundColor&quot;:[&quot;#4e73df&quot;,&quot;#1cc88a&quot;,&quot;#36b9cc&quot;],&quot;borderColor&quot;:[&quot;#ffffff&quot;,&quot;#ffffff&quot;,&quot;#ffffff&quot;],&quot;data&quot;:[&quot;50&quot;,&quot;30&quot;,&quot;15&quot;]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:false,&quot;legend&quot;:{&quot;display&quot;:false,&quot;labels&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}},&quot;title&quot;:{&quot;fontStyle&quot;:&quot;normal&quot;}}}"></canvas>
-                                    </div>
-                                    <div class="text-center small mt-4"><span class="me-2"><i
-                                                class="fas fa-circle text-primary"></i>&nbsp;Direct</span><span
-                                            class="me-2"><i
-                                                class="fas fa-circle text-success"></i>&nbsp;Social</span><span
-                                            class="me-2"><i class="fas fa-circle text-info"></i>&nbsp;Refferal</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
-
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">Total Holdings</h3>
+                        <p class="text-2xl font-bold text-white" id="total-holdings">0 Assets</p>
                     </div>
-                    <div class="row">
+                </div>
+                <p class="mt-3 text-accent text-sm">Diversified portfolio</p>
+            </div>
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-arrow-trend-up text-accent text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">Best Performer</h3>
+                        <p class="text-2xl font-bold text-white" id="best-performer">--</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-red-400 text-sm" id="worst-performer">--</p>
+            </div>
+            <div class="card p-6 fade-in">
+                <div class="flex items-center">
+                    <div class="bg-gray-700 rounded-full p-3 mr-4">
+                        <i class="fa-solid fa-wallet text-accent text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm uppercase">24h Change</h3>
+                        <p class="text-2xl font-bold text-white" id="change-value">$0.00</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-accent text-sm" id="change-percent"><i class="fas fa-caret-up mr-1"></i>0.0% gain
+                </p>
+            </div>
+        </div>
 
-                        <!-- SHOWS TRENDING COINS -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="text-primary fw-bold m-0">Top 7 Coins Today</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div id="coin-list" class="coin-list">
-                                        <!-- Existing or initial content -->
-                                    </div>
+        <!-- Main Content -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Column -->
+            <div class="lg:w-7/12">
+                <!-- Portfolio Overview -->
+                <div class="card p-6 mb-8 fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-white">
+                            <i class="fas fa-chart-pie text-accent mr-3"></i>Portfolio Overview
+                        </h2>
+                        <button id="export-csv" class="text-accent text-sm font-medium flex items-center">
+                            <i class="fas fa-download mr-2"></i> Export CSV
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto sm:rounded-lg shadow">
+                        <table class="min-w-full divide-y divide-gray-700 table-striped bg-gray-800"
+                            id="portfolio-table">
+                            <thead>
+                                <tr class="text-gray-400 text-sm">
+                                    <th class="py-3 px-4 text-left">Coin</th>
+                                    <th class="py-3 px-4 text-right">Holdings</th>
+                                    <th class="py-3 px-4 text-right">Price</th>
+                                    <th class="py-3 px-4 text-right">Value</th>
+                                    <th class="py-3 px-4 text-right">24h</th>
+                                    <th class="py-3 px-4 text-right">Profit/Loss %</th>
+                                    <th class="py-3 px-4 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white" id="portfolio-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI Price Prediction -->
+                <div class="card p-6 mb-8 fade-in">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-robot text-accent mr-3"></i>AI Price Prediction
+                    </h2>
+                    <div class="mb-6 p-4 bg-gray-800 rounded-lg border border-accent">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-accent text-lg mr-3 mt-1"></i>
+                            <p class="text-sm text-gray-300">
+                                <span class="font-medium text-accent">Disclaimer:</span> AI predictions are based on
+                                technical analysis and historical data. They do not constitute financial advice and
+                                should not be relied upon for investment decisions. Cryptocurrency markets are highly
+                                volatile and unpredictable. Always do your own research.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-gray-400 mb-2">Select Cryptocurrency</label>
+                            <div class="relative">
+                                <select id="predict-coin"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent"></select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                    <i class="fas fa-chevron-down"></i>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <div class="col">
-                            <div class="row">
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card text-white bg-primary shadow">
-                                        <div class="card-body">
-                                            <p class="m-0">Primary</p>
-                                            <p class="text-white-50 small m-0">#4e73df</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card text-white bg-success shadow">
-                                        <div class="card-body">
-                                            <p class="m-0">Success</p>
-                                            <p class="text-white-50 small m-0">#1cc88a</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card text-white bg-info shadow">
-                                        <div class="card-body">
-                                            <p class="m-0">Info</p>
-                                            <p class="text-white-50 small m-0">#36b9cc</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card text-white bg-warning shadow">
-                                        <div class="card-body">
-                                            <p class="m-0">Warning</p>
-                                            <p class="text-white-50 small m-0">#f6c23e</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card text-white bg-danger shadow">
-                                        <div class="card-body">
-                                            <p class="m-0">Danger</p>
-                                            <p class="text-white-50 small m-0">#e74a3b</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card text-white bg-secondary shadow">
-                                        <div class="card-body">
-                                            <p class="m-0">Secondary</p>
-                                            <p class="text-white-50 small m-0">#858796</p>
-                                        </div>
-                                    </div>
+                        <div>
+                            <label class="block text-gray-400 mb-2">AI Prediction Key</label>
+                            <div class="relative">
+                                <input type="password" id="ai-key" placeholder="Enter your AI key"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4">
+                                    <i class="fas fa-key text-gray-400"></i>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                        <canvas id="predictionChart" height="150"></canvas>
+                    </div>
+                    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center">
+                        <div>
+                            <h4 class="text-lg font-bold text-white mb-1" id="prediction-title">Prediction</h4>
+                            <p class="text-gray-400">Next 30 days forecast based on AI analysis</p>
+                        </div>
+                        <button id="runPrediction"
+                            class="mt-4 sm:mt-0 px-6 py-3 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition flex items-center glow-hover opacity-50 cursor-not-allowed sm:flex"
+                            disabled>
+                            <i class="fas fa-bolt mr-2"></i>Run Prediction (Coming soon)
+                        </button>
                     </div>
                 </div>
             </div>
-            <footer class="bg-dark sticky-footer">
-                <div class="container my-auto">
-                    <div class="text-center my-auto copyright"><span>Copyright © cryptoTracker Lite 2023 by
-                            abhimanyus1997</span>
+
+            <!-- Right Column -->
+            <div class="lg:w-5/12">
+                <!-- Historical Performance -->
+                <div class="card p-6 mb-8 fade-in">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-chart-area text-accent mr-3"></i>Historical Performance
+                    </h2>
+                    <div class="mb-6">
+                        <div class="flex justify-between border-b border-gray-700">
+                            <button class="timeframe-btn py-3 px-4 border-b-2 border-accent font-medium text-accent"
+                                data-timeframe="1M">1M</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="3M">3M</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="6M">6M</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="1Y">1Y</button>
+                            <button class="timeframe-btn py-3 px-4 font-medium text-gray-400 hover:text-white"
+                                data-timeframe="All">All</button>
+                        </div>
                     </div>
-                    <!-- <div class="text-center my-auto small" id="myip">Fetching IP...</div> -->
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 mb-6">
+                        <canvas id="performanceChart" height="150"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-gray-400 text-sm">30D Return</p>
+                            <p class="font-bold text-accent" id="return-30d">+0.0%</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Max Drawdown</p>
+                            <p class="font-bold text-red-400" id="max-drawdown">0.0%</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Volatility</p>
+                            <p class="font-bold text-gray-200" id="volatility">Medium</p>
+                        </div>
+                    </div>
                 </div>
-            </footer>
-        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+
+                <!-- Manage Holdings & CSV Import -->
+                <div class="space-y-8">
+                    <!-- Add/Edit Holdings -->
+                    <div class="card p-6 fade-in">
+                        <h2 class="text-xl font-bold text-white mb-6">
+                            <i class="fas fa-plus-circle text-accent mr-3"></i>Add Holding
+                        </h2>
+                        <form id="add-holding-form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Cryptocurrency</label>
+                                    <div class="relative">
+                                        <select id="coin-name"
+                                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white appearance-none focus:outline-none focus:border-accent"></select>
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Amount</label>
+                                    <input type="number" id="coin-amount" step="any" min="0" placeholder="0.00"
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Purchase Price</label>
+                                    <input type="number" id="purchase-price" step="any" min="0" placeholder="0.00"
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 mb-2">Date Acquired</label>
+                                    <input type="date" id="date-acquired"
+                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-accent">
+                                </div>
+                            </div>
+                            <div class="flex space-x-4">
+                                <button type="submit"
+                                    class="flex-1 px-6 py-3 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition glow-hover">
+                                    <i class="fas fa-save mr-2"></i>Add Holding
+                                </button>
+                                <button type="reset"
+                                    class="px-4 py-3 rounded-lg border border-gray-600 text-gray-300 font-medium hover:bg-gray-700 transition">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- CSV Import -->
+                    <div class="card p-6 fade-in">
+                        <h2 class="text-xl font-bold text-white mb-6">
+                            <i class="fas fa-file-import text-accent mr-3"></i>Import from CSV
+                        </h2>
+                        <div class="mb-6 p-6 border-2 border-dashed border-gray-600 rounded-xl bg-gray-800 text-center cursor-pointer hover:border-accent transition"
+                            id="dropzone">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-500 mb-4"></i>
+                            <p class="text-gray-400 mb-2">Drag & drop your CSV file here</p>
+                            <p class="text-gray-500 text-sm">or</p>
+                            <label for="csvFile"
+                                class="mt-4 px-6 py-3 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition inline-block cursor-pointer">
+                                <i class="fas fa-folder-open mr-2"></i>Browse Files
+                            </label>
+                            <input type="file" id="csvFile" accept=".csv" class="hidden">
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between items-center">
+                            <div>
+                                <p class="text-gray-400 text-sm">Supported formats: Coinbase, Binance, Kraken</p>
+                            </div>
+                            <button
+                                class="mt-4 sm:mt-0 px-6 py-3 rounded-lg bg-gray-700 text-gray-300 font-medium hover:bg-gray-600 transition glow-hover">
+                                <i class="fas fa-cog mr-2"></i>Import Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Crypto News Section (Moved to Bottom) -->
+    <div id="news-section" class="container mx-auto px-4 py-8 hidden">
+        <h2 class="text-xl font-bold text-white mb-6">
+            <i class="fas fa-newspaper text-accent mr-3"></i>Latest Crypto News
+        </h2>
+        <div id="news-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.1.1/chartjs-plugin-zoom.min.js"></script> -->
+    <footer class="py-6 mt-8 border-t border-gray-800">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>© 2025 CryptoTracker. All rights reserved. Cryptocurrency investments are subject to high market risk.
+            </p>
+            <p class="mt-2">Data is provided for informational purposes only and not intended as trading advice.</p>
+        </div>
+    </footer>
 
-    <script src="assets/js/bs-init.js"></script>
-    <script src="assets/js/theme.js"></script>
-    <script src="js/graphs.js"></script>
-    <script src="js/charts.js"></script>
-    <script src="js/script.js"></script>
-    <!-- python script for complex computation -->
-    <script type="py" src="python/main.py" config="python/pyscript.json"></script>
+    <script src="./static/ai.js" type="module"></script>
 </body>
 
 </html>
