@@ -1,8 +1,23 @@
-# CryptoTracker - All-in-one Crypto Tracker
+# CryptoTracker (Legacy)
 
-Cryptocurrency Market Tracker utilizing various APIs and Web Scraping techniques.
+This branch contains the legacy version of CryptoTracker, built with Django and Flask.
 
-[Explore CryptoTracker Lite](https://abhimanyus1997.github.io/cryptoTracker/)
+**Note:** This version is no longer actively maintained. Active development is happening on the `master` (Web Version) and `full-version` (FastAPI Backend) branches.
+
+## Features (Legacy)
+
+-   Uses **Coingecko API** to fetch data of top 7 trending coins.
+-   Uses **CoinCap and Coincap API** for global average price of top 100 cryptocurrencies.
+-   **Django Backend** for user authentication and dashboard.
+-   **Flask API** integration.
+
+## Setup (Legacy)
+
+Requirements: `Python 3.x`
+
+1.  Clone the repository and switch to `legacy` branch.
+2.  Install dependencies: `pip install -r requirements.txt`
+3.  Run Django server: `python manage.py runserver`
 
 ## Overview
 
