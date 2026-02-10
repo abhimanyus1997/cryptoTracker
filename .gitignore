@@ -1,51 +1,103 @@
-flask/__pycache__/
-flask/__pycache__/server.cpython-39.pyc
-tempCodeRunnerFile.bat
-flask/__pycache__/cryptotracker_scrapping.cpython-39.pyc
-flask/__pycache__/cryptotracker_scrapping.cpython-310.pyc
-flask/__pycache__/cryptotracker_scrapping.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/cryptotracker_scrapping.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/models.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/__init__.cpython-311.pyc
-flask_app/__pycache__/auth.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/auth.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/auth.cpython-311.pyc
-security.log
-instance/database.db
-instance/database.db
-security.log
-instance/database.db
-flask_app/__pycache__/auth.cpython-311.pyc
-instance/database.db
-security.log
-alpha/~$token_generated.xlsx
-security.log
-security.log
-security.log
-flask_app/__pycache__/cryptotracker_api.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-security.log
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/__pycache__/views.cpython-311.pyc
-security.log
-security.log
-flask_app/__pycache__/views.cpython-311.pyc
-flask_app/static/userfiles/0x9c85c376a50721c75e4e015ac22efe066dbb73ec-export-csv.csv
-flask_app/static/userfiles/0x9c85c376a50721c75e4e015ac22efe066dbb73ec-sorted-csv.csv
-flask_app/static/userfiles/0xd7e9d18153de624713c18b1ca18a238c42033ea5-export-csv.csv
-flask_app/static/userfiles/0xd7e9d18153de624713c18b1ca18a238c42033ea5-sorted-csv.csv
-security.log
-security.log
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+.venv/
+env/
+.env
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+instance/
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Env Configs (Secrets)
+.env
+.env.*
+!.env.example
+flask/env
+config.py
+secrets.py
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

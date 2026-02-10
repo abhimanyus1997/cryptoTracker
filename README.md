@@ -1,23 +1,23 @@
-# CryptoTracker (Legacy)
+# CryptoTracker (Web Version)
 
-This branch contains the legacy version of CryptoTracker, built with Django and Flask.
+This is the lightweight, web-only version of CryptoTracker. It runs entirely in the browser using HTML, CSS, JavaScript, and PyScript.
 
-**Note:** This version is no longer actively maintained. Active development is happening on the `master` (Web Version) and `full-version` (FastAPI Backend) branches.
+**Hosting**: [Live Website](https://abhimanyus1997.github.io/cryptoTracker/)
 
-## Features (Legacy)
+## Features
+-   **Live Crypto Prices**: Fetches data from Coingecko and CoinCap APIs.
+-   **Dashboard**: Visualizes price trends and top coins.
+-   **Client-Side Python**: Uses PyScript for client-side computations.
+-   **No Server Required**: Can be hosted on GitHub Pages or any static site host.
 
--   Uses **Coingecko API** to fetch data of top 7 trending coins.
--   Uses **CoinCap and Coincap API** for global average price of top 100 cryptocurrencies.
--   **Django Backend** for user authentication and dashboard.
--   **Flask API** integration.
+## Setup
+Simply serve the files using any static file server:
 
-## Setup (Legacy)
-
-Requirements: `Python 3.x`
-
-1.  Clone the repository and switch to `legacy` branch.
-2.  Install dependencies: `pip install -r requirements.txt`
-3.  Run Django server: `python manage.py runserver`
+```bash
+# Python 3
+python -m http.server 8000
+```
+Then visit `http://localhost:8000`
 
 ## Overview
 
