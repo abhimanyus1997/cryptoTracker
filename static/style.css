@@ -1,40 +1,42 @@
 /* styles.css */
 :root {
-  --bg-dark: #263238;
-  --bg-sidebar: #1e293b;
-  --bg-card: #304048;
+  --bg-dark: #0a0f0d;
+  --bg-sidebar: #0d1512;
+  --bg-card: rgba(20, 31, 26, 0.8);
+  --bg-card-solid: #141f1a;
   --accent: #9ef01a;
   --accent-hover: #8bd815;
-  --text-main: #e0e0e0;
-  --text-muted: #94a3b8;
-  --text-heading: #ffffff;
-  --border-color: #374151;
-  --bg-input: #374151;
-  --bg-modal: #1e293b;
-  --bg-hover: rgba(255, 255, 255, 0.03);
-  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --skeleton-from: #304048;
-  --skeleton-mid: #374151;
+  --text-main: #c8d6cf;
+  --text-muted: #6b8a78;
+  --text-heading: #e8f5ec;
+  --border-color: #1e3329;
+  --bg-input: #162420;
+  --bg-modal: #101a15;
+  --bg-hover: rgba(158, 240, 26, 0.03);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --skeleton-from: #141f1a;
+  --skeleton-mid: #1e3329;
   --color-scheme: dark;
 }
 
 /* Light Theme */
 [data-theme="light"] {
-  --bg-dark: #f1f5f9;
+  --bg-dark: #f0f4f2;
   --bg-sidebar: #ffffff;
   --bg-card: #ffffff;
+  --bg-card-solid: #ffffff;
   --accent: #16a34a;
   --accent-hover: #15803d;
   --text-main: #334155;
   --text-muted: #64748b;
   --text-heading: #0f172a;
-  --border-color: #e2e8f0;
-  --bg-input: #f1f5f9;
+  --border-color: #dce5df;
+  --bg-input: #f0f4f2;
   --bg-modal: #ffffff;
   --bg-hover: rgba(0, 0, 0, 0.03);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --skeleton-from: #e2e8f0;
-  --skeleton-mid: #f1f5f9;
+  --skeleton-from: #dce5df;
+  --skeleton-mid: #f0f4f2;
   --color-scheme: light;
 }
 
@@ -70,7 +72,7 @@ body {
 .branding {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-heading);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -130,15 +132,17 @@ body {
 
 .card {
   background-color: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-color: rgba(158, 240, 26, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(158, 240, 26, 0.1);
+  border-color: rgba(158, 240, 26, 0.25);
 }
 
 /* Table Enhancements (Nansen-like) */
@@ -164,13 +168,13 @@ th {
 
 td {
   padding: 1rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--border-color);
   color: var(--text-main);
   font-size: 0.95rem;
 }
 
 tr:hover td {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: var(--bg-hover);
 }
 
 /* AI Chat Modal Adjustments */
@@ -233,6 +237,73 @@ tr:hover td {
 
 .glow-hover:hover {
   box-shadow: 0 0 15px rgba(158, 240, 26, 0.5);
+}
+
+/* Price Rolling Animation */
+@keyframes priceTickUp {
+  0% {
+    transform: translateY(40%);
+    opacity: 0;
+    color: var(--accent);
+  }
+
+  50% {
+    color: var(--accent);
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    color: inherit;
+  }
+}
+
+@keyframes priceTickDown {
+  0% {
+    transform: translateY(-40%);
+    opacity: 0;
+    color: #ef4444;
+  }
+
+  50% {
+    color: #ef4444;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    color: inherit;
+  }
+}
+
+.price-tick-up {
+  animation: priceTickUp 0.45s ease-out;
+}
+
+.price-tick-down {
+  animation: priceTickDown 0.45s ease-out;
+}
+
+/* Coin logo in table */
+.coin-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--bg-input);
+}
+
+.coin-logo-fallback {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--text-heading);
+  background: linear-gradient(135deg, var(--accent), #22c55e);
 }
 
 /* Skeleton Loading */
@@ -882,6 +953,14 @@ tr:hover td {
 }
 
 [data-theme="light"] .bg-gray-700 {
+  background-color: var(--bg-input) !important;
+}
+
+[data-theme="light"] .bg-gray-700\/50 {
+  background-color: rgba(22, 163, 74, 0.08) !important;
+}
+
+[data-theme="light"] .bg-gray-600 {
   background-color: var(--bg-input) !important;
 }
 

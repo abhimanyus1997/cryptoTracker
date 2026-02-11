@@ -6,10 +6,18 @@ let portfolio = [
     { symbol: 'SCRUSDT', name: 'Scroll', ticker: 'SCR', amount: 49.096, purchasePrice: 1.21 }
 ];
 let tradingPairs = [];
-const coinIcons = {
-    'ETHUSDT': 'fa-ethereum text-blue-500',
-    'AVAXUSDT': 'fa-circle text-blue-400',
-    'SCRUSDT': 'fa-fire text-orange-400'
+const coinImages = {
+    'ETHUSDT': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    'AVAXUSDT': 'https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png',
+    'SCRUSDT': 'https://assets.coingecko.com/coins/images/39228/small/scroll.png',
+    'BTCUSDT': 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+    'SOLUSDT': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+    'DOGEUSDT': 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
+    'ADAUSDT': 'https://assets.coingecko.com/coins/images/975/small/cardano.png',
+    'DOTUSDT': 'https://assets.coingecko.com/coins/images/12171/small/polkadot.png',
+    'MATICUSDT': 'https://assets.coingecko.com/coins/images/4713/small/polygon.png',
+    'LINKUSDT': 'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png',
+    'XRPUSDT': 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png'
 };
 let availableCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 let perfChart = null;
@@ -217,13 +225,16 @@ async function updatePortfolio(prices) {
             ? ((price - yesterdayPrice) / yesterdayPrice * 100).toFixed(2)
             : 0;
 
-        const iconClass = coinIcons[holding.symbol] || 'fa-circle text-gray-400';
+        const coinImg = coinImages[holding.symbol];
+        const imgHtml = coinImg
+            ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.outerHTML='<div class=coin-logo-fallback>${holding.ticker.charAt(0)}</div>'">`
+            : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="py-4 px-4">
                 <div class="flex items-center">
-                    <div class="bg-gray-600 rounded-full p-2 mr-3">
-                        <i class="fas ${iconClass} text-lg"></i>
+                    <div class="mr-3">
+                        ${imgHtml}
                     </div>
                     <div>
                         <div class="font-semibold">${holding.name}</div>
@@ -327,6 +338,8 @@ async function initPerformanceChart(timeframe = '1M') {
     console.log("Initializing performance chart with timeframe:", timeframe);
     let interval, limit;
     switch (timeframe) {
+        case '1D': interval = '5m'; limit = 288; break;
+        case '7D': interval = '1h'; limit = 168; break;
         case '1M': interval = '1h'; limit = 24 * 15; break;
         case '3M': interval = '4h'; limit = 24 * 90 / 4; break;
         case '6M': interval = '12h'; limit = 24 * 180 / 12; break;
@@ -645,7 +658,10 @@ async function fetchCryptoNews() {
 // Theme Toggle (Dark / Light)
 // =============================================
 function getTheme() {
-    return localStorage.getItem('ct_theme') || 'dark';
+    const saved = localStorage.getItem('ct_theme');
+    if (saved) return saved;
+    // System-based default
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
 function applyTheme(theme) {
@@ -658,6 +674,111 @@ function applyTheme(theme) {
 
 // Apply theme immediately to prevent flash
 applyTheme(getTheme());
+
+// ============================================
+// Price Animation Helper — per-digit rolling
+// ============================================
+function animatePrice(element, oldVal, newVal) {
+    if (!element || oldVal === newVal) return;
+    const direction = newVal > oldVal ? 'up' : 'down';
+    const oldStr = element.textContent;
+    const newStr = typeof newVal === 'string' ? newVal : formatCurrency(newVal);
+    if (oldStr === newStr) return;
+
+    // Pad to same length
+    const maxLen = Math.max(oldStr.length, newStr.length);
+    const oldPad = oldStr.padStart(maxLen);
+    const newPad = newStr.padStart(maxLen);
+
+    let html = '';
+    for (let i = 0; i < maxLen; i++) {
+        if (oldPad[i] !== newPad[i]) {
+            html += `<span class="price-tick-${direction}" style="display:inline-block">${newPad[i]}</span>`;
+        } else {
+            html += newPad[i];
+        }
+    }
+    element.innerHTML = html;
+}
+
+// ============================================
+// Binance WebSocket — Live Prices
+// ============================================
+let binanceWs = null;
+const livePrices = {};
+
+function initBinanceWebSocket() {
+    if (binanceWs) binanceWs.close();
+    const symbols = portfolio.map(h => h.symbol.toLowerCase());
+    if (symbols.length === 0) return;
+
+    binanceWs = new WebSocket('wss://stream.binance.com:9443/ws/!miniTicker@arr');
+
+    binanceWs.onmessage = (event) => {
+        const tickers = JSON.parse(event.data);
+        let updated = false;
+        for (const ticker of tickers) {
+            const sym = ticker.s; // e.g. 'ETHUSDT'
+            if (!symbols.includes(sym.toLowerCase())) continue;
+            const newPrice = parseFloat(ticker.c);
+            const oldPrice = livePrices[sym] || newPrice;
+            livePrices[sym] = newPrice;
+
+            // Update table row
+            const rows = document.querySelectorAll('#portfolio-body tr');
+            portfolio.forEach((holding, idx) => {
+                if (holding.symbol !== sym || !rows[idx]) return;
+                const cells = rows[idx].querySelectorAll('td');
+                if (!cells[2] || !cells[3]) return;
+
+                // Price cell
+                animatePrice(cells[2], oldPrice, newPrice);
+                cells[2].textContent = formatCurrency(newPrice);
+
+                // Value cell
+                const newValue = holding.amount * newPrice;
+                cells[3].textContent = formatCurrency(newValue);
+
+                updated = true;
+            });
+        }
+
+        // Debounce summary updates
+        if (updated && !window._wsSummaryPending) {
+            window._wsSummaryPending = true;
+            setTimeout(() => {
+                updateSummaryFromLive();
+                window._wsSummaryPending = false;
+            }, 2000);
+        }
+    };
+
+    binanceWs.onclose = () => {
+        console.log('🔌 Binance WS closed, reconnecting in 3s...');
+        setTimeout(initBinanceWebSocket, 3000);
+    };
+
+    binanceWs.onerror = (err) => {
+        console.error('Binance WS error:', err);
+        binanceWs.close();
+    };
+
+    binanceWs.onopen = () => console.log('✅ Binance WebSocket connected');
+}
+
+function updateSummaryFromLive() {
+    let totalValue = 0;
+    for (const holding of portfolio) {
+        const price = livePrices[holding.symbol] || holding.purchasePrice;
+        totalValue += holding.amount * price;
+    }
+    const el = document.getElementById('portfolio-value');
+    if (el) {
+        const oldVal = parseFloat(el.textContent.replace(/[^0-9.-]/g, ''));
+        animatePrice(el, oldVal, totalValue);
+        el.textContent = formatCurrency(totalValue);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM fully loaded");
@@ -929,7 +1050,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     fetchTradingPairs().then(() => {
-        fetchPrices().then(() => initPerformanceChart());
+        fetchPrices().then(() => {
+            initPerformanceChart();
+            initBinanceWebSocket();
+        });
         console.log("Initial data loaded");
     });
 
