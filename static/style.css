@@ -413,7 +413,7 @@ tr:hover td {
 .chat-header {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(30, 41, 59, 0.8);
+  background: var(--bg-card);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: space-between;
@@ -438,7 +438,7 @@ tr:hover td {
 /* Settings Panel (collapsible) */
 .chat-settings-panel {
   border-bottom: 1px solid var(--border-color);
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--bg-hover);
   overflow: hidden;
   max-height: 0;
   transition: max-height 0.3s ease, padding 0.3s ease;
@@ -746,7 +746,7 @@ tr:hover td {
 .chat-input-area {
   padding: 0.75rem 1rem;
   border-top: 1px solid var(--border-color);
-  background: rgba(30, 41, 59, 0.8);
+  background: var(--bg-card);
   flex-shrink: 0;
 }
 
@@ -754,7 +754,7 @@ tr:hover td {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  background: rgba(55, 65, 81, 0.6);
+  background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 0.25rem 0.5rem;

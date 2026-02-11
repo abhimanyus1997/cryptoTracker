@@ -448,37 +448,33 @@
     <!-- Settings Modal -->
     <div id="settings-modal"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[70]">
-        <div class="card w-full max-w-md relative shadow-2xl mx-4 p-6 bg-gray-800 border border-gray-700">
-            <button id="settings-close" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <div class="card w-full max-w-md relative shadow-2xl mx-4 p-6">
+            <button id="settings-close" class="absolute top-4 right-4 text-muted hover:text-heading">
                 <i class="fas fa-times text-lg"></i>
             </button>
-            <h2 class="text-xl font-bold text-white mb-6">Settings</h2>
+            <h2 class="text-xl font-bold text-heading mb-6">Settings</h2>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-gray-400 text-sm mb-2">Gemini API Key</label>
                     <input type="password" id="gemini-key" placeholder="Enter Gemini API Key"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-gray-400 text-sm mb-2">Groq API Key</label>
                     <input type="password" id="groq-key" placeholder="Enter Groq API Key"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none">
+                        class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none">
                 </div>
                 <hr class="border-gray-700">
                 <div>
-                    <label class="block text-gray-400 text-sm mb-2">AI Provider</label>
                     <select id="ai-provider-select"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none text-sm">
+                        class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none text-sm">
                         <option value="gemini">Google Gemini</option>
                         <option value="groq">Groq</option>
                         <option value="webllm">WebLLM (Local)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-gray-400 text-sm mb-2">Model</label>
                     <select id="ai-model-select"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white focus:border-accent focus:outline-none text-sm">
+                        class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none text-sm">
                         <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                     </select>
                 </div>

@@ -172,6 +172,7 @@ async function fetchPrices() {
             acc[item.symbol] = parseFloat(item.price);
             return acc;
         }, {});
+        window.currentPrices = prices; // Expose for AI client
         await updatePortfolio(prices);
         await updateSummary(prices);
         console.log("Prices fetched successfully");
