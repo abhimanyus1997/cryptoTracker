@@ -28,8 +28,8 @@ html {
 
 .chat-box {
     overflow-y: scroll;
-    background-color: #c3c3c3;
-    border: 1px solid #ccc;
+    background-color: transparent;
+    border: none;
     padding: 5px;
     flex: 1 1;
 }
@@ -67,8 +67,8 @@ html {
 }
 
 .message-container.assistant .message {
-    background: #f1f0f0;
-    color: #333;
+    background: var(--bg-hover);
+    color: var(--text-main);
 }
 
 .chat-input-container {

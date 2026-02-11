@@ -17,27 +17,44 @@
   --skeleton-from: #141f1a;
   --skeleton-mid: #1e3329;
   --color-scheme: dark;
+
+  /* Shared variables */
+  --transition-speed: 0.3s;
+  --bg-button-secondary: #1f2937;
+  /* Gray 800 */
+  --bg-button-hover: #374151;
+  /* Gray 700 */
 }
 
 /* Light Theme */
 [data-theme="light"] {
-  --bg-dark: #f0f4f2;
+  --bg-dark: #f8fafc;
+  /* Lighter slate */
   --bg-sidebar: #ffffff;
   --bg-card: #ffffff;
   --bg-card-solid: #ffffff;
-  --accent: #16a34a;
-  --accent-hover: #15803d;
-  --text-main: #334155;
+  --accent: #22c55e;
+  /* Green 500 - more standard vibrant green */
+  --accent-hover: #16a34a;
+  /* Green 600 */
+  --text-main: #1e293b;
+  /* Slate 800 */
   --text-muted: #64748b;
   --text-heading: #0f172a;
-  --border-color: #dce5df;
-  --bg-input: #f0f4f2;
+  --border-color: #f1f5f9;
+  /* Even lighter slate */
+  --bg-input: #f1f5f9;
   --bg-modal: #ffffff;
-  --bg-hover: rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --skeleton-from: #dce5df;
-  --skeleton-mid: #f0f4f2;
+  --bg-hover: rgba(16, 185, 129, 0.05);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --skeleton-from: #f1f5f9;
+  --skeleton-mid: #e2e8f0;
   --color-scheme: light;
+
+  --bg-button-secondary: #e2e8f0;
+  /* Light gray */
+  --bg-button-hover: #cbd5e1;
+  /* Darker light gray */
 }
 
 body {
@@ -284,6 +301,42 @@ tr:hover td {
   animation: priceTickDown 0.45s ease-out;
 }
 
+@keyframes pulseUp {
+  0% {
+    background-color: transparent;
+  }
+
+  20% {
+    background-color: rgba(158, 240, 26, 0.2);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes pulseDown {
+  0% {
+    background-color: transparent;
+  }
+
+  20% {
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+.price-pulse-up {
+  animation: pulseUp 1.5s ease-out;
+}
+
+.price-pulse-down {
+  animation: pulseDown 1.5s ease-out;
+}
+
 /* Coin logo in table */
 .coin-logo {
   width: 28px;
@@ -493,8 +546,10 @@ tr:hover td {
 }
 
 .chat-msg.assistant .chat-bubble {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-hover);
   color: var(--text-main);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  /* Very subtle emerald border */
   border-top-left-radius: 4px;
 }
 
@@ -528,7 +583,7 @@ tr:hover td {
 
 .chat-bubble pre {
   background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 0.75rem;
   overflow-x: auto;
@@ -568,7 +623,7 @@ tr:hover td {
 
 .chat-bubble th,
 .chat-bubble td {
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(148, 163, 184, 0.2);
   padding: 0.4em 0.6em;
   text-align: left;
 }

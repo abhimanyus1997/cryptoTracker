@@ -685,7 +685,13 @@ function animatePrice(element, oldVal, newVal) {
     const newStr = typeof newVal === 'string' ? newVal : formatCurrency(newVal);
     if (oldStr === newStr) return;
 
-    // Pad to same length
+    // Apply pulse animation to the parent or element itself
+    const pulseClass = direction === 'up' ? 'price-pulse-up' : 'price-pulse-down';
+    element.classList.remove('price-pulse-up', 'price-pulse-down');
+    void element.offsetWidth; // Trigger reflow
+    element.classList.add(pulseClass);
+
+    // Pad to same length for digit rolling
     const maxLen = Math.max(oldStr.length, newStr.length);
     const oldPad = oldStr.padStart(maxLen);
     const newPad = newStr.padStart(maxLen);
