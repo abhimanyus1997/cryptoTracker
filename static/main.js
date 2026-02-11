@@ -309,6 +309,17 @@ async function updateSummary(prices) {
     document.getElementById('change-percent').classList.remove('skeleton', 'text-transparent');
     document.getElementById('change-percent').classList.remove('text-accent', 'text-red-400');
     document.getElementById('change-percent').classList.add(`text-${change24h >= 0 ? 'accent' : 'red-400'}`);
+
+    // Best & Worst Performer
+    const bestEl = document.getElementById('best-performer');
+    const worstEl = document.getElementById('worst-performer');
+    if (bestEl) bestEl.textContent = bestCoin !== '--' ? `${bestCoin} (${bestChange >= 0 ? '+' : ''}${bestChange.toFixed(2)}%)` : '--';
+    if (worstEl) worstEl.textContent = worstCoin !== '--' ? `${worstCoin} (${worstChange >= 0 ? '+' : ''}${worstChange.toFixed(2)}%)` : '--';
+
+    // Total Assets count
+    const totalHoldingsEl = document.getElementById('total-holdings');
+    if (totalHoldingsEl) totalHoldingsEl.textContent = portfolio.length;
+
     console.log("Summary updated");
 }
 
@@ -316,9 +327,9 @@ async function initPerformanceChart(timeframe = '1M') {
     console.log("Initializing performance chart with timeframe:", timeframe);
     let interval, limit;
     switch (timeframe) {
-        case '1M': interval = '1h'; limit = 24 * 30; break;
-        case '3M': interval = '4h'; limit = 24 * 30 * 3 / 4; break;
-        case '6M': interval = '12h'; limit = 24 * 30 * 6 / 12; break;
+        case '1M': interval = '1h'; limit = 24 * 15; break;
+        case '3M': interval = '4h'; limit = 24 * 90 / 4; break;
+        case '6M': interval = '12h'; limit = 24 * 180 / 12; break;
         case '1Y': interval = '1d'; limit = 365; break;
         case 'All': interval = '1w'; limit = 104; break;
         default: interval = '1h'; limit = 24 * 30;
@@ -358,9 +369,9 @@ async function initPerformanceChart(timeframe = '1M') {
                     borderColor: '#9EF01A',
                     backgroundColor: gradient,
                     borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
                     pointBackgroundColor: '#9EF01A',
-                    pointRadius: 4,
-                    pointHoverRadius: 7,
                     tension: 0.3,
                     fill: true
                 }]
@@ -441,50 +452,78 @@ const updatePurchasePrice = debounce(async () => {
     }
 }, 500);
 
-// Linear Regression Calculation
-function calculateLinearRegression(prices) {
-    const n = prices.length;
-    let sumX = 0;
-    let sumY = 0;
-    let sumXY = 0;
-    let sumXX = 0;
+// Smart Trend Calculation (RSI + SMA) — Pure JS, no external library
+function calculateSmartTrend(prices) {
+    console.log("📊 calculateSmartTrend called, data points:", prices.length);
 
-    for (let i = 0; i < n; i++) {
-        sumX += i;
-        sumY += prices[i];
-        sumXY += i * prices[i];
-        sumXX += i * i;
+    if (prices.length < 20) {
+        console.warn("⚠️ Not enough data for indicators, need 20+ got", prices.length);
+        return { trendFactor: 1, lastRSI: 50 };
     }
 
-    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
+    // --- Pure JS RSI (Wilder's smoothing, period=14) ---
+    const period = 14;
+    let gains = 0, losses = 0;
+    for (let i = 1; i <= period; i++) {
+        const change = prices[i] - prices[i - 1];
+        if (change >= 0) gains += change;
+        else losses -= change;
+    }
+    let avgGain = gains / period;
+    let avgLoss = losses / period;
+    for (let i = period + 1; i < prices.length; i++) {
+        const change = prices[i] - prices[i - 1];
+        avgGain = (avgGain * (period - 1) + Math.max(change, 0)) / period;
+        avgLoss = (avgLoss * (period - 1) + Math.max(-change, 0)) / period;
+    }
+    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+    const lastRSI = 100 - (100 / (1 + rs));
 
-    return { slope, intercept };
+    // --- Pure JS SMA (period=14) ---
+    const smaSlice = prices.slice(-period);
+    const lastSMA = smaSlice.reduce((a, b) => a + b, 0) / period;
+    const prevSlice = prices.slice(-(period + 1), -1);
+    const prevSMA = prevSlice.reduce((a, b) => a + b, 0) / period;
+
+    let trendFactor;
+
+    // RSI Logic (Reversal detection)
+    if (lastRSI < 30) trendFactor = 1.02; // Oversold -> Expect Pump
+    else if (lastRSI > 70) trendFactor = 0.98; // Overbought -> Expect Drop
+    else {
+        // Follow SMA Trend
+        const smaSlope = (lastSMA - prevSMA) / prevSMA;
+        trendFactor = 1 + smaSlope;
+    }
+
+    console.log("📈 RSI:", lastRSI.toFixed(1), "| SMA:", lastSMA.toFixed(2), "| Trend:", trendFactor.toFixed(4));
+    return { trendFactor, lastRSI };
 }
 
 async function updatePredictionChart(symbol) {
     console.log(`Updating prediction chart for ${symbol}...`);
     try {
-        // Fetch 30 days of history
+        // Fetch 60 days of history (Need more for RSI/SMA calculation)
         const response = await axios.get('https://api.binance.com/api/v3/klines', {
-            params: { symbol, interval: '1d', limit: 30 }
+            params: { symbol, interval: '1d', limit: 60 }
         });
         const history = response.data.map(k => parseFloat(k[4])); // Close prices
-        const { slope, intercept } = calculateLinearRegression(history);
+        const { trendFactor, lastRSI } = calculateSmartTrend(history); // Use smart trend logic
 
         // Project next 7 days
         const labels = [];
         const data = [];
         const today = new Date();
+        const lastPrice = history[history.length - 1];
 
-        // Add last historical point as starting point
+        // Add last historical point
         labels.push('Today');
-        data.push(history[history.length - 1]);
+        data.push(lastPrice);
 
+        let currentPrice = lastPrice;
         for (let i = 1; i <= 7; i++) {
-            const futureIndex = history.length - 1 + i;
-            const predictedPrice = slope * futureIndex + intercept;
-            data.push(predictedPrice);
+            currentPrice = currentPrice * trendFactor;
+            data.push(currentPrice);
 
             const futureDate = new Date(today);
             futureDate.setDate(today.getDate() + i);
@@ -495,12 +534,25 @@ async function updatePredictionChart(symbol) {
         if (predChart) {
             predChart.data.labels = labels;
             predChart.data.datasets[0].data = data;
-            predChart.data.datasets[0].label = `Predicted Price (${symbol})`;
+            predChart.data.datasets[0].label = `Smart Forecast (${symbol})`;
+            const signalColor = lastRSI > 70 ? '#ef4444' : lastRSI < 30 ? '#9ef01a' : '#3b82f6';
+            predChart.data.datasets[0].borderColor = signalColor;
+            predChart.data.datasets[0].pointBackgroundColor = signalColor;
             predChart.update();
         }
 
-        // Update Title
-        document.getElementById('prediction-title').textContent = `${symbol.replace('USDT', '')} 7-Day Forecast`;
+        // Update Title & Tooltip
+        document.getElementById('prediction-title').textContent = `${symbol.replace('USDT', '')} Smart Forecast`;
+        const rsiStatus = lastRSI > 70 ? 'Overbought ⚠️' : lastRSI < 30 ? 'Oversold 🟢' : 'Neutral';
+        const rsiColor = lastRSI > 70 ? 'text-red-400' : lastRSI < 30 ? 'text-accent' : 'text-blue-400';
+        const tooltipContent = document.querySelector('.cursor-help .absolute');
+        if (tooltipContent) {
+            tooltipContent.innerHTML = `
+                <p class="mb-1 font-bold text-white">Smart Analysis:</p>
+                <p>RSI(14): <span class="${rsiColor} font-bold">${lastRSI.toFixed(1)} (${rsiStatus})</span></p>
+                <p class="mt-1">Combines RSI + SMA for trend detection.</p>
+            `;
+        }
 
     } catch (error) {
         console.error("Error updating prediction chart:", error);
@@ -510,45 +562,65 @@ async function updatePredictionChart(symbol) {
 async function fetchCryptoNews() {
     try {
         const newsFeed = document.getElementById('news-feed');
-        // Show Skeletons if empty
-        if (!newsFeed.hasChildNodes() || newsFeed.children.length === 0) {
-            newsFeed.innerHTML = Array(4).fill(0).map(() => `
-                <div class="news-card animate-pulse">
-                    <div class="flex gap-4 p-3">
-                        <div class="skeleton w-20 h-20 rounded-lg"></div>
-                        <div class="flex-1 space-y-2 py-1">
-                            <div class="skeleton skeleton-text w-3/4"></div>
-                            <div class="skeleton skeleton-text w-1/2"></div>
-                        </div>
-                    </div>
+        // Show Skeletons if empty or refreshing
+        newsFeed.innerHTML = Array(6).fill(0).map(() => `
+            <div class="news-card-enhanced animate-pulse">
+                <div class="news-card-img skeleton" style="height:160px;border-radius:12px 12px 0 0"></div>
+                <div class="p-4 space-y-3">
+                    <div class="skeleton skeleton-text w-3/4"></div>
+                    <div class="skeleton skeleton-text w-full"></div>
+                    <div class="skeleton skeleton-text w-1/2"></div>
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
 
         const response = await axios.get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
         console.log("Crypto News: ", response);
-        const articles = response.data.Data.slice(0, 12); // More articles for list view
-        newsFeed.innerHTML = ''; // Clear skeletons
+        const articles = response.data.Data.slice(0, 12);
+        newsFeed.innerHTML = '';
 
         articles.forEach(article => {
             const card = document.createElement('div');
-            card.className = 'news-card';
+            card.className = 'news-card-enhanced';
 
-            // Format time (e.g., "4 hours ago")
+            // Time ago
             const published = new Date(article.published_on * 1000);
-            const timeAgo = Math.floor((new Date() - published) / 3600000);
-            const timeString = timeAgo > 0 ? `${timeAgo}h ago` : 'Just now';
-            const imageUrl = article.imageurl || 'https://via.placeholder.com/80?text=News';
+            const diffMs = Date.now() - published;
+            const diffMins = Math.floor(diffMs / 60000);
+            let timeString;
+            if (diffMins < 1) timeString = 'Just now';
+            else if (diffMins < 60) timeString = `${diffMins}m ago`;
+            else if (diffMins < 1440) timeString = `${Math.floor(diffMins / 60)}h ago`;
+            else timeString = `${Math.floor(diffMins / 1440)}d ago`;
+
+            const imageUrl = article.imageurl || '';
+            const categories = (article.categories || '').split('|').slice(0, 2);
 
             card.innerHTML = `
-                <a href="${article.url}" target="_blank" class="flex gap-4 hover:bg-white/5 p-3 rounded-lg transition duration-200 group">
-                    <div class="news-thumbnail flex-shrink-0 w-20 h-20 rounded-lg bg-cover bg-center border border-gray-700 group-hover:border-accent/30 transition" style="background-image: url('${imageUrl}')"></div>
-                    <div class="flex flex-col justify-center">
-                        <h3 class="news-title text-sm font-semibold text-white group-hover:text-accent transition leading-tight mb-1">${article.title}</h3>
-                        <div class="news-meta text-xs text-gray-500 flex items-center gap-2">
-                            <span class="news-source text-gray-400">${article.source}</span>
-                            <span>•</span>
-                            <span>${timeString}</span>
+                <a href="${article.url}" target="_blank" rel="noopener" class="news-card-link">
+                    ${imageUrl ? `<div class="news-card-img" style="background-image: url('${imageUrl}')">
+                        <div class="news-card-img-overlay"></div>
+                        <div class="news-card-badges">
+                            ${categories.map(c => c.trim() ? `<span class="news-badge">${c.trim()}</span>` : '').join('')}
+                        </div>
+                    </div>` : `<div class="news-card-img news-card-img-placeholder">
+                        <i class="fas fa-newspaper text-3xl text-gray-600"></i>
+                        <div class="news-card-badges">
+                            ${categories.map(c => c.trim() ? `<span class="news-badge">${c.trim()}</span>` : '').join('')}
+                        </div>
+                    </div>`}
+                    <div class="news-card-body">
+                        <h3 class="news-card-title">${article.title}</h3>
+                        <p class="news-card-excerpt">${(article.body || '').substring(0, 100)}${(article.body || '').length > 100 ? '...' : ''}</p>
+                        <div class="news-card-footer">
+                            <span class="news-source-badge">
+                                <i class="fas fa-rss text-accent text-[10px]"></i>
+                                ${article.source}
+                            </span>
+                            <span class="news-time-badge">
+                                <i class="far fa-clock"></i>
+                                ${timeString}
+                            </span>
                         </div>
                     </div>
                 </a>
@@ -559,11 +631,45 @@ async function fetchCryptoNews() {
         document.getElementById('news-section').classList.remove('hidden');
     } catch (error) {
         console.error("Error fetching crypto news:", error);
+        const newsFeed = document.getElementById('news-feed');
+        newsFeed.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-exclamation-triangle text-3xl text-gray-600 mb-3"></i>
+                <p class="text-gray-400">Unable to load news. <button onclick="fetchCryptoNews()" class="text-accent hover:underline">Try again</button></p>
+            </div>
+        `;
     }
 }
 
+// =============================================
+// Theme Toggle (Dark / Light)
+// =============================================
+function getTheme() {
+    return localStorage.getItem('ct_theme') || 'dark';
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const icon = document.getElementById('theme-icon');
+    const label = document.getElementById('theme-label');
+    if (icon) icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    if (label) label.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+}
+
+// Apply theme immediately to prevent flash
+applyTheme(getTheme());
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM fully loaded");
+
+    // Theme toggle
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        const current = getTheme();
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('ct_theme', next);
+        applyTheme(next);
+        console.log("🎨 Theme changed to:", next);
+    });
 
     const predChartContext = document.getElementById('predictionChart').getContext('2d');
     predChart = new Chart(predChartContext, {
@@ -624,10 +730,12 @@ document.addEventListener('DOMContentLoaded', function () {
     settingsToggle?.addEventListener('click', openSettings);
     settingsClose?.addEventListener('click', closeSettings);
     saveSettingsvBtn?.addEventListener('click', () => {
-        // Validation or saving logic could go here if not handled by ai.js
+        // Delegate saving to AI client
+        if (window.aiClient) {
+            window.aiClient.saveSettings();
+            console.log("✅ Settings saved via AIClient");
+        }
         closeSettings();
-        // Optional: Trigger a notification
-        alert('Settings Saved!');
     });
 
     chatSettingsBtn?.addEventListener('click', () => {
