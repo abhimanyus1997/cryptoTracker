@@ -414,7 +414,8 @@ async function initPerformanceChart(timeframe = '1M') {
                     data: totalValues.reverse(),
                     borderColor: '#9EF01A',
                     backgroundColor: gradient,
-                    borderWidth: 2,
+                    borderWidth: 1.5,
+                    borderDash: [2, 5],
                     pointRadius: 0,
                     pointHoverRadius: 5,
                     pointBackgroundColor: '#9EF01A',
@@ -854,12 +855,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 label: 'Predicted Price',
                 data: [0, 0, 0, 0, 0, 0],
                 borderColor: '#9EF01A',
-                borderWidth: 2,
+                borderWidth: 1.5,
+                borderDash: [2, 5],
                 pointBackgroundColor: '#9EF01A',
                 pointRadius: 4,
                 pointHoverRadius: 7,
                 tension: 0.3,
-                borderDash: [5, 5]
+                borderDash: [2, 5]
             }]
         },
         options: {

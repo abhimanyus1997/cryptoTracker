@@ -7,10 +7,10 @@
     <title>CryptoTracker | Advanced Portfolio Management</title>
     <meta name="description" content="Monitor crypto holdings, market prices, portfolio performance, and private LiteRT AI insights.">
     <meta name="theme-color" content="#263238">
-    <link rel="icon" type="image/png" href="./assets/icons/cryptotracker-icon.png">
-    <link rel="apple-touch-icon" href="./assets/icons/cryptotracker-icon.png">
+    <link rel="icon" type="image/png" href="./assets/icons/cryptotracker-orbit.png">
+    <link rel="apple-touch-icon" href="./assets/icons/cryptotracker-orbit.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,25 +24,25 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="branding">
-                <img src="./assets/icons/cryptotracker-icon.png" alt="" class="w-8 h-8" width="32" height="32">
+                <img src="./assets/icons/cryptotracker-orbit.png" alt="" class="brand-orbit w-8 h-8" width="32" height="32">
                 <span>CryptoTracker</span>
             </div>
         </div>
         <nav class="nav-links">
             <a href="#" class="nav-item active">
-                <i class="fas fa-th-large"></i> Dashboard
+                <i class="fas fa-chart-pie"></i> Dashboard
             </a>
             <a href="#portfolio-section" class="nav-item">
-                <i class="fas fa-wallet"></i> Portfolio
+                <i class="fas fa-layer-group"></i> Portfolio
             </a>
             <button id="ai-chat-toggle" class="nav-item w-full text-left">
-                <i class="fas fa-robot"></i> AI Chat
+                <i class="fas fa-wand-magic-sparkles"></i> AI Analyst
             </button>
             <a href="#news-section" class="nav-item">
-                <i class="fas fa-newspaper"></i> Market News
+                <i class="fas fa-tower-broadcast"></i> Market Pulse
             </a>
             <button id="settings-toggle" class="nav-item mt-auto w-full text-left">
-                <i class="fas fa-cog"></i> Settings
+                <i class="fas fa-sliders"></i> Settings
             </button>
             <button id="theme-toggle" class="theme-toggle mt-2" title="Toggle dark/light mode">
                 <i class="fas fa-moon" id="theme-icon"></i>
@@ -56,7 +56,7 @@
         <!-- Mobile Header -->
         <header class="md:hidden flex justify-between items-center mb-6">
             <div class="branding text-white">
-                <img src="./assets/icons/cryptotracker-icon.png" alt="" class="w-8 h-8 mr-2" width="32" height="32">
+                <img src="./assets/icons/cryptotracker-orbit.png" alt="" class="brand-orbit w-8 h-8 mr-2" width="32" height="32">
                 <span class="font-bold text-lg">CryptoTracker</span>
             </div>
             <button id="menu-toggle" class="text-white p-2 focus:outline-none">
@@ -71,10 +71,10 @@
                 <p class="text-muted text-sm">Welcome back to your portfolio overview</p>
             </div>
             <div class="flex gap-3">
-                <button id="connect-wallet" class="wallet-connect" type="button"><i class="fas fa-wallet"></i><span>Connect wallet</span></button>
+                <button id="connect-wallet" class="wallet-connect" type="button"><i class="fas fa-fingerprint"></i><span>Connect wallet</span></button>
                 <button id="refresh-data"
                     class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center">
-                    <i class="fas fa-sync mr-2"></i>Refresh
+                    <i class="fas fa-rotate mr-2"></i>Refresh
                 </button>
                 <button class="px-4 py-2 rounded-lg btn-secondary font-medium flex items-center">
                     <i class="fas fa-user-circle mr-2"></i>Account
@@ -91,7 +91,7 @@
                         <h3 class="text-2xl font-bold text-white mt-1" id="portfolio-value">$0.00</h3>
                     </div>
                     <div class="bg-gray-700/50 rounded-lg p-2">
-                        <i class="fa-solid fa-chart-line text-accent text-lg"></i>
+                        <i class="fa-solid fa-wave-square text-accent text-lg"></i>
                     </div>
                 </div>
 
@@ -104,6 +104,20 @@
                     <div class="bot-metrics"><div><span>Strategy</span><strong>Trend guard</strong></div><div><span>Signal</span><strong class="text-accent">Watching ETH</strong></div></div>
                     <button id="bot-preview" class="bot-preview" type="button"><i class="fas fa-flask"></i> Preview paper strategy</button>
                     <p id="bot-output" class="bot-output" aria-live="polite">No paper orders generated.</p>
+                </section>
+
+                <section class="card wallet-profile fade-in" aria-labelledby="wallet-title">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div><p class="eyebrow">Non-custodial viewer</p><h2 id="wallet-title" class="text-lg font-bold text-white">Wallet profile</h2></div>
+                        <span id="wallet-state" class="bot-status">Not connected</span>
+                    </div>
+                    <div class="wallet-grid">
+                        <div><span>Account</span><strong id="wallet-address">—</strong></div>
+                        <div><span>Network</span><strong id="wallet-network">—</strong></div>
+                        <div><span>Native balance</span><strong id="wallet-balance">—</strong></div>
+                        <div><span>Permissions</span><strong id="wallet-permissions">Read-only</strong></div>
+                    </div>
+                    <p class="bot-output">Only public account data you approve is read. Private keys, seed phrases, and transaction signing are never requested.</p>
                 </section>
                 <div class="flex items-center text-sm">
                     <p id="portfolio-change"
@@ -121,7 +135,7 @@
                         <h3 class="text-2xl font-bold text-white mt-1" id="total-holdings">0</h3>
                     </div>
                     <div class="bg-gray-700/50 rounded-lg p-2">
-                        <i class="fa-solid fa-coins text-blue-400 text-lg"></i>
+                        <i class="fa-solid fa-cubes-stacked text-blue-400 text-lg"></i>
                     </div>
                 </div>
                 <div class="text-sm text-gray-400">
@@ -172,7 +186,7 @@
                     <div
                         class="p-6 border-b border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <h2 class="text-lg font-bold text-white flex items-center">
-                            <i class="fas fa-layer-group text-accent mr-2"></i>Holdings
+                            <i class="fas fa-cubes-stacked text-accent mr-2"></i>Holdings
                         </h2>
                         <button id="export-csv" class="text-sm btn-secondary px-3 py-1.5 rounded flex items-center">
                             <i class="fas fa-download mr-2"></i> Export CSV
@@ -202,7 +216,7 @@
                     <div
                         class="p-6 border-b border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <h2 class="text-lg font-bold text-white flex items-center">
-                            <i class="fas fa-exchange-alt text-accent mr-2"></i>DEX Holdings
+                            <i class="fas fa-arrows-left-right text-accent mr-2"></i>DEX Holdings
                         </h2>
                     </div>
                     <div class="table-container">
@@ -228,7 +242,7 @@
                 <div class="card p-6 mb-6 fade-in">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-lg font-bold text-white">
-                            <i class="fas fa-brain text-accent mr-2"></i>AI Forecast
+                            <i class="fas fa-wand-magic-sparkles text-accent mr-2"></i>AI Forecast
                         </h2>
                         <span class="bg-accent/10 text-accent text-xs font-bold px-2 py-1 rounded">BETA</span>
                     </div>
@@ -380,7 +394,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                        <i class="fas fa-newspaper text-accent text-lg"></i>
+                        <i class="fas fa-satellite-dish text-accent text-lg"></i>
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-white">Market Intelligence</h2>
@@ -437,7 +451,8 @@
                         <label class="block text-gray-500 text-xs uppercase mb-1">Provider</label>
                         <select id="ai-provider"
                             class="w-full bg-gray-700 border border-gray-600 rounded text-white text-xs py-1.5 px-2 focus:outline-none">
-                            <option value="litert">Local WebGPU RAG</option>
+                            <option value="webllm">WebLLM Local RAG (recommended)</option>
+                            <option value="litert">LiteRT Local RAG</option>
                             <option value="gemini">Google Gemini</option>
                             <option value="groq">Groq (Fast)</option>
                         </select>
@@ -510,7 +525,8 @@
                 <div>
                     <select id="ai-provider-select"
                         class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none text-sm">
-                        <option value="litert">Local WebGPU RAG</option>
+                        <option value="webllm">WebLLM Local RAG (recommended)</option>
+                        <option value="litert">LiteRT Local RAG</option>
                         <option value="gemini">Google Gemini</option>
                         <option value="groq">Groq</option>
                     </select>

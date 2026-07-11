@@ -22,7 +22,7 @@ const LOCAL_MODELS = {
 };
 
 const AI_CONFIG = {
-    keys: { provider: 'ct_ai_provider', localModel: 'ct_local_model', gemini: 'gemini_api_key', groq: 'groq_api_key' },
+    keys: { provider: 'ct_ai_provider', localModel: 'ct_local_model', webllmModel: 'ct_webllm_model', gemini: 'gemini_api_key', groq: 'groq_api_key' },
     geminiModel: 'gemini-2.5-flash',
     groqModel: 'openai/gpt-oss-120b'
 };
@@ -76,12 +76,15 @@ class LocalRetriever {
 
 class AIClient {
     constructor() {
-        this.provider = localStorage.getItem(AI_CONFIG.keys.provider) || 'litert';
+        this.provider = localStorage.getItem(AI_CONFIG.keys.provider) || 'webllm';
         this.localModel = localStorage.getItem(AI_CONFIG.keys.localModel) || 'e2b';
+        this.webllmModel = localStorage.getItem(AI_CONFIG.keys.webllmModel) || 'Qwen2-0.5B-Instruct-q4f16_1-MLC';
         this.geminiKey = localStorage.getItem(AI_CONFIG.keys.gemini) || '';
         this.groqKey = localStorage.getItem(AI_CONFIG.keys.groq) || '';
         this.engine = null;
         this.conversation = null;
+        this.webllm = null;
+        this.webllmEngine = null;
         this.retriever = new LocalRetriever();
         this.isGenerating = false;
         this.initUI();
@@ -105,13 +108,14 @@ class AIClient {
         };
         if (!this.ui.provider || !this.ui.box || !this.ui.send) return;
         this.ui.provider.value = this.provider;
-        this.populateLocalModels();
+        this.populateModels();
         this.ui.provider.addEventListener('change', (event) => {
             this.provider = event.target.value;
             localStorage.setItem(AI_CONFIG.keys.provider, this.provider);
+            this.populateModels();
             this.updateUIState();
         });
-        this.ui.load.addEventListener('click', () => this.initializeLocalModel());
+        this.ui.load.addEventListener('click', () => this.provider === 'webllm' ? this.initializeWebLLM() : this.initializeLocalModel());
         this.ui.send.addEventListener('click', () => this.sendMessage());
         this.ui.input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); this.sendMessage(); }
@@ -124,7 +128,8 @@ class AIClient {
         this.updateUIState();
     }
 
-    populateLocalModels() {
+    populateModels() {
+        if (this.provider === 'webllm') { this.loadWebLLMModels(); return; }
         this.ui.model.innerHTML = Object.values(LOCAL_MODELS).map((model) =>
             `<option value="${model.id}">${model.name} · ${model.download}</option>`).join('');
         this.ui.model.value = this.localModel;
@@ -136,10 +141,37 @@ class AIClient {
     }
 
     updateUIState() {
-        const local = this.provider === 'litert';
+        const local = this.provider === 'litert' || this.provider === 'webllm';
         this.ui.localControls.classList.toggle('hidden', !local);
-        this.ui.badge.textContent = local ? 'Local WebGPU · RAG' : this.provider === 'gemini' ? 'Gemini' : 'Groq';
-        this.ui.send.disabled = local ? !this.conversation : (this.provider === 'gemini' ? !this.geminiKey : !this.groqKey);
+        this.ui.badge.textContent = this.provider === 'webllm' ? 'WebLLM · local RAG' : local ? 'LiteRT · local RAG' : this.provider === 'gemini' ? 'Gemini' : 'Groq';
+        this.ui.send.disabled = this.provider === 'webllm' ? !this.webllmEngine : local ? !this.conversation : (this.provider === 'gemini' ? !this.geminiKey : !this.groqKey);
+    }
+
+    async loadWebLLMModels() {
+        this.ui.model.innerHTML = '<option>Loading WebLLM models…</option>';
+        try {
+            this.webllm = this.webllm || await import('https://esm.run/@mlc-ai/web-llm');
+            const models = this.webllm.prebuiltAppConfig.model_list;
+            this.ui.model.innerHTML = models.map(model => `<option value="${model.model_id}">${model.model_id}</option>`).join('');
+            const preferred = models.find(model => model.model_id === this.webllmModel) || models.find(model => /Qwen2.*0\.5B.*Instruct.*q4f16/i.test(model.model_id)) || models[0];
+            this.webllmModel = preferred.model_id;
+            this.ui.model.value = this.webllmModel;
+            this.ui.model.onchange = (event) => { this.webllmModel = event.target.value; localStorage.setItem(AI_CONFIG.keys.webllmModel, this.webllmModel); };
+        } catch (error) { this.setStatus(`WebLLM is unavailable: ${error.message}`); }
+    }
+
+    async initializeWebLLM() {
+        if (!navigator.gpu) { this.setStatus('WebLLM also requires WebGPU. Use Gemini or Groq on this device.'); return; }
+        await this.loadWebLLMModels();
+        if (!this.webllm) return;
+        this.ui.load.disabled = true;
+        this.setStatus(`Loading ${this.webllmModel}. The first download can be large.`);
+        try {
+            this.webllmEngine = new this.webllm.MLCEngine({ initProgressCallback: (report) => this.setStatus(report.text) });
+            await this.webllmEngine.reload(this.webllmModel, { temperature: 0.5, top_p: 0.9 });
+            this.setStatus('WebLLM is ready. Prompts and retrieved portfolio context stay in this browser.');
+        } catch (error) { this.setStatus(`Could not load WebLLM: ${error.message}`); }
+        finally { this.ui.load.disabled = false; this.updateUIState(); }
     }
 
     setStatus(message) {
@@ -207,7 +239,8 @@ class AIClient {
             this.ui.stats.classList.remove('hidden');
             this.ui.stats.textContent = `Local RAG retrieved ${context ? context.split('\n\n').length : 0} dashboard context snippets.`;
             let response;
-            if (this.provider === 'litert') response = await this.callLiteRT(query, context, bubble);
+            if (this.provider === 'webllm') response = await this.callWebLLM(query, context, bubble);
+            else if (this.provider === 'litert') response = await this.callLiteRT(query, context, bubble);
             else if (this.provider === 'gemini') response = await this.callGemini(query, context);
             else response = await this.callGroq(query, context);
             bubble.innerHTML = this.render(response);
@@ -227,6 +260,14 @@ class AIClient {
                 if (item.type === 'text' && item.text) { response += item.text; bubble.innerHTML = this.render(response); this.ui.box.scrollTop = this.ui.box.scrollHeight; }
             }
         }
+        return response || 'I could not generate a response.';
+    }
+
+    async callWebLLM(query, context, bubble) {
+        if (!this.webllmEngine) throw new Error('Load a WebLLM model before sending a message.');
+        let response = '';
+        const stream = await this.webllmEngine.chat.completions.create({ stream: true, messages: [{ role: 'system', content: this.systemPrompt(context) }, { role: 'user', content: query }] });
+        for await (const chunk of stream) { const token = chunk.choices?.[0]?.delta?.content || ''; if (token) { response += token; bubble.innerHTML = this.render(response); } }
         return response || 'I could not generate a response.';
     }
 
@@ -251,7 +292,7 @@ class AIClient {
         localStorage.setItem(AI_CONFIG.keys.gemini, this.geminiKey);
         localStorage.setItem(AI_CONFIG.keys.groq, this.groqKey);
         const provider = document.getElementById('ai-provider-select')?.value;
-        if (provider) { this.provider = provider; localStorage.setItem(AI_CONFIG.keys.provider, provider); this.ui.provider.value = provider; }
+        if (provider) { this.provider = provider; localStorage.setItem(AI_CONFIG.keys.provider, provider); this.ui.provider.value = provider; this.populateModels(); }
         this.updateUIState();
     }
 }
