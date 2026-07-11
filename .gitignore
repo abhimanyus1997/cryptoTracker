@@ -25,6 +25,9 @@ MANIFEST
 venv/
 .venv/
 env/
+
+# Node / Vite
+node_modules/
 .env
 
 # Installer logs
@@ -102,3 +105,5 @@ secrets.py
 .DS_Store
 Thumbs.db
 .env
+assets/raw/*
+.vercel

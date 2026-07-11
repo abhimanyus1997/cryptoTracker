@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CryptoTracker | Advanced Portfolio Management</title>
+    <meta name="description" content="Monitor crypto holdings, market prices, portfolio performance, and private LiteRT AI insights.">
+    <meta name="theme-color" content="#263238">
+    <link rel="icon" type="image/png" href="./assets/icons/cryptotracker-icon.png">
+    <link rel="apple-touch-icon" href="./assets/icons/cryptotracker-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,7 +24,7 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="branding">
-                <i class="fa-brands fa-bitcoin text-accent text-2xl"></i>
+                <img src="./assets/icons/cryptotracker-icon.png" alt="" class="w-8 h-8" width="32" height="32">
                 <span>CryptoTracker</span>
             </div>
         </div>
@@ -52,7 +56,7 @@
         <!-- Mobile Header -->
         <header class="md:hidden flex justify-between items-center mb-6">
             <div class="branding text-white">
-                <i class="fa-brands fa-bitcoin text-accent text-2xl mr-2"></i>
+                <img src="./assets/icons/cryptotracker-icon.png" alt="" class="w-8 h-8 mr-2" width="32" height="32">
                 <span class="font-bold text-lg">CryptoTracker</span>
             </div>
             <button id="menu-toggle" class="text-white p-2 focus:outline-none">
@@ -67,6 +71,7 @@
                 <p class="text-muted text-sm">Welcome back to your portfolio overview</p>
             </div>
             <div class="flex gap-3">
+                <button id="connect-wallet" class="wallet-connect" type="button"><i class="fas fa-wallet"></i><span>Connect wallet</span></button>
                 <button id="refresh-data"
                     class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center">
                     <i class="fas fa-sync mr-2"></i>Refresh
@@ -89,6 +94,17 @@
                         <i class="fa-solid fa-chart-line text-accent text-lg"></i>
                     </div>
                 </div>
+
+                <section class="card bot-console fade-in" aria-labelledby="bot-title">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div><p class="eyebrow">Automation lab</p><h2 id="bot-title" class="text-lg font-bold text-white">Trading Bot</h2></div>
+                        <span class="bot-status">Paper mode</span>
+                    </div>
+                    <p class="text-muted text-sm mb-4">Test a rules-based strategy against live market data. This workspace never submits trades or requests wallet signatures.</p>
+                    <div class="bot-metrics"><div><span>Strategy</span><strong>Trend guard</strong></div><div><span>Signal</span><strong class="text-accent">Watching ETH</strong></div></div>
+                    <button id="bot-preview" class="bot-preview" type="button"><i class="fas fa-flask"></i> Preview paper strategy</button>
+                    <p id="bot-output" class="bot-output" aria-live="polite">No paper orders generated.</p>
+                </section>
                 <div class="flex items-center text-sm">
                     <p id="portfolio-change"
                         class="text-accent font-medium flex items-center bg-accent/10 px-2 py-0.5 rounded">
@@ -176,6 +192,32 @@
                                 </tr>
                             </thead>
                             <tbody id="portfolio-body">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mb-6 fade-in" id="dex-portfolio-section">
+                    <div
+                        class="p-6 border-b border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-exchange-alt text-accent mr-2"></i>DEX Holdings
+                        </h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="min-w-full" id="dex-portfolio-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left py-4 px-4">Asset</th>
+                                    <th class="text-right py-4 px-4">Balance</th>
+                                    <th class="text-right py-4 px-4">Price</th>
+                                    <th class="text-right py-4 px-4">Value</th>
+                                    <th class="text-right py-4 px-4">24h Change</th>
+                                    <th class="text-right py-4 px-4">ROI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dex-portfolio-body">
                                 <!-- JS Populated -->
                             </tbody>
                         </table>
@@ -395,23 +437,24 @@
                         <label class="block text-gray-500 text-xs uppercase mb-1">Provider</label>
                         <select id="ai-provider"
                             class="w-full bg-gray-700 border border-gray-600 rounded text-white text-xs py-1.5 px-2 focus:outline-none">
+                            <option value="litert">Local WebGPU RAG</option>
                             <option value="gemini">Google Gemini</option>
                             <option value="groq">Groq (Fast)</option>
-                            <option value="webllm">WebLLM (Local)</option>
                         </select>
                     </div>
                     <button id="chat-settings-btn" class="text-xs text-accent hover:underline pb-1.5 whitespace-nowrap">
                         <i class="fas fa-key mr-1"></i>API Keys
                     </button>
                 </div>
-                <div id="webllm-controls" class="mt-2 hidden">
+                <div id="local-controls" class="mt-3 hidden">
                     <div class="flex gap-2">
                         <select id="model-selection"
                             class="flex-1 bg-gray-700 border border-gray-600 rounded text-white text-xs py-1 px-2"></select>
                         <button id="download"
                             class="px-3 py-1 bg-accent text-gray-900 text-xs font-bold rounded">Load</button>
                     </div>
-                    <p id="download-status" class="text-xs text-accent mt-1 hidden"></p>
+                    <p id="download-status" class="text-xs text-accent mt-2 hidden"></p>
+                    <p class="text-[11px] text-gray-500 mt-1">Choose LiteRT Gemma or Qwen 3.5 LiteRT beta. Models run on your device; no API key is needed.</p>
                 </div>
             </div>
 
@@ -421,8 +464,8 @@
                     <div class="chat-avatar"><i class="fas fa-robot"></i></div>
                     <div class="chat-msg-content">
                         <div class="chat-bubble">
-                            Hi! I'm your AI Crypto Analyst. Ask me about your portfolio, market trends, or say
-                            <strong>"latest news"</strong> to fetch live headlines.
+                            Hi! I’m your local AI Crypto Analyst. Choose a LiteRT Gemma or Qwen LiteRT model to chat privately with RAG grounded in
+                            the holdings and prices visible in this dashboard. Responses are not financial advice.
                         </div>
                         <span class="chat-timestamp">Just now</span>
                     </div>
@@ -467,17 +510,12 @@
                 <div>
                     <select id="ai-provider-select"
                         class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none text-sm">
+                        <option value="litert">Local WebGPU RAG</option>
                         <option value="gemini">Google Gemini</option>
                         <option value="groq">Groq</option>
-                        <option value="webllm">WebLLM (Local)</option>
                     </select>
                 </div>
-                <div>
-                    <select id="ai-model-select"
-                        class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none text-sm">
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                    </select>
-                </div>
+                <p class="text-xs text-muted">Local model selection is available in the AI chat panel. Gemini and Groq use their configured defaults.</p>
             </div>
 
             <div class="mt-6 flex justify-end">
@@ -489,7 +527,82 @@
         </div>
     </div>
 
+
+    <!-- CSV Import Filter Modal -->
+    <div id="csv-filter-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[70]">
+        <div class="card w-full max-w-md relative shadow-2xl mx-4 p-6">
+            <button id="csv-filter-close" class="absolute top-4 right-4 text-muted hover:text-heading">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <h2 class="text-xl font-bold text-heading mb-6">Filter Transactions</h2>
+
+            <div class="space-y-4">
+                <p class="text-sm text-gray-400">Select the transaction types you want to import.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" id="filter-buy" name="tx-filter" value="buy" checked class="form-checkbox h-5 w-5 text-accent bg-gray-800 border-gray-600 rounded focus:ring-accent">
+                        <span class="text-white">Buy</span>
+                    </label>
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" id="filter-sell" name="tx-filter" value="sell" checked class="form-checkbox h-5 w-5 text-accent bg-gray-800 border-gray-600 rounded focus:ring-accent">
+                        <span class="text-white">Sell</span>
+                    </label>
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" id="filter-in" name="tx-filter" value="in" checked class="form-checkbox h-5 w-5 text-accent bg-gray-800 border-gray-600 rounded focus:ring-accent">
+                        <span class="text-white">In</span>
+                    </label>
+                    <label class="flex items-center space-x-3">
+                        <input type="checkbox" id="filter-out" name="tx-filter" value="out" checked class="form-checkbox h-5 w-5 text-accent bg-gray-800 border-gray-600 rounded focus:ring-accent">
+                        <span class="text-white">Out</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button id="import-csv-btn" class="px-4 py-2 bg-accent text-gray-900 font-bold rounded-lg hover:bg-opacity-90 transition">
+                    Import
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV Verification Modal -->
+    <div id="csv-verification-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-[80]">
+        <div class="card w-full max-w-2xl relative shadow-2xl mx-4 p-6">
+            <button id="csv-verification-close" class="absolute top-4 right-4 text-muted hover:text-heading">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <h2 class="text-xl font-bold text-heading mb-6">Verify Transactions</h2>
+            <div class="max-h-96 overflow-y-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-left py-2 px-3">Date</th>
+                            <th class="text-left py-2 px-3">Type</th>
+                            <th class="text-left py-2 px-3">Asset</th>
+                            <th class="text-right py-2 px-3">Amount</th>
+                            <th class="text-right py-2 px-3">Price</th>
+                            <th class="text-right py-2 px-3">Category</th>
+                        </tr>
+                    </thead>
+                    <tbody id="verification-table-body">
+                        <!-- Transactions will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-import-btn" class="px-4 py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button id="confirm-import-btn" class="px-4 py-2 bg-accent text-gray-900 font-bold rounded-lg hover:bg-opacity-90 transition">
+                    Confirm Import
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="./static/main.js"></script>
+    <script src="./static/wallet.js"></script>
     <script src="./static/ai.js"></script>
 </body>
 

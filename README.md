@@ -1,126 +1,76 @@
-# 🪙 CryptoTracker Lite
+# CryptoTracker
 
-> A modern, lightweight, and serverless cryptocurrency tracking dashboard powered by **PyScript** and **D3.js**.
+A privacy-minded, static cryptocurrency portfolio dashboard with live market data, technical forecasts, CSV import, and an on-device AI analyst.
 
-[![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://abhimanyus1997.github.io/cryptoTracker/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
-[![PyScript](https://img.shields.io/badge/PyScript-2023.11.1-orange)](https://pyscript.net/)
+Live site: [cryptotracker.abhimanyu.fyi](https://cryptotracker.abhimanyu.fyi)
 
----
+## Highlights
 
-## 📖 Table of Contents
+- Portfolio and DEX holding views with live Binance prices
+- Performance charts, basic technical projections, CSV import, and CSV export
+- Local WebGPU RAG: choose LiteRT Gemma or Qwen 3.5 models while retrieving relevant holdings, prices, ROI, and dashboard scope before answering
+- Optional Gemini and Groq providers for users who prefer an API-backed assistant
+- Static deployment on Vercel; no application backend or server-side database
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Usage](#-usage)
-- [Project Structure](#-project-structure)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
+## Local AI and RAG
 
-## 🚀 Overview
+The default AI provider is **Local WebGPU RAG**. It offers LiteRT-LM Gemma models and the [Qwen 3.5 0.8B LiteRT bundle](https://huggingface.co/GabrieleConte/Qwen3.5-0.8B-LiteRT) through WebGPU.
 
-**CryptoTracker** is a fully client-side web application designed to provide real-time cryptocurrency market data and portfolio management tools. By leveraging **PyScript**, it runs Python code directly in the browser, eliminating the need for a dedicated backend server for core logic.
+At query time, CryptoTracker builds small local documents from the holdings and the latest loaded prices. A lightweight lexical retriever selects the most relevant snippets, adds them to the model prompt, and the response cites them as `[1]`, `[2]`, and so on. The portfolio context and model inference remain in the browser.
 
-The dashboard offers an intuitive interface to track live prices, visualize historical trends, and analyze market movements using interactive charts.
+Users can choose one of these local models in the chat panel:
 
-## ✨ Features
+| Model | First download | Use case |
+| --- | ---: | --- |
+| Gemma 4 E2B | about 2.6 GB | Default; best balance for most devices |
+| Gemma 4 E4B | about 3.7 GB | Higher quality on high-memory devices |
+| Qwen 3.5 0.8B LiteRT | about 1.2 GB | Multimodal LiteRT bundle; currently offered as a text-chat beta in the browser |
 
--   **Real-time Data Fetching**:
-    -   Live prices for top cryptocurrencies (Bitcoin, Ethereum, BNB, Solana, etc.).
-    -   Data sourced from robust APIs like **Coingecko** and **CoinCap**.
--   **Interactive Dashboard**:
-    -   Clean and responsive UI built with **Bootstrap**.
-    -   Dynamic charts powered by **D3.js** and **Chart.js**.
--   **Client-Side Python**:
-    -   Complex data processing handled directly in the browser using **PyScript**.
-    -   No server-side Python installation required for the end user.
--   **Serverless Architecture**:
-    -   Hosted entirely on GitHub Pages.
-    -   Zero backend maintenance.
+Use a recent Chrome or Edge build with hardware acceleration and WebGPU enabled. The first model load can take time; subsequent use may reuse browser-cached assets. These models are best suited to desktop or capable laptop devices.
 
-## 🛠 Tech Stack
+The assistant is informational only and is not financial advice. It can explain the dashboard data, but it cannot guarantee price movements or execute trades.
 
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Frontend** | ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=flat-square&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=flat-square&logo=javascript&logoColor=%23F7DF1E) | Core structure and styling. |
-| **Logic** | ![Python](https://img.shields.io/badge/python-3670A0?style=flat-square&logo=python&logoColor=ffdd54) ![PyScript](https://img.shields.io/badge/PyScript-000000?style=flat-square&logo=pyscript&logoColor=white) | Browser-based Python execution. |
-| **Visualization** | ![D3.js](https://img.shields.io/badge/d3.js-F9A03C?style=flat-square&logo=d3.js&logoColor=white) ![Chart.js](https://img.shields.io/badge/chart.js-F5788D?style=flat-square&logo=chart.js&logoColor=white) | Interactive data visualization. |
-| **Framework** | ![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=flat-square&logo=bootstrap&logoColor=white) | Responsive design system. |
+## Run locally
 
-## 🏁 Getting Started
+CryptoTracker uses Vite for local development and production builds.
 
-Since this is a client-side application, you can run it using any static file server.
-
-### Prerequisites
-
--   A modern web browser (Chrome, Firefox, Edge, Safari).
--   Python 3 (optional, for local serving).
-
-### Installation
-
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/abhimanyus1997/cryptoTracker.git
-    cd cryptoTracker
-    ```
-
-2.  **Run a local server**:
-    You can use Python's built-in HTTP server:
-    ```bash
-    python -m http.server 8000
-    ```
-
-3.  **Access the App**:
-    Open your browser and navigate to `http://localhost:8000`.
-
-## 💡 Usage
-
-1.  **Dashboard**: View live prices of top coins immediately upon loading.
-2.  **Charts**: Interact with the graphs to see historical price movements.
-3.  **Python Logic**: Observe real-time computations performed by PyScript in the browser console or specific UI elements.
-
-## 📂 Project Structure
-
-```
-cryptoTracker/
-├── assets/             # Images and static assets
-├── css/                # Stylesheets (Bootstrap, custom CSS)
-├── js/                 # JavaScript files (Charts, Logic)
-├── python/             # Python scripts run by PyScript
-│   ├── main.py         # Core Python logic
-│   └── pyscript.json   # PyScript configuration
-├── index.html          # Main entry point
-└── README.md           # Documentation
+```bash
+npm install
+npm run dev
 ```
 
-## 🗺 Roadmap
+Open the local URL shown by Vite, then open the dashboard. Serve over `localhost` or HTTPS so WebGPU is available.
 
-- [ ] Add portfolio management features.
-- [ ] Implement user settings (currency preference, theme).
-- [ ] Add more advanced technical indicators.
-- [ ] optimize PyScript loading time.
+## Deploy to Vercel
 
-## 🤝 Contributing
+```bash
+vercel --prod
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+For `cryptotracker.abhimanyu.fyi`, attach the subdomain to the Vercel project and create the CNAME record Vercel provides. Make it the project’s primary domain if the `*.vercel.app` URL should redirect to it.
 
-1.  Fork the project.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+### Future GitHub Pages deployment
 
-## 📄 License
+Vercel is the primary deployment target. If you later deploy to GitHub Pages, build with the repository base path and publish `dist/`:
 
-Distributed under the MIT License. See `LICENSE` for more information.
+```bash
+VITE_BASE_PATH=/cryptoTracker/ npm run build
+```
 
-## 📞 Contact
+Set `VITE_BASE_PATH=/` for Vercel or a custom domain. The project does not include a GitHub Actions workflow, so GitHub Pages remains opt-in.
 
-**Abhimanyu** - [GitHub Profile](https://github.com/abhimanyus1997)
+## Technology
 
-Project Link: [https://github.com/abhimanyus1997/cryptoTracker](https://github.com/abhimanyus1997/cryptoTracker)
+- HTML, CSS, JavaScript, Tailwind CSS, Chart.js
+- Binance public market-data API
+- [LiteRT-LM](https://github.com/google-ai-edge/LiteRT) Web SDK (`@litert-lm/core`) and WebGPU
+- [LiteRT Community web models](https://huggingface.co/collections/litert-community/web-llm-models) and [Qwen 3.5 0.8B LiteRT](https://huggingface.co/GabrieleConte/Qwen3.5-0.8B-LiteRT)
+- Vercel static hosting
+
+## Privacy
+
+Local WebGPU RAG does not require an API key and does not send prompts or retrieved portfolio context to an application server. Optional Gemini and Groq modes send their prompts to the provider selected by the user; their API keys are stored in that browser’s local storage.
+
+## License
+
+MIT

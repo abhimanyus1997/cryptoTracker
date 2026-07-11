@@ -1,10 +1,11 @@
-let selectedCurrency = 'USD';
+const selectedCurrency = 'USD';
 const currencySymbols = { USD: '$', INR: '₹', EUR: '€', GBP: '£' };
 let portfolio = [
     { symbol: 'ETHUSDT', name: 'Ethereum', ticker: 'ETH', amount: 0.035, purchasePrice: 2197.02 },
     { symbol: 'AVAXUSDT', name: 'Avalanche', ticker: 'AVAX', amount: 0.816, purchasePrice: 22.08 },
     { symbol: 'SCRUSDT', name: 'Scroll', ticker: 'SCR', amount: 49.096, purchasePrice: 1.21 }
 ];
+let dexPortfolio = [];
 let tradingPairs = [];
 const coinImages = {
     'ETHUSDT': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
@@ -19,12 +20,12 @@ const coinImages = {
     'LINKUSDT': 'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png',
     'XRPUSDT': 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png'
 };
-let availableCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 let perfChart = null;
 let predChart = null;
 
 // Expose portfolio globally for Ai.js to access
 window.portfolio = portfolio;
+window.dexPortfolio = dexPortfolio;
 
 
 console.log("Portfolio initialized:", portfolio);
@@ -45,8 +46,9 @@ function debounce(func, wait) {
 function getPortfolioSummaryText(prices) {
     let summary = "Current Portfolio Summary:\n";
     let totalValue = 0;
+    const allHoldings = [...portfolio, ...dexPortfolio];
 
-    portfolio.forEach(holding => {
+    allHoldings.forEach(holding => {
         const price = prices[holding.symbol] || holding.purchasePrice;
         const value = holding.amount * price;
         totalValue += value;
@@ -64,30 +66,6 @@ function getPortfolioSummaryText(prices) {
     summary += `Total Portfolio Value: ${formatCurrency(totalValue)}\n`;
 
     return summary;
-}
-
-function populateCurrencySelector() {
-    const selector = document.getElementById('currency-selector');
-    const selectorMobile = document.getElementById('currency-selector-mobile');
-    const populate = (sel) => {
-        sel.innerHTML = '';
-        const priorityCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
-        priorityCurrencies.forEach(curr => {
-            if (availableCurrencies.includes(curr)) {
-                sel.innerHTML += `<option value="${curr}">${curr} (${currencySymbols[curr] || curr})</option>`;
-            }
-        });
-        availableCurrencies.forEach(curr => {
-            if (!priorityCurrencies.includes(curr)) {
-                sel.innerHTML += `<option value="${curr}">${curr}</option>`;
-            }
-        });
-        sel.value = availableCurrencies.includes(selectedCurrency) ? selectedCurrency : 'USD';
-    };
-    if (selector) populate(selector);
-    if (selectorMobile) populate(selectorMobile);
-    selectedCurrency = selector ? selector.value : (selectorMobile ? selectorMobile.value : 'USD');
-    console.log("Currency selector populated, selected:", selectedCurrency);
 }
 
 async function fetchTradingPairs() {
@@ -174,6 +152,7 @@ async function fetchPrices() {
         }, {});
         window.currentPrices = prices; // Expose for AI client
         await updatePortfolio(prices);
+        await updateDexPortfolio(prices);
         await updateSummary(prices);
         console.log("Prices fetched successfully");
     } catch (error) {
@@ -263,6 +242,57 @@ async function updatePortfolio(prices) {
     console.log("Portfolio updated");
 }
 
+async function updateDexPortfolio(prices) {
+    console.log("Updating DEX portfolio...");
+    const tbody = document.getElementById('dex-portfolio-body');
+    tbody.innerHTML = '';
+
+    for (const [index, holding] of dexPortfolio.entries()) {
+        const price = prices[holding.symbol] || holding.purchasePrice;
+        const yesterdayPrice = await fetchYesterdayPrice(holding.symbol);
+        const value = holding.amount * price;
+        const profitLossPercent = price !== holding.purchasePrice
+            ? ((price - holding.purchasePrice) / holding.purchasePrice * 100).toFixed(2)
+            : 0;
+        const profitLossAmount = (price - holding.purchasePrice) * holding.amount;
+        const change24h = (yesterdayPrice && price !== holding.purchasePrice)
+            ? ((price - yesterdayPrice) / yesterdayPrice * 100).toFixed(2)
+            : 0;
+
+        const coinImg = coinImages[holding.symbol];
+        const imgHtml = coinImg
+            ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.outerHTML='<div class=coin-logo-fallback>${holding.ticker.charAt(0)}</div>'">`
+            : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="py-4 px-4">
+                <div class="flex items-center">
+                    <div class="mr-3">
+                        ${imgHtml}
+                    </div>
+                    <div>
+                        <div class="font-semibold">${holding.name}</div>
+                        <div class="text-gray-500 text-sm">${holding.ticker}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="py-4 px-4 text-right">${holding.amount.toFixed(8)}</td>
+            <td class="py-4 px-4 text-right">${formatCurrency(price)}</td>
+            <td class="py-4 px-4 text-right font-medium">${formatCurrency(value)}</td>
+            <td class="py-4 px-4 text-right ${change24h >= 0 ? 'text-accent' : 'text-red-400'}">${change24h >= 0 ? '+' : ''}${change24h}%</td>
+            <td class="py-4 px-4 text-right">
+                <span class="${profitLossPercent >= 0 ? 'text-accent' : 'text-red-400'}"
+                      title="${formatCurrency(profitLossAmount)}">
+                    ${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent}%
+                </span>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+    console.log("DEX Portfolio updated");
+}
+
+
 async function updateSummary(prices) {
     console.log("Updating summary...");
     let totalValue = 0;
@@ -273,8 +303,9 @@ async function updateSummary(prices) {
     let bestChange = 0;
     let worstCoin = '--';
     let worstChange = 0;
+    const allHoldings = [...portfolio, ...dexPortfolio];
 
-    for (const holding of portfolio) {
+    for (const holding of allHoldings) {
         const price = prices[holding.symbol] || holding.purchasePrice;
         const yesterdayPrice = await fetchYesterdayPrice(holding.symbol);
         const value = holding.amount * price;
@@ -330,7 +361,7 @@ async function updateSummary(prices) {
 
     // Total Assets count
     const totalHoldingsEl = document.getElementById('total-holdings');
-    if (totalHoldingsEl) totalHoldingsEl.textContent = portfolio.length;
+    if (totalHoldingsEl) totalHoldingsEl.textContent = allHoldings.length;
 
     console.log("Summary updated");
 }
@@ -338,6 +369,7 @@ async function updateSummary(prices) {
 async function initPerformanceChart(timeframe = '1M') {
     console.log("Initializing performance chart with timeframe:", timeframe);
     let interval, limit;
+    const allHoldings = [...portfolio, ...dexPortfolio];
     switch (timeframe) {
         case '1D': interval = '5m'; limit = 288; break;
         case '7D': interval = '1h'; limit = 168; break;
@@ -351,7 +383,7 @@ async function initPerformanceChart(timeframe = '1M') {
     try {
         const totalValues = [];
         const labels = [];
-        for (const holding of portfolio) {
+        for (const holding of allHoldings) {
             const response = await axios.get('https://api.binance.com/api/v3/klines', {
                 params: { symbol: holding.symbol, interval, limit }
             });
@@ -588,9 +620,23 @@ async function fetchCryptoNews() {
             </div>
         `).join('');
 
-        const response = await axios.get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN');
-        console.log("Crypto News: ", response);
-        const articles = response.data.Data.slice(0, 12);
+        let articles;
+        try {
+            const response = await axios.get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN', { timeout: 8000 });
+            articles = response.data.Data.slice(0, 12);
+        } catch (primaryError) {
+            console.warn('CryptoCompare news unavailable; using CoinStats fallback.', primaryError.message);
+            const fallback = await axios.get('https://api.coinstats.app/public/v1/news?limit=12', { timeout: 8000 });
+            articles = (fallback.data.news || []).map(item => ({
+                title: item.title,
+                body: item.description || item.content || '',
+                url: item.link || item.url,
+                imageurl: item.imgURL || item.image || '',
+                source: item.source || 'CoinStats',
+                categories: item.type || 'Market',
+                published_on: Math.floor(new Date(item.feedDate || item.publishedAt || Date.now()).getTime() / 1000)
+            }));
+        }
         newsFeed.innerHTML = '';
 
         articles.forEach(article => {
@@ -844,7 +890,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const settingsModal = document.getElementById('settings-modal');
     const settingsToggle = document.getElementById('settings-toggle');
     const settingsClose = document.getElementById('settings-close');
-    const saveSettingsvBtn = document.getElementById('save-settings');
+    const saveSettingsBtn = document.getElementById('save-settings');
     const chatSettingsBtn = document.getElementById('chat-settings-btn'); // From Chat Modal
 
     function openSettings() {
@@ -857,7 +903,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     settingsToggle?.addEventListener('click', openSettings);
     settingsClose?.addEventListener('click', closeSettings);
-    saveSettingsvBtn?.addEventListener('click', () => {
+    saveSettingsBtn?.addEventListener('click', () => {
         // Delegate saving to AI client
         if (window.aiClient) {
             window.aiClient.saveSettings();
@@ -912,17 +958,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    const updateCurrency = async () => {
-        selectedCurrency = document.getElementById('currency-selector')?.value || document.getElementById('currency-selector-mobile')?.value || 'USD';
-        console.log("Currency changed to:", selectedCurrency);
-        await fetchPrices();
-        await initPerformanceChart();
-        updatePurchasePrice();
-    };
-
-    document.getElementById('currency-selector')?.addEventListener('change', updateCurrency);
-    document.getElementById('currency-selector-mobile')?.addEventListener('change', updateCurrency);
-
     document.getElementById('add-holding-form')?.addEventListener('submit', async function (event) {
         event.preventDefault();
         const symbol = document.getElementById('coin-name').value;
@@ -960,7 +995,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('export-csv')?.addEventListener('click', function () {
         console.log("Exporting portfolio...");
         const csv = ['Symbol,Name,Ticker,Amount,PurchasePrice'];
-        portfolio.forEach(holding => {
+        const allHoldings = [...portfolio, ...dexPortfolio];
+        allHoldings.forEach(holding => {
             csv.push(`${holding.symbol},${holding.name},${holding.ticker},${holding.amount.toFixed(8)},${holding.purchasePrice.toFixed(2)}`);
         });
         const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
@@ -1009,39 +1045,174 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // CSV Import Logic
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('csvFile');
+    const csvFilterModal = document.getElementById('csv-filter-modal');
+    const csvFilterClose = document.getElementById('csv-filter-close');
+    const importCsvBtn = document.getElementById('import-csv-btn');
+    const csvVerificationModal = document.getElementById('csv-verification-modal');
+    const csvVerificationClose = document.getElementById('csv-verification-close');
+    const verificationTableBody = document.getElementById('verification-table-body');
+    const cancelImportBtn = document.getElementById('cancel-import-btn');
+    const confirmImportBtn = document.getElementById('confirm-import-btn');
+
+    let csvFileToProcess = null;
+    let transactionsToImport = [];
+
+
     dropzone?.addEventListener('click', () => fileInput.click());
-    fileInput?.addEventListener('change', async function () {
+    fileInput?.addEventListener('change', function () {
         if (this.files.length > 0) {
-            const fileName = this.files[0].name;
-            dropzone.innerHTML = `
-                <i class="fas fa-file-csv text-accent text-3xl mb-4"></i>
-                <p class="text-gray-300 mb-2">${fileName}</p>
-                <p class="text-gray-600 text-sm">Click to select another file</p>
-            `;
-            const reader = new FileReader();
-            reader.onload = async function (e) {
-                const text = e.target.result;
-                const lines = text.split('\n').slice(1).filter(line => line.trim());
-                for (const line of lines) {
-                    const [symbol, name, ticker, amount, purchasePrice] = line.split(',').map(s => s.trim());
-                    if (symbol && amount && purchasePrice) {
-                        portfolio.push({ symbol, name, ticker, amount: parseFloat(amount), purchasePrice: parseFloat(purchasePrice) });
-                    }
-                }
-                await fetchPrices();
-                await initPerformanceChart();
-                dropzone.innerHTML = `
-                    <i class="fas fa-check-circle text-accent text-3xl mb-4"></i>
-                    <p class="text-gray-300 mb-2">Processed Successfully!</p>
-                    <p class="text-gray-600 text-sm">${lines.length} holdings imported</p>
-                `;
-                console.log(`${lines.length} holdings imported`);
-            };
-            reader.readAsText(this.files[0]);
+            csvFileToProcess = this.files[0];
+            csvFilterModal.classList.remove('hidden');
         }
     });
+
+    csvFilterClose?.addEventListener('click', () => {
+        csvFilterModal.classList.add('hidden');
+        csvFileToProcess = null;
+    });
+
+    importCsvBtn?.addEventListener('click', () => {
+        if (csvFileToProcess) {
+            prepareCsvVerification(csvFileToProcess);
+            csvFileToProcess = null;
+        }
+    });
+
+    csvVerificationClose?.addEventListener('click', () => {
+        csvVerificationModal.classList.add('hidden');
+        transactionsToImport = [];
+    });
+
+    cancelImportBtn?.addEventListener('click', () => {
+        csvVerificationModal.classList.add('hidden');
+        transactionsToImport = [];
+    });
+
+    confirmImportBtn?.addEventListener('click', async () => {
+        const rows = verificationTableBody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            const category = row.querySelector('.category-select').value;
+            if (category !== 'omit') {
+                const tx = transactionsToImport[index];
+                const { symbol, name, ticker, amount, purchasePrice } = tx;
+                const existingHolding = dexPortfolio.find(h => h.symbol === symbol);
+
+                if (category === 'buy') {
+                    if (existingHolding) {
+                        const totalAmount = existingHolding.amount + amount;
+                        const avgPrice = ((existingHolding.amount * existingHolding.purchasePrice) + (amount * purchasePrice)) / totalAmount;
+                        existingHolding.amount = totalAmount;
+                        existingHolding.purchasePrice = avgPrice;
+                    } else {
+                        dexPortfolio.push({ symbol, name, ticker, amount, purchasePrice });
+                    }
+                } else if (category === 'sell') {
+                    if (existingHolding) {
+                        existingHolding.amount -= amount;
+                        if (existingHolding.amount <= 0) {
+                            dexPortfolio = dexPortfolio.filter(h => h.symbol !== symbol);
+                            window.dexPortfolio = dexPortfolio;
+                        }
+                    }
+                }
+            }
+        });
+
+        await fetchPrices();
+        await initPerformanceChart();
+        csvVerificationModal.classList.add('hidden');
+        transactionsToImport = [];
+        dropzone.innerHTML = `
+            <i class="fas fa-check-circle text-accent text-3xl mb-4"></i>
+            <p class="text-gray-300 mb-2">Processed Successfully!</p>
+            <p class="text-gray-600 text-sm">${rows.length} transactions imported</p>
+        `;
+    });
+
+    async function prepareCsvVerification(file) {
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+            const text = e.target.result;
+            const lines = text.split('\n').slice(1).filter(line => line.trim());
+            
+            transactionsToImport = [];
+            verificationTableBody.innerHTML = '';
+
+            const filters = {
+                buy: document.getElementById('filter-buy').checked,
+                sell: document.getElementById('filter-sell').checked,
+                in: document.getElementById('filter-in').checked,
+                out: document.getElementById('filter-out').checked
+            };
+
+            for (const line of lines) {
+                const parts = line.split(',').map(s => s.trim().replace(/"/g, ''));
+                const [txHash, block, ts, dt, from, to, contract, valueIn, valueOut, currentVal, txFee, txFeeUsd, historicalPrice, status, err, method] = parts;
+                
+                const valueInNum = parseFloat(valueIn);
+                const valueOutNum = parseFloat(valueOut);
+                const historicalPriceNum = parseFloat(historicalPrice);
+
+                let type = 'omit';
+                if (method.toLowerCase().includes('purchase') || method.toLowerCase().includes('mint') && valueInNum > 0) {
+                    type = 'buy';
+                } else if (method.toLowerCase().includes('transfer') && valueOutNum > 0) {
+                    type = 'sell';
+                } else if (method.toLowerCase().includes('transfer') && valueInNum > 0) {
+                    type = 'buy';
+                } else if (method.toLowerCase().includes('deposit') && valueInNum > 0) {
+                    type = 'buy';
+                } else if (method.toLowerCase().includes('withdraw') && valueOutNum > 0) {
+                    type = 'sell';
+                } else if (valueOutNum > 0) {
+                    type = 'sell';
+                }
+
+
+                if (filters[type] || (type === 'omit' && (filters.buy || filters.sell))) {
+                    const amount = (valueInNum > 0) ? valueInNum : valueOutNum;
+                    if (amount > 0) {
+                        const symbol = "ETHUSDT"; // Assuming ETH for now from the CSV
+                        const name = "Ethereum";
+                        const ticker = "ETH";
+                        transactionsToImport.push({
+                            date: dt.split(' ')[0],
+                            type,
+                            symbol,
+                            name,
+                            ticker,
+                            amount,
+                            purchasePrice: historicalPriceNum
+                        });
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="py-2 px-3">${dt.split(' ')[0]}</td>
+                            <td class="py-2 px-3 capitalize">${method}</td>
+                            <td class="py-2 px-3">${name}</td>
+                            <td class="py-2 px-3 text-right">${amount.toFixed(6)}</td>
+                            <td class="py-2 px-3 text-right">${formatCurrency(historicalPriceNum)}</td>
+                            <td class="py-2 px-3 text-right">
+                                <select class="category-select bg-gray-700 border border-gray-600 rounded text-white text-xs py-1 px-2 focus:outline-none">
+                                    <option value="buy" ${type === 'buy' || type === 'in' ? 'selected' : ''}>Buy</option>
+                                    <option value="sell" ${type === 'sell' || type === 'out' ? 'selected' : ''}>Sell</option>
+                                    <option value="omit" ${type === 'omit' ? 'selected' : ''}>Omit</option>
+                                </select>
+                            </td>
+                        `;
+                        verificationTableBody.appendChild(row);
+                    }
+                }
+            }
+            csvFilterModal.classList.add('hidden');
+            csvVerificationModal.classList.remove('hidden');
+        };
+        reader.readAsText(file);
+    }
+
 
     document.querySelectorAll('.timeframe-btn').forEach(btn => {
         btn.addEventListener('click', function () {

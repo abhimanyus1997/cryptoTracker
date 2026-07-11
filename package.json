@@ -1,0 +1,15 @@
+{
+  "name": "cryptotracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A privacy-focused crypto portfolio dashboard with local WebGPU RAG.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7"
+  }
+}

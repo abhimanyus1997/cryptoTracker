@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cryptotracker.abhimanyu.fyi/sitemap.xml
