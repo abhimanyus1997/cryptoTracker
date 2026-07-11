@@ -100,11 +100,13 @@ class AIClient {
             model: document.getElementById('model-selection'),
             load: document.getElementById('download'),
             status: document.getElementById('download-status'),
+            progress: document.getElementById('download-progress'),
+            progressBar: document.getElementById('download-progress-bar'),
             modal: document.getElementById('ai-chat-modal'),
             box: document.getElementById('chat-box'),
             stats: document.getElementById('chat-stats'),
             input: document.getElementById('user-input'),
-            send: document.getElementById('send')
+            send: document.getElementById('send'), attach: document.getElementById('attach-image'), imageInput: document.getElementById('image-input'), attachmentStatus: document.getElementById('attachment-status')
         };
         if (!this.ui.provider || !this.ui.box || !this.ui.send) return;
         this.ui.provider.value = this.provider;
@@ -120,6 +122,9 @@ class AIClient {
         this.ui.input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); this.sendMessage(); }
         });
+        this.attachment = null;
+        this.ui.attach?.addEventListener('click', () => this.ui.imageInput.click());
+        this.ui.imageInput?.addEventListener('change', () => this.readAttachment());
         this.ui.panelToggle?.addEventListener('click', () => this.ui.panel.classList.toggle('open'));
         document.getElementById('ai-chat-toggle')?.addEventListener('click', () => this.openModal());
         document.getElementById('ai-chat-toggle-mobile')?.addEventListener('click', () => this.openModal());
@@ -156,9 +161,17 @@ class AIClient {
             const preferred = models.find(model => model.model_id === this.webllmModel) || models.find(model => /Qwen2.*0\.5B.*Instruct.*q4f16/i.test(model.model_id)) || models[0];
             this.webllmModel = preferred.model_id;
             this.ui.model.value = this.webllmModel;
-            this.ui.model.onchange = (event) => { this.webllmModel = event.target.value; localStorage.setItem(AI_CONFIG.keys.webllmModel, this.webllmModel); };
+            this.ui.model.onchange = (event) => { this.webllmModel = event.target.value; localStorage.setItem(AI_CONFIG.keys.webllmModel, this.webllmModel); this.updateAttachmentSupport(); };
+            this.updateAttachmentSupport();
         } catch (error) { this.setStatus(`WebLLM is unavailable: ${error.message}`); }
     }
+
+    updateAttachmentSupport() {
+        const vision = this.provider === 'webllm' && /vision|llava|vlm|qwen.*vl/i.test(this.webllmModel);
+        if (this.ui.attach) this.ui.attach.disabled = !vision;
+        if (this.ui.attachmentStatus) this.ui.attachmentStatus.textContent = vision ? 'Vision model ready: attach a PNG, JPEG, or WebP image.' : 'Select a WebLLM vision model to attach images. LiteRT Web is text-only.';
+    }
+    readAttachment() { const file = this.ui.imageInput.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { this.attachment = reader.result; this.ui.attachmentStatus.textContent = `Attached: ${file.name}`; }; reader.readAsDataURL(file); }
 
     async initializeWebLLM() {
         if (!navigator.gpu) { this.setStatus('WebLLM also requires WebGPU. Use Gemini or Groq on this device.'); return; }
@@ -167,16 +180,25 @@ class AIClient {
         this.ui.load.disabled = true;
         this.setStatus(`Loading ${this.webllmModel}. The first download can be large.`);
         try {
-            this.webllmEngine = new this.webllm.MLCEngine({ initProgressCallback: (report) => this.setStatus(report.text) });
+            this.webllmEngine = new this.webllm.MLCEngine({ initProgressCallback: (report) => this.setStatus(report.text, report.progress) });
             await this.webllmEngine.reload(this.webllmModel, { temperature: 0.5, top_p: 0.9 });
             this.setStatus('WebLLM is ready. Prompts and retrieved portfolio context stay in this browser.');
         } catch (error) { this.setStatus(`Could not load WebLLM: ${error.message}`); }
         finally { this.ui.load.disabled = false; this.updateUIState(); }
     }
 
-    setStatus(message) {
+    setStatus(message, progress = null) {
         this.ui.status.classList.remove('hidden');
         this.ui.status.textContent = message;
+        const indeterminate = progress === 'indeterminate';
+        const validProgress = indeterminate || (typeof progress === 'number' && Number.isFinite(progress));
+        this.ui.progress?.classList.toggle('hidden', !validProgress);
+        this.ui.progress?.classList.toggle('is-indeterminate', indeterminate);
+        if (validProgress && this.ui.progressBar) {
+            const percent = Math.max(0, Math.min(100, Math.round(progress * 100)));
+            this.ui.progress.setAttribute('aria-valuenow', String(percent));
+            this.ui.progressBar.style.width = `${percent}%`;
+        }
     }
 
     async initializeLocalModel() {
@@ -186,7 +208,7 @@ class AIClient {
         }
         const model = LOCAL_MODELS[this.localModel];
         this.ui.load.disabled = true;
-        this.setStatus(`Loading ${model.name}. First use downloads ${model.download}; this may take a while.`);
+        this.setStatus(`Loading ${model.name}. First use downloads ${model.download}; this may take a while.`, 'indeterminate');
         try {
             if (this.engine) await this.engine.delete();
             this.engine = null;
@@ -266,7 +288,8 @@ class AIClient {
     async callWebLLM(query, context, bubble) {
         if (!this.webllmEngine) throw new Error('Load a WebLLM model before sending a message.');
         let response = '';
-        const stream = await this.webllmEngine.chat.completions.create({ stream: true, messages: [{ role: 'system', content: this.systemPrompt(context) }, { role: 'user', content: query }] });
+        const content = this.attachment ? [{ type: 'text', text: query }, { type: 'image_url', image_url: { url: this.attachment } }] : query;
+        const stream = await this.webllmEngine.chat.completions.create({ stream: true, messages: [{ role: 'system', content: this.systemPrompt(context) }, { role: 'user', content }] });
         for await (const chunk of stream) { const token = chunk.choices?.[0]?.delta?.content || ''; if (token) { response += token; bubble.innerHTML = this.render(response); } }
         return response || 'I could not generate a response.';
     }

@@ -1204,6 +1204,14 @@ h1,h2,h3,.text-2xl,.text-xl { font-family:'Manrope',system-ui,sans-serif; font-w
 @keyframes connection-pulse { 0% { box-shadow:0 0 0 0 rgba(183,248,51,.5); } 70%,100% { box-shadow:0 0 0 7px rgba(183,248,51,0); } }
 @media (prefers-reduced-motion: reduce) { .brand-orbit,.card.fade-in,.bot-console::after,.wallet-connect.is-connected::before { animation:none !important; } }
 
+img.brand-orbit { display:block; flex:0 0 auto; width:2rem; height:2rem; object-fit:contain; padding:2px; border-radius:9px; background:radial-gradient(circle,rgba(183,248,51,.22),rgba(8,10,8,.9) 70%); border:1px solid rgba(183,248,51,.24); }
+.download-progress { height:6px; overflow:hidden; margin-top:.5rem; border:1px solid rgba(183,248,51,.18); border-radius:999px; background:#070907; }
+.download-progress-bar { width:0; height:100%; background:linear-gradient(90deg,#82b814,#b7f833,#e8ffae); box-shadow:0 0 10px rgba(183,248,51,.65); transition:width .2s ease; }
+.download-progress.is-indeterminate .download-progress-bar { width:42%; animation:download-scan 1.25s ease-in-out infinite; }
+@keyframes download-scan { from { transform:translateX(-120%); } to { transform:translateX(260%); } }
+.chat-attach-btn { color:#8b9785; padding:.55rem; background:transparent; border:0; }.chat-attach-btn:not(:disabled):hover { color:var(--acid); }.chat-attach-btn:disabled { opacity:.35; cursor:not-allowed; }
+@media (max-width:768px) { .branding .brand-orbit { width:2.15rem; height:2.15rem; padding:3px; } }
+
 [data-theme="light"] .input-adaptive {
     background-color: var(--bg-input);
     color: var(--text-main);

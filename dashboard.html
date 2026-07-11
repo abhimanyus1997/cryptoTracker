@@ -469,7 +469,10 @@
                             class="px-3 py-1 bg-accent text-gray-900 text-xs font-bold rounded">Load</button>
                     </div>
                     <p id="download-status" class="text-xs text-accent mt-2 hidden"></p>
-                    <p class="text-[11px] text-gray-500 mt-1">Choose LiteRT Gemma or Qwen 3.5 LiteRT beta. Models run on your device; no API key is needed.</p>
+                    <div id="download-progress" class="download-progress hidden" role="progressbar" aria-label="AI model download progress" aria-valuemin="0" aria-valuemax="100">
+                        <div id="download-progress-bar" class="download-progress-bar"></div>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-1">Choose WebLLM for smaller mobile-ready models, or LiteRT for supported WebGPU models. No API key is needed.</p>
                 </div>
             </div>
 
@@ -493,11 +496,14 @@
             <!-- Input Area -->
             <div class="chat-input-area">
                 <div class="chat-input-wrapper">
+                    <button id="attach-image" class="chat-attach-btn" title="Attach image for vision model" disabled><i class="fas fa-image"></i></button>
+                    <input id="image-input" type="file" accept="image/png,image/jpeg,image/webp" class="hidden">
                     <input type="text" id="user-input" placeholder="Ask anything about crypto..." autocomplete="off">
                     <button id="send" class="chat-send-btn" title="Send">
                         <i class="fas fa-arrow-up"></i>
                     </button>
                 </div>
+                <p id="attachment-status" class="text-[11px] text-gray-500 mt-2">Image attachments are enabled when a vision model is selected.</p>
             </div>
         </div>
     </div>
