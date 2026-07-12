@@ -88,9 +88,14 @@ async function fetchTradingPairs() {
                     }
                 });
             }
-            // Store CoinGecko image
+            // Store CoinGecko image or generate unique icon URL
             if (coin.image) {
                 coinImages[coin.symbol.toUpperCase() + 'USDT'] = coin.image;
+            } else {
+                // Use our token icon generator API for tokens without images
+                const symbol = coin.symbol.toUpperCase() + 'USDT';
+                const contractInfo = tokenContracts.get(symbol);
+                coinImages[symbol] = `/api/token-icon?symbol=${coin.symbol}&contract=${contractInfo?.address || ''}&name=${encodeURIComponent(coin.name)}`;
             }
         });
         
