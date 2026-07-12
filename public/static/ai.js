@@ -407,12 +407,14 @@ class AIClient {
             ? 'https://cryptotracker.abhimanyu.fyi'
             : '';
         const { model } = AI_CONFIG.litellm;
+        
+        // Use non-streaming mode for simplicity
         const response = await fetch(`${host}/api/zerion?litellm=true`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model,
-                stream: true,
+                stream: false, // Disable SSE streaming
                 messages: [
                     { role: 'system', content: this.systemPrompt(context) },
                     { role: 'user', content: query }
@@ -421,45 +423,32 @@ class AIClient {
                 temperature: 0.7
             })
         });
+        
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.error || `LiteLLM proxy error: ${response.status}`);
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let fullText = '';
+        const data = await response.json();
+        const fullText = data.choices?.[0]?.message?.content || 'No response.';
+        
+        // Simulate typing effect
+        await this.simulateTyping(fullText, bubble);
+        return fullText;
+    }
+    
+    async simulateTyping(text, bubble) {
         bubble.innerHTML = '';
-
-        try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-                for (const line of lines) {
-                    const cleaned = line.trim();
-                    if (!cleaned || cleaned === 'data: [DONE]') continue;
-                    if (cleaned.startsWith('data: ')) {
-                        try {
-                            const parsed = JSON.parse(cleaned.substring(6));
-                            const text = parsed.choices?.[0]?.delta?.content || '';
-                            if (text) {
-                                fullText += text;
-                                bubble.innerHTML = this.render(fullText);
-                                this.ui.box.scrollTop = this.ui.box.scrollHeight;
-                            }
-                        } catch (e) {
-                            // Non-json SSE lines are ignored
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.error('Error reading stream', e);
+        const words = text.split(' ');
+        
+        for (let i = 0; i < words.length; i++) {
+            bubble.innerHTML = this.render(words.slice(0, i + 1).join(' '));
+            this.ui.box.scrollTop = this.ui.box.scrollHeight;
+            
+            // Natural typing speed: 20-50ms per word
+            const delay = Math.random() * 30 + 20;
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
-
-        return fullText || 'No response generated.';
     }
 
     saveSettings() {
