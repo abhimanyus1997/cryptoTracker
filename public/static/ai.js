@@ -57,8 +57,15 @@ class LocalRetriever {
         const total = holdings.reduce((sum, h) => sum + h.amount * (prices[h.symbol] || h.purchasePrice || 0), 0);
         docs.push({
             title: 'Portfolio summary',
-            text: `Portfolio has ${holdings.length} holdings with an estimated current value of $${total.toFixed(2)}. Prices are fetched from Binance when available.`
+            text: `Portfolio has ${holdings.length} tracked holdings with an estimated current value of $${total.toFixed(2)}. Prices are fetched from Binance when available.`
         });
+        const walletSummary = window.walletPortfolioSummary;
+        if (walletSummary && Number.isFinite(Number(walletSummary.totalValue))) {
+            docs.push({
+                title: 'Connected wallet portfolio value',
+                text: `Connected wallet currently holds approximately $${Number(walletSummary.totalValue).toFixed(2)} across ${walletSummary.holdingCount || 'multiple'} assets. This value comes from the connected wallet balance feed.`
+            });
+        }
         docs.push({
             title: 'CryptoTracker scope',
             text: 'CryptoTracker is a client-side crypto portfolio dashboard. Forecasts are technical projections only and are not financial advice. The assistant should distinguish live dashboard data from general knowledge.'
@@ -80,6 +87,10 @@ class LocalRetriever {
 
     context(query) {
         const matches = this.search(query);
+        const walletValueDoc = this.documents().find(doc => doc.title === 'Connected wallet portfolio value');
+        if (walletValueDoc && !matches.some(doc => doc.title === walletValueDoc.title)) {
+            matches.push(walletValueDoc);
+        }
         return matches.map((doc, index) => `[${index + 1}] ${doc.title}\n${doc.text}`).join('\n\n');
     }
 }
