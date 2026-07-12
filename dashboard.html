@@ -59,25 +59,24 @@
                 <img src="./assets/icons/cryptotracker-orbit.png" alt="" class="brand-orbit w-8 h-8 mr-2" width="32" height="32">
                 <span class="font-bold text-lg">CryptoTracker</span>
             </div>
-            <button id="menu-toggle" class="text-white p-2 focus:outline-none">
-                <i class="fas fa-bars text-2xl"></i>
+            <button id="menu-toggle" class="menu-toggle text-white p-2 focus:outline-none" type="button" aria-label="Open navigation">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
             </button>
         </header>
 
         <!-- Desktop Header / Toolbar -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-heading">Dashboard</h1>
+                <h1 class="text-2xl font-bold text-heading section-heading">Dashboard</h1>
                 <p class="text-muted text-sm">Welcome back to your portfolio overview</p>
             </div>
             <div class="flex gap-3">
-                <button id="connect-wallet" class="wallet-connect" type="button"><i class="fas fa-fingerprint"></i><span>Connect wallet</span></button>
                 <button id="refresh-data"
                     class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center">
                     <i class="fas fa-rotate mr-2"></i>Refresh
                 </button>
-                <button class="px-4 py-2 rounded-lg btn-secondary font-medium flex items-center">
-                    <i class="fas fa-user-circle mr-2"></i>Account
+                <button id="connect-wallet" class="wallet-connect" type="button">
+                    <i class="fas fa-fingerprint"></i><span>Connect wallet</span>
                 </button>
             </div>
         </div>
@@ -90,35 +89,11 @@
                         <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">Net Worth</p>
                         <h3 class="text-2xl font-bold text-white mt-1" id="portfolio-value">$0.00</h3>
                     </div>
-                    <div class="bg-gray-700/50 rounded-lg p-2">
+                    <div class="metric-icon metric-icon-value">
                         <i class="fa-solid fa-wave-square text-accent text-lg"></i>
                     </div>
                 </div>
 
-                <section class="card bot-console fade-in" aria-labelledby="bot-title">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <div><p class="eyebrow">Automation lab</p><h2 id="bot-title" class="text-lg font-bold text-white">Trading Bot</h2></div>
-                        <span class="bot-status">Paper mode</span>
-                    </div>
-                    <p class="text-muted text-sm mb-4">Test a rules-based strategy against live market data. This workspace never submits trades or requests wallet signatures.</p>
-                    <div class="bot-metrics"><div><span>Strategy</span><strong>Trend guard</strong></div><div><span>Signal</span><strong class="text-accent">Watching ETH</strong></div></div>
-                    <button id="bot-preview" class="bot-preview" type="button"><i class="fas fa-flask"></i> Preview paper strategy</button>
-                    <p id="bot-output" class="bot-output" aria-live="polite">No paper orders generated.</p>
-                </section>
-
-                <section class="card wallet-profile fade-in" aria-labelledby="wallet-title">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <div><p class="eyebrow">Non-custodial viewer</p><h2 id="wallet-title" class="text-lg font-bold text-white">Wallet profile</h2></div>
-                        <span id="wallet-state" class="bot-status">Not connected</span>
-                    </div>
-                    <div class="wallet-grid">
-                        <div><span>Account</span><strong id="wallet-address">—</strong></div>
-                        <div><span>Network</span><strong id="wallet-network">—</strong></div>
-                        <div><span>Native balance</span><strong id="wallet-balance">—</strong></div>
-                        <div><span>Permissions</span><strong id="wallet-permissions">Read-only</strong></div>
-                    </div>
-                    <p class="bot-output">Only public account data you approve is read. Private keys, seed phrases, and transaction signing are never requested.</p>
-                </section>
                 <div class="flex items-center text-sm">
                     <p id="portfolio-change"
                         class="text-accent font-medium flex items-center bg-accent/10 px-2 py-0.5 rounded">
@@ -134,7 +109,7 @@
                         <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">Total Assets</p>
                         <h3 class="text-2xl font-bold text-white mt-1" id="total-holdings">0</h3>
                     </div>
-                    <div class="bg-gray-700/50 rounded-lg p-2">
+                    <div class="metric-icon metric-icon-assets">
                         <i class="fa-solid fa-cubes-stacked text-blue-400 text-lg"></i>
                     </div>
                 </div>
@@ -149,7 +124,7 @@
                         <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">Best Performer</p>
                         <h3 class="text-xl font-bold text-white mt-1 truncate" id="best-performer">--</h3>
                     </div>
-                    <div class="bg-gray-700/50 rounded-lg p-2">
+                    <div class="metric-icon metric-icon-trend">
                         <i class="fa-solid fa-arrow-trend-up text-green-400 text-lg"></i>
                     </div>
                 </div>
@@ -164,7 +139,7 @@
                         <p class="text-gray-400 text-xs uppercase font-semibold tracking-wider">24h Profit/Loss</p>
                         <h3 class="text-2xl font-bold text-white mt-1" id="change-value">$0.00</h3>
                     </div>
-                    <div class="bg-gray-700/50 rounded-lg p-2">
+                    <div class="metric-icon metric-icon-pnl">
                         <i class="fa-solid fa-sack-dollar text-yellow-400 text-lg"></i>
                     </div>
                 </div>
@@ -342,6 +317,52 @@
                     </div>
                 </div>
 
+                <section class="card bot-console fade-in" aria-labelledby="bot-title">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div><p class="eyebrow">Automation lab</p><h2 id="bot-title" class="text-lg font-bold text-white">Trading Bot</h2></div>
+                        <span class="bot-status">Paper mode</span>
+                    </div>
+                    <p class="text-muted text-sm mb-4">Test a rules-based strategy against live market data. This workspace never submits trades or requests wallet signatures.</p>
+                    <div class="bot-metrics"><div><span>Strategy</span><strong>Trend guard</strong></div><div><span>Signal</span><strong class="text-accent">Watching ETH</strong></div></div>
+                    <button id="bot-preview" class="bot-preview" type="button"><i class="fas fa-flask"></i> Preview paper strategy</button>
+                    <p id="bot-output" class="bot-output" aria-live="polite">No paper orders generated.</p>
+                </section>
+
+                <section class="card wallet-profile fade-in" aria-labelledby="wallet-title">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div><h2 id="wallet-title" class="text-lg font-bold text-white">Wallet Profile</h2></div>
+                        <span id="wallet-state" class="bot-status">Not connected</span>
+                    </div>
+                    <div class="wallet-grid">
+                        <div><span>Account</span><strong id="wallet-address">—</strong></div>
+                        <div><span>Network</span><strong id="wallet-network">—</strong></div>
+                        <div><span>Native balance</span><strong id="wallet-balance">—</strong></div>
+                        <div><span>Permissions</span><strong id="wallet-permissions">Read-only</strong></div>
+                    </div>
+
+                    <button id="account-details-btn" class="wallet-scan mt-3" type="button" style="border-style:solid;">
+                        <i class="fas fa-chevron-down"></i> Account Details
+                    </button>
+                    <div id="wallet-details-panel" class="hidden" style="margin-top:.6rem; padding:.75rem; border:1px solid var(--line-soft); border-radius:8px; background:rgba(0,0,0,.15); font-size:.72rem; font-family:'DM Mono',monospace;">
+                        <div style="display:grid; gap:.5rem;">
+                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Full Address</span><strong id="detail-full-address" style="color:#edf5e8; word-break:break-all;">—</strong></div>
+                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Chain ID</span><strong id="detail-chain-id" style="color:#edf5e8;">—</strong></div>
+                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Network</span><strong id="detail-network-name" style="color:#edf5e8;">—</strong></div>
+                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Native Symbol</span><strong id="detail-native-symbol" style="color:#edf5e8;">—</strong></div>
+                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Full Balance</span><strong id="detail-balance-full" style="color:#edf5e8;">—</strong></div>
+                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Permissions</span><strong id="detail-permissions" style="color:#edf5e8;">—</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="wallet-token-add">
+                        <input id="wallet-token-address" class="input-adaptive" inputmode="text" placeholder="ERC-20 contract address (0x…)" aria-label="ERC-20 contract address">
+                        <button id="add-wallet-token" class="bot-preview" type="button"><i class="fas fa-plus"></i> Add token</button>
+                    </div>
+                    <button id="scan-top-tokens" class="wallet-scan" type="button"><i class="fas fa-radar"></i> Scan top 1000 tokens across 40 chains</button>
+                    <div id="wallet-token-list" class="wallet-token-list" aria-live="polite"></div>
+                    <p class="bot-output"><i class="fas fa-shield-halved" style="margin-right:.3rem;"></i>Non-custodial viewer — only public account data you approve is read. Private keys, seed phrases, and transaction signing are never requested.</p>
+                </section>
+
                 <!-- Add Holding Form -->
                 <div class="card p-6 fade-in">
                     <h2 class="text-lg font-bold text-white mb-4">
@@ -419,7 +440,7 @@
     <!-- Floating AI Chat Button (Mobile) -->
     <button id="ai-chat-toggle-mobile"
         class="fixed bottom-6 right-6 z-40 px-4 py-4 rounded-full bg-accent text-gray-900 shadow-xl shadow-accent/20 hover:scale-110 transition md:hidden flex items-center justify-center w-14 h-14">
-        <i class="fas fa-robot text-xl"></i>
+        <svg class="ai-fab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M5.6 5.6l2.8 2.8M3 12h4M5.6 18.4l2.8-2.8M12 17v4M18.4 18.4l-2.8-2.8M17 12h4M18.4 5.6l-2.8 2.8M12 8.5l1.1 2.4 2.4 1.1-2.4 1.1-1.1 2.4-1.1-2.4-2.4-1.1 2.4-1.1z"/></svg>
     </button>
 
     <!-- AI Chat Modal -->

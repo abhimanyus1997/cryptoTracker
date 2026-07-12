@@ -1,10 +1,7 @@
 const selectedCurrency = 'USD';
 const currencySymbols = { USD: '$', INR: '₹', EUR: '€', GBP: '£' };
-let portfolio = [
-    { symbol: 'ETHUSDT', name: 'Ethereum', ticker: 'ETH', amount: 0.035, purchasePrice: 2197.02 },
-    { symbol: 'AVAXUSDT', name: 'Avalanche', ticker: 'AVAX', amount: 0.816, purchasePrice: 22.08 },
-    { symbol: 'SCRUSDT', name: 'Scroll', ticker: 'SCR', amount: 49.096, purchasePrice: 1.21 }
-];
+// Holdings are user-owned: start empty and populate from manual entry, CSV import, or a connected wallet.
+let portfolio = [];
 let dexPortfolio = [];
 let tradingPairs = [];
 const coinImages = {
@@ -74,7 +71,7 @@ async function fetchTradingPairs() {
         const response = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
         tradingPairs = response.data.symbols
             .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
-            .slice(0, 500)
+            .slice(0, 1000)
             .map(s => ({ symbol: s.symbol, name: s.baseAsset, ticker: s.baseAsset }))
             .sort((a, b) => a.name.localeCompare(b.name));
         populateCoinDropdowns();
@@ -192,6 +189,11 @@ async function updatePortfolio(prices) {
     console.log("Updating portfolio...");
     const tbody = document.getElementById('portfolio-body');
     tbody.innerHTML = '';
+
+    if (portfolio.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-10 px-4 text-center text-gray-500">Connect a wallet, import a CSV, or add your first holding to start tracking.</td></tr>';
+        return;
+    }
 
     for (const [index, holding] of portfolio.entries()) {
         const price = prices[holding.symbol] || holding.purchasePrice;
@@ -557,20 +559,27 @@ async function updatePredictionChart(symbol) {
         const history = response.data.map(k => parseFloat(k[4])); // Close prices
         const { trendFactor, lastRSI } = calculateSmartTrend(history); // Use smart trend logic
 
-        // Project next 7 days
+        // Show a real historical anchor plus a probabilistic forecast band.
         const labels = [];
-        const data = [];
         const today = new Date();
         const lastPrice = history[history.length - 1];
 
-        // Add last historical point
-        labels.push('Today');
-        data.push(lastPrice);
+        const recent = history.slice(-7);
+        const returns = history.slice(1).map((price, index) => Math.log(price / history[index]));
+        const meanReturn = returns.reduce((sum, value) => sum + value, 0) / returns.length;
+        const volatility = Math.sqrt(returns.reduce((sum, value) => sum + (value - meanReturn) ** 2, 0) / returns.length);
+        const historical = recent.map((price, index) => { labels.push(index === recent.length - 1 ? 'Today' : `${recent.length - 1 - index}D`); return price; });
+        const forecast = [...historical];
+        const lower = [...historical];
+        const upper = [...historical];
 
         let currentPrice = lastPrice;
         for (let i = 1; i <= 7; i++) {
             currentPrice = currentPrice * trendFactor;
-            data.push(currentPrice);
+            forecast.push(currentPrice);
+            const spread = 1.28 * volatility * Math.sqrt(i);
+            lower.push(currentPrice * Math.exp(-spread));
+            upper.push(currentPrice * Math.exp(spread));
 
             const futureDate = new Date(today);
             futureDate.setDate(today.getDate() + i);
@@ -580,11 +589,14 @@ async function updatePredictionChart(symbol) {
         // Update Chart
         if (predChart) {
             predChart.data.labels = labels;
-            predChart.data.datasets[0].data = data;
-            predChart.data.datasets[0].label = `Smart Forecast (${symbol})`;
+            predChart.data.datasets[0].data = historical.concat(Array(7).fill(null));
+            predChart.data.datasets[1].data = forecast;
+            predChart.data.datasets[2].data = lower;
+            predChart.data.datasets[3].data = upper;
+            predChart.data.datasets[1].label = `Forecast (${symbol})`;
             const signalColor = lastRSI > 70 ? '#ef4444' : lastRSI < 30 ? '#9ef01a' : '#3b82f6';
-            predChart.data.datasets[0].borderColor = signalColor;
-            predChart.data.datasets[0].pointBackgroundColor = signalColor;
+            predChart.data.datasets[1].borderColor = signalColor;
+            predChart.data.datasets[1].pointBackgroundColor = signalColor;
             predChart.update();
         }
 
@@ -597,7 +609,7 @@ async function updatePredictionChart(symbol) {
             tooltipContent.innerHTML = `
                 <p class="mb-1 font-bold text-white">Smart Analysis:</p>
                 <p>RSI(14): <span class="${rsiColor} font-bold">${lastRSI.toFixed(1)} (${rsiStatus})</span></p>
-                <p class="mt-1">Combines RSI + SMA for trend detection.</p>
+                <p class="mt-1">Trend model with a 80% volatility-based confidence band. Not financial advice.</p>
             `;
         }
 
@@ -621,23 +633,32 @@ async function fetchCryptoNews() {
             </div>
         `).join('');
 
-        let articles;
-        try {
-            const response = await axios.get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN', { timeout: 8000 });
-            articles = response.data.Data.slice(0, 12);
-        } catch (primaryError) {
-            console.warn('CryptoCompare news unavailable; using CoinStats fallback.', primaryError.message);
-            const fallback = await axios.get('https://api.coinstats.app/public/v1/news?limit=12', { timeout: 8000 });
-            articles = (fallback.data.news || []).map(item => ({
+        // CryptoCompare now requires an API key and the former CoinStats endpoint was removed.
+        // Mix three public RSS feeds so one publisher or a transient feed error cannot blank the section.
+        const feeds = [
+            { source: 'Cointelegraph', url: 'https://cointelegraph.com/rss' },
+            { source: 'Decrypt', url: 'https://decrypt.co/feed' },
+            { source: 'CoinDesk', url: 'https://www.coindesk.com/arc/outboundfeeds/rss/' }
+        ];
+        const results = await Promise.allSettled(feeds.map(feed => axios.get(
+            `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`,
+            { timeout: 12000 }
+        )));
+        const articles = results.flatMap((result, index) => {
+            if (result.status !== 'fulfilled' || result.value.data.status !== 'ok' || !Array.isArray(result.value.data.items)) return [];
+            return result.value.data.items.slice(0, 6).map(item => ({
                 title: item.title,
-                body: item.description || item.content || '',
-                url: item.link || item.url,
-                imageurl: item.imgURL || item.image || '',
-                source: item.source || 'CoinStats',
-                categories: item.type || 'Market',
-                published_on: Math.floor(new Date(item.feedDate || item.publishedAt || Date.now()).getTime() / 1000)
+                body: (item.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
+                url: item.link,
+                imageurl: item.thumbnail || item.enclosure?.link || '',
+                source: feeds[index].source,
+                categories: (item.categories || ['Market']).join('|'),
+                published_on: Math.floor(new Date(item.pubDate).getTime() / 1000)
             }));
-        }
+        }).filter(article => article.title && article.url)
+            .sort((a, b) => b.published_on - a.published_on)
+            .slice(0, 12);
+        if (!articles.length) throw new Error('News feeds returned no articles');
         newsFeed.innerHTML = '';
 
         articles.forEach(article => {
@@ -654,29 +675,38 @@ async function fetchCryptoNews() {
             else if (diffMins < 1440) timeString = `${Math.floor(diffMins / 60)}h ago`;
             else timeString = `${Math.floor(diffMins / 1440)}d ago`;
 
-            const imageUrl = article.imageurl || '';
+            const escapeHtml = value => String(value || '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character]);
+            const safeUrl = value => {
+                try {
+                    const url = new URL(value);
+                    return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+                } catch { return ''; }
+            };
+            const imageUrl = safeUrl(article.imageurl);
+            const articleUrl = safeUrl(article.url);
             const categories = (article.categories || '').split('|').slice(0, 2);
+            const badges = categories.map(category => category.trim() ? `<span class="news-badge">${escapeHtml(category.trim())}</span>` : '').join('');
 
             card.innerHTML = `
-                <a href="${article.url}" target="_blank" rel="noopener" class="news-card-link">
-                    ${imageUrl ? `<div class="news-card-img" style="background-image: url('${imageUrl}')">
+                <a href="${articleUrl}" target="_blank" rel="noopener noreferrer" class="news-card-link">
+                    ${imageUrl ? `<div class="news-card-img">
                         <div class="news-card-img-overlay"></div>
                         <div class="news-card-badges">
-                            ${categories.map(c => c.trim() ? `<span class="news-badge">${c.trim()}</span>` : '').join('')}
+                            ${badges}
                         </div>
                     </div>` : `<div class="news-card-img news-card-img-placeholder">
                         <i class="fas fa-newspaper text-3xl text-gray-600"></i>
                         <div class="news-card-badges">
-                            ${categories.map(c => c.trim() ? `<span class="news-badge">${c.trim()}</span>` : '').join('')}
+                            ${badges}
                         </div>
                     </div>`}
                     <div class="news-card-body">
-                        <h3 class="news-card-title">${article.title}</h3>
-                        <p class="news-card-excerpt">${(article.body || '').substring(0, 100)}${(article.body || '').length > 100 ? '...' : ''}</p>
+                        <h3 class="news-card-title">${escapeHtml(article.title)}</h3>
+                        <p class="news-card-excerpt">${escapeHtml((article.body || '').substring(0, 120))}${article.body.length > 120 ? '...' : ''}</p>
                         <div class="news-card-footer">
                             <span class="news-source-badge">
                                 <i class="fas fa-rss text-accent text-[10px]"></i>
-                                ${article.source}
+                                ${escapeHtml(article.source)}
                             </span>
                             <span class="news-time-badge">
                                 <i class="far fa-clock"></i>
@@ -686,6 +716,7 @@ async function fetchCryptoNews() {
                     </div>
                 </a>
             `;
+            if (imageUrl) card.querySelector('.news-card-img').style.backgroundImage = `url("${imageUrl.replace(/"/g, '%22')}")`;
             newsFeed.appendChild(card);
         });
 
@@ -852,16 +883,18 @@ document.addEventListener('DOMContentLoaded', function () {
         data: {
             labels: ['Now', '1D', '3D', '7D', '15D', '30D'],
             datasets: [{
-                label: 'Predicted Price',
+                label: 'Historical price',
                 data: [0, 0, 0, 0, 0, 0],
-                borderColor: '#9EF01A',
-                borderWidth: 1.5,
-                borderDash: [2, 5],
-                pointBackgroundColor: '#9EF01A',
-                pointRadius: 4,
-                pointHoverRadius: 7,
+                borderColor: '#71806e',
+                borderWidth: 1.2,
+                pointRadius: 0,
                 tension: 0.3,
-                borderDash: [2, 5]
+            }, {
+                label: 'Forecast', data: [], borderColor: '#b7f833', borderWidth: 2, borderDash: [3, 5], pointBackgroundColor: '#b7f833', pointRadius: 2, pointHoverRadius: 5, tension: 0.3
+            }, {
+                label: 'Lower confidence', data: [], borderColor: 'transparent', pointRadius: 0, fill: false
+            }, {
+                label: 'Upper confidence', data: [], borderColor: 'transparent', pointRadius: 0, backgroundColor: 'rgba(183,248,51,.10)', fill: '-1'
             }]
         },
         options: {
@@ -1013,25 +1046,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('runPrediction')?.addEventListener('click', async function () {
         const coin = document.getElementById('predict-coin').value;
-        const aiKey = document.getElementById('ai-key').value;
-        if (!aiKey) {
-            alert('Please enter an AI key.');
-            console.log("AI key missing");
-            return;
-        }
         console.log("Running prediction for:", coin);
         this.innerHTML = '<div class="loading-spinner mr-2"></div> Running prediction...';
         this.disabled = true;
         try {
-            const response = await axios.get('https://api.binance.com/api/v3/ticker/price', { params: { symbol: coin } });
-            const currentPrice = parseFloat(response.data.price);
-            const predictedData = [currentPrice, currentPrice * 1.01, currentPrice * 1.03, currentPrice * 1.07, currentPrice * 1.10, currentPrice * 1.15];
-            predChart.data.datasets[0].data = predictedData;
-            predChart.data.datasets[0].borderDash = [];
-            predChart.update();
+            await updatePredictionChart(coin);
             const coinName = tradingPairs.find(p => p.symbol === coin)?.name || coin.replace('USDT', '');
             document.getElementById('prediction-title').textContent = `${coinName} Prediction`;
-            this.innerHTML = '<i class="fas fa-check mr-2"></i> Prediction Complete';
+            this.innerHTML = '<i class="fas fa-check mr-2"></i> Forecast Updated';
             console.log("Prediction completed successfully");
             setTimeout(() => {
                 this.innerHTML = '<i class="fas fa-bolt mr-2"></i> Run Prediction';
