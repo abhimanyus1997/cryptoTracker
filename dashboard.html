@@ -75,10 +75,81 @@
                     class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center">
                     <i class="fas fa-rotate mr-2"></i>Refresh
                 </button>
-                <button id="connect-wallet" class="wallet-connect" type="button">
-                    <i class="fas fa-fingerprint"></i><span>Connect wallet</span>
-                </button>
+                <div class="relative">
+                    <button id="connect-wallet" class="wallet-connect" type="button">
+                        <i class="fas fa-fingerprint"></i><span>Connect wallet</span>
+                    </button>
+                    <button id="wallet-profile-toggle" class="wallet-connect ml-1" type="button" title="Wallet Profile" style="padding:.5rem .6rem;">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <!-- Wallet Profile Panel (toggled from profile button) -->
+        <div id="wallet-profile-panel" class="hidden mb-6">
+            <section class="card wallet-profile fade-in p-5" aria-labelledby="wallet-title">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <div><h2 id="wallet-title" class="text-lg font-bold text-white">Wallet Profile</h2></div>
+                    <div class="flex items-center gap-2">
+                        <span id="wallet-state" class="bot-status">Not connected</span>
+                        <button id="wallet-profile-close" class="text-muted hover:text-heading" style="font-size:1rem;"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="wallet-grid">
+                    <div><span>Account</span><strong id="wallet-address">—</strong></div>
+                    <div><span>Network</span><strong id="wallet-network">—</strong></div>
+                    <div><span>Native balance</span><strong id="wallet-balance">—</strong></div>
+                    <div><span>Permissions</span><strong id="wallet-permissions">Read-only</strong></div>
+                </div>
+
+                <button id="account-details-btn" class="wallet-scan mt-3" type="button" style="border-style:solid;">
+                    <i class="fas fa-chevron-down"></i> Account Details
+                </button>
+                <div id="wallet-details-panel" class="hidden" style="margin-top:.6rem; padding:.75rem; border:1px solid var(--line-soft); border-radius:8px; background:rgba(0,0,0,.15); font-size:.72rem; font-family:'DM Mono',monospace;">
+                    <div style="display:grid; gap:.5rem;">
+                        <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Full Address</span><strong id="detail-full-address" style="color:#edf5e8; word-break:break-all;">—</strong></div>
+                        <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Chain ID</span><strong id="detail-chain-id" style="color:#edf5e8;">—</strong></div>
+                        <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Network</span><strong id="detail-network-name" style="color:#edf5e8;">—</strong></div>
+                        <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Native Symbol</span><strong id="detail-native-symbol" style="color:#edf5e8;">—</strong></div>
+                        <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Full Balance</span><strong id="detail-balance-full" style="color:#edf5e8;">—</strong></div>
+                        <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Permissions</span><strong id="detail-permissions" style="color:#edf5e8;">—</strong></div>
+                    </div>
+                </div>
+
+                <!-- Zerion Portfolio & PnL Summary -->
+                <div id="zerion-portfolio-summary" class="wallet-grid" style="margin-top:.75rem;"></div>
+                <div id="zerion-pnl-summary" class="wallet-grid" style="margin-top:.5rem;"></div>
+
+                <!-- Wallet Tabs -->
+                <div style="display:flex; gap:0; margin-top:.9rem; border-bottom:1px solid var(--line-soft); overflow-x:auto;" class="noscroll">
+                    <button class="wallet-tab-btn active" data-panel="wallet-positions-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid var(--accent); color:var(--accent); cursor:pointer;">Positions</button>
+                    <button class="wallet-tab-btn" data-panel="zerion-tx-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid transparent; color:#6f786d; cursor:pointer;">Transactions</button>
+                    <button class="wallet-tab-btn" data-panel="zerion-nft-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid transparent; color:#6f786d; cursor:pointer;">NFTs</button>
+                </div>
+
+                <!-- Positions Panel -->
+                <div id="wallet-positions-panel" class="wallet-tab-panel" style="margin-top:.5rem;">
+                    <div class="wallet-token-add">
+                        <input id="wallet-token-address" class="input-adaptive" inputmode="text" placeholder="ERC-20 contract address (0x…)" aria-label="ERC-20 contract address">
+                        <button id="add-wallet-token" class="bot-preview" type="button"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <button id="scan-top-tokens" class="wallet-scan" type="button"><i class="fas fa-radar"></i> Scan all tokens (Zerion API)</button>
+                    <!-- Progress bar for scanning -->
+                    <div id="scan-progress" class="download-progress hidden" style="margin-top:.5rem;" role="progressbar" aria-label="Token scan progress">
+                        <div id="scan-progress-bar" class="download-progress-bar"></div>
+                    </div>
+                    <div id="wallet-token-list" class="wallet-token-list" aria-live="polite" style="max-height:300px; overflow-y:auto;"></div>
+                </div>
+
+                <!-- Transactions Panel -->
+                <div id="zerion-tx-panel" class="wallet-tab-panel hidden" style="margin-top:.5rem; max-height:320px; overflow-y:auto;"></div>
+
+                <!-- NFTs Panel -->
+                <div id="zerion-nft-panel" class="wallet-tab-panel hidden" style="margin-top:.5rem; max-height:280px; overflow-y:auto;"></div>
+
+                <p class="bot-output"><i class="fas fa-shield-halved" style="margin-right:.3rem;"></i>Non-custodial viewer — only public account data you approve is read. Private keys, seed phrases, and transaction signing are never requested.</p>
+            </section>
         </div>
 
         <!-- Portfolio Summary Cards -->
@@ -213,6 +284,18 @@
                     </div>
                 </div>
 
+                <!-- Automation Lab -->
+                <section class="card bot-console fade-in mb-6" aria-labelledby="bot-title">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div><p class="eyebrow">Automation lab</p><h2 id="bot-title" class="text-lg font-bold text-white">Trading Bot</h2></div>
+                        <span class="bot-status">Paper mode</span>
+                    </div>
+                    <p class="text-muted text-sm mb-4">Test a rules-based strategy against live market data. This workspace never submits trades or requests wallet signatures.</p>
+                    <div class="bot-metrics"><div><span>Strategy</span><strong>Trend guard</strong></div><div><span>Signal</span><strong class="text-accent">Watching ETH</strong></div></div>
+                    <button id="bot-preview" class="bot-preview" type="button"><i class="fas fa-flask"></i> Preview paper strategy</button>
+                    <p id="bot-output" class="bot-output" aria-live="polite">No paper orders generated.</p>
+                </section>
+
                 <!-- AI Prediction Block -->
                 <div class="card p-6 mb-6 fade-in">
                     <div class="flex justify-between items-center mb-6">
@@ -316,75 +399,6 @@
                         </div>
                     </div>
                 </div>
-
-                <section class="card bot-console fade-in" aria-labelledby="bot-title">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <div><p class="eyebrow">Automation lab</p><h2 id="bot-title" class="text-lg font-bold text-white">Trading Bot</h2></div>
-                        <span class="bot-status">Paper mode</span>
-                    </div>
-                    <p class="text-muted text-sm mb-4">Test a rules-based strategy against live market data. This workspace never submits trades or requests wallet signatures.</p>
-                    <div class="bot-metrics"><div><span>Strategy</span><strong>Trend guard</strong></div><div><span>Signal</span><strong class="text-accent">Watching ETH</strong></div></div>
-                    <button id="bot-preview" class="bot-preview" type="button"><i class="fas fa-flask"></i> Preview paper strategy</button>
-                    <p id="bot-output" class="bot-output" aria-live="polite">No paper orders generated.</p>
-                </section>
-
-                <section class="card wallet-profile fade-in" aria-labelledby="wallet-title">
-                    <div class="flex items-start justify-between gap-4 mb-4">
-                        <div><h2 id="wallet-title" class="text-lg font-bold text-white">Wallet Profile</h2></div>
-                        <span id="wallet-state" class="bot-status">Not connected</span>
-                    </div>
-                    <div class="wallet-grid">
-                        <div><span>Account</span><strong id="wallet-address">—</strong></div>
-                        <div><span>Network</span><strong id="wallet-network">—</strong></div>
-                        <div><span>Native balance</span><strong id="wallet-balance">—</strong></div>
-                        <div><span>Permissions</span><strong id="wallet-permissions">Read-only</strong></div>
-                    </div>
-
-                    <button id="account-details-btn" class="wallet-scan mt-3" type="button" style="border-style:solid;">
-                        <i class="fas fa-chevron-down"></i> Account Details
-                    </button>
-                    <div id="wallet-details-panel" class="hidden" style="margin-top:.6rem; padding:.75rem; border:1px solid var(--line-soft); border-radius:8px; background:rgba(0,0,0,.15); font-size:.72rem; font-family:'DM Mono',monospace;">
-                        <div style="display:grid; gap:.5rem;">
-                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Full Address</span><strong id="detail-full-address" style="color:#edf5e8; word-break:break-all;">—</strong></div>
-                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Chain ID</span><strong id="detail-chain-id" style="color:#edf5e8;">—</strong></div>
-                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Network</span><strong id="detail-network-name" style="color:#edf5e8;">—</strong></div>
-                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Native Symbol</span><strong id="detail-native-symbol" style="color:#edf5e8;">—</strong></div>
-                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Full Balance</span><strong id="detail-balance-full" style="color:#edf5e8;">—</strong></div>
-                            <div><span style="color:#6f786d; display:block; font-size:.64rem; text-transform:uppercase; letter-spacing:.08em;">Permissions</span><strong id="detail-permissions" style="color:#edf5e8;">—</strong></div>
-                        </div>
-                    </div>
-
-                    <!-- Zerion Portfolio Summary -->
-                    <div id="zerion-portfolio-summary" class="wallet-grid" style="margin-top:.75rem;"></div>
-
-                    <!-- Zerion PnL Summary -->
-                    <div id="zerion-pnl-summary" class="wallet-grid" style="margin-top:.5rem;"></div>
-
-                    <!-- Wallet Tabs -->
-                    <div style="display:flex; gap:0; margin-top:.9rem; border-bottom:1px solid var(--line-soft); overflow-x:auto;" class="noscroll">
-                        <button class="wallet-tab-btn active" data-panel="wallet-positions-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid var(--accent); color:var(--accent); cursor:pointer;">Positions</button>
-                        <button class="wallet-tab-btn" data-panel="zerion-tx-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid transparent; color:#6f786d; cursor:pointer;">Transactions</button>
-                        <button class="wallet-tab-btn" data-panel="zerion-nft-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid transparent; color:#6f786d; cursor:pointer;">NFTs</button>
-                    </div>
-
-                    <!-- Positions Panel (default visible) -->
-                    <div id="wallet-positions-panel" class="wallet-tab-panel" style="margin-top:.5rem;">
-                        <div class="wallet-token-add">
-                            <input id="wallet-token-address" class="input-adaptive" inputmode="text" placeholder="ERC-20 contract address (0x…)" aria-label="ERC-20 contract address">
-                            <button id="add-wallet-token" class="bot-preview" type="button"><i class="fas fa-plus"></i> Add</button>
-                        </div>
-                        <button id="scan-top-tokens" class="wallet-scan" type="button"><i class="fas fa-radar"></i> Scan all tokens (Zerion API — all chains)</button>
-                        <div id="wallet-token-list" class="wallet-token-list" aria-live="polite"></div>
-                    </div>
-
-                    <!-- Transactions Panel -->
-                    <div id="zerion-tx-panel" class="wallet-tab-panel hidden" style="margin-top:.5rem; max-height:320px; overflow-y:auto;"></div>
-
-                    <!-- NFTs Panel -->
-                    <div id="zerion-nft-panel" class="wallet-tab-panel hidden" style="margin-top:.5rem; max-height:280px; overflow-y:auto;"></div>
-
-                    <p class="bot-output"><i class="fas fa-shield-halved" style="margin-right:.3rem;"></i>Non-custodial viewer — only public account data you approve is read. Private keys, seed phrases, and transaction signing are never requested.</p>
-                </section>
 
                 <!-- Add Holding Form -->
                 <div class="card p-6 fade-in">

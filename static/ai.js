@@ -30,7 +30,10 @@ const AI_CONFIG = {
         apiKey: 'REDACTED_LITELLM_KEY',
         model: 'nvidia.nemotron-nano-9b-v2'
     },
-    rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 }
+    rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 },
+    superAdmin: '0xd7e9d18153de624713C18b1cA18A238C42033EA5'.toLowerCase(),
+    subscriptionWallet: '0xd7e9d18153de624713C18b1cA18A238C42033EA5',
+    subscriptionAmount: '0.001' // ETH to unlock unlimited
 };
 
 class LocalRetriever {
@@ -99,28 +102,62 @@ class AIClient {
         this.initUI();
     }
 
+    isSuperAdmin() {
+        const addr = document.getElementById('wallet-address')?.title || '';
+        return addr.toLowerCase() === AI_CONFIG.superAdmin;
+    }
+
+    isSubscribed() {
+        return localStorage.getItem('ct_subscription_active') === 'true' || this.isSuperAdmin();
+    }
+
     checkRateLimit() {
+        if (this.isSuperAdmin() || this.isSubscribed()) return;
         if (Date.now() - this.sessionStart > AI_CONFIG.rateLimit.windowMs) {
             this.messageCount = 0; this.sessionStart = Date.now();
             sessionStorage.setItem('ct_session_start', this.sessionStart.toString());
             sessionStorage.setItem('ct_msg_count', '0');
         }
         if (this.messageCount >= AI_CONFIG.rateLimit.maxPerSession) {
-            throw new Error(`Rate limit reached (${AI_CONFIG.rateLimit.maxPerSession} messages/hour). Connect your wallet or wait.`);
+            throw new Error(`Rate limit reached (${AI_CONFIG.rateLimit.maxPerSession} messages/hour). Upgrade to unlimited by clicking "Unlock Unlimited" below, or wait.`);
         }
     }
 
     requireAuth() {
+        if (this.isSuperAdmin()) return;
         const walletState = document.getElementById('wallet-state')?.textContent;
         const isConnected = walletState === 'Connected' || walletState === 'Viewing';
         if (!isConnected && this.provider === 'litellm') {
-            throw new Error('Connect your wallet or click "Scan" in Wallet Profile to use the AI assistant. This prevents abuse of the shared model endpoint.');
+            throw new Error('Connect your wallet or open Wallet Profile to use the AI assistant. This prevents abuse of the shared endpoint.');
         }
     }
 
     incrementMessageCount() {
+        if (this.isSuperAdmin() || this.isSubscribed()) return;
         this.messageCount++;
         sessionStorage.setItem('ct_msg_count', this.messageCount.toString());
+    }
+
+    async unlockSubscription() {
+        if (!window.ethereum) throw new Error('MetaMask required to process payment.');
+        const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const amountWei = '0x' + BigInt(Math.floor(parseFloat(AI_CONFIG.subscriptionAmount) * 1e18)).toString(16);
+        try {
+            const txHash = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                    from: account,
+                    to: AI_CONFIG.subscriptionWallet,
+                    value: amountWei
+                }]
+            });
+            localStorage.setItem('ct_subscription_active', 'true');
+            localStorage.setItem('ct_subscription_tx', txHash);
+            return txHash;
+        } catch (e) {
+            if (e.code === 4001) throw new Error('Transaction cancelled by user.');
+            throw e;
+        }
     }
 
     initUI() {
@@ -299,7 +336,19 @@ class AIClient {
             this.checkRateLimit();
             const context = this.retriever.context(query);
             this.ui.stats.classList.remove('hidden');
-            this.ui.stats.textContent = `RAG: ${context ? context.split('\n\n').length : 0} context snippets · ${AI_CONFIG.rateLimit.maxPerSession - this.messageCount} messages remaining`;
+            if (this.isSuperAdmin()) {
+                this.ui.stats.innerHTML = `<span style="color:var(--accent);">⚡ Super Admin</span> · RAG: ${context ? context.split('\n\n').length : 0} context snippets · Unlimited`;
+            } else if (this.isSubscribed()) {
+                this.ui.stats.innerHTML = `<span style="color:var(--accent);">✓ Subscribed</span> · RAG: ${context ? context.split('\n\n').length : 0} snippets · Unlimited`;
+            } else {
+                this.ui.stats.innerHTML = `RAG: ${context ? context.split('\n\n').length : 0} snippets · ${AI_CONFIG.rateLimit.maxPerSession - this.messageCount} msgs left · <button id="unlock-btn" style="color:var(--accent); text-decoration:underline; background:none; border:none; cursor:pointer; font:inherit;">Unlock Unlimited (${AI_CONFIG.subscriptionAmount} ETH)</button>`;
+                document.getElementById('unlock-btn')?.addEventListener('click', async () => {
+                    try {
+                        const tx = await this.unlockSubscription();
+                        this.ui.stats.innerHTML = `<span style="color:var(--accent);">✓ Subscription active!</span> Tx: ${tx.slice(0, 10)}…`;
+                    } catch (e) { this.ui.stats.textContent = e.message; }
+                });
+            }
             let response;
             if (this.provider === 'litellm') response = await this.callLiteLLM(query, context);
             else if (this.provider === 'webllm') response = await this.callWebLLM(query, context, bubble);

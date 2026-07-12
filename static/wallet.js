@@ -231,8 +231,10 @@
 
     if (hasZerionKey()) {
       scanTokens.textContent = 'Scanning via Zerion API (all chains)…';
+      showScanProgress('indeterminate');
       try {
         const positions = await scanWithZerion(address);
+        hideScanProgress();
         tokenList.innerHTML = '';
         if (!positions.length) { tokenList.textContent = 'No token positions found.'; return; }
 
@@ -273,6 +275,7 @@
         scanTokens.innerHTML = `<i class="fas fa-check"></i> Found ${positions.length} positions across all chains`;
         if (addedCount > 0 && typeof window.fetchPrices === 'function') window.fetchPrices();
       } catch (e) {
+        hideScanProgress();
         tokenList.textContent = e.message;
         if (e.message.includes('Rate limited')) {
           scanTokens.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Rate limited — add API key in Settings';
@@ -501,6 +504,28 @@
   // ──────────────────────────────────────────────────
   // Event listeners
   // ──────────────────────────────────────────────────
+
+  // Wallet Profile panel toggle
+  const profileToggle = document.getElementById('wallet-profile-toggle');
+  const profilePanel = document.getElementById('wallet-profile-panel');
+  const profileClose = document.getElementById('wallet-profile-close');
+  profileToggle?.addEventListener('click', () => profilePanel?.classList.toggle('hidden'));
+  profileClose?.addEventListener('click', () => profilePanel?.classList.add('hidden'));
+
+  // Progress bar for scanning
+  function showScanProgress(percent) {
+    const bar = document.getElementById('scan-progress');
+    const fill = document.getElementById('scan-progress-bar');
+    if (!bar || !fill) return;
+    bar.classList.remove('hidden');
+    if (percent === 'indeterminate') { bar.classList.add('is-indeterminate'); return; }
+    bar.classList.remove('is-indeterminate');
+    fill.style.width = `${Math.min(100, Math.round(percent))}%`;
+  }
+  function hideScanProgress() {
+    const bar = document.getElementById('scan-progress');
+    if (bar) { bar.classList.add('hidden'); bar.classList.remove('is-indeterminate'); }
+  }
 
   addToken?.addEventListener('click', addTokenBalance);
   scanTokens?.addEventListener('click', scanTopTokens);

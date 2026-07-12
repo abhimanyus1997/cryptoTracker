@@ -1261,6 +1261,7 @@ h3 { font-size: 1.1rem; }
 @media (prefers-reduced-motion: reduce) { .brand-orbit,.card.fade-in,.bot-console::after,.wallet-connect.is-connected::before { animation:none !important; } }
 
 img.brand-orbit { display:block; flex:0 0 auto; width:2rem; height:2rem; object-fit:contain; padding:2px; border-radius:9px; background:radial-gradient(circle,rgba(183,248,51,.22),rgba(8,10,8,.9) 70%); border:1px solid rgba(183,248,51,.24); }
+[data-theme="light"] img.brand-orbit { background:radial-gradient(circle,rgba(22,163,74,.12),rgba(255,255,255,.9) 70%); border-color:rgba(22,163,74,.25); filter: brightness(1.1) contrast(1.1); }
 .download-progress { height:6px; overflow:hidden; margin-top:.5rem; border:1px solid rgba(183,248,51,.18); border-radius:999px; background:#070907; }
 .download-progress-bar { width:0; height:100%; background:linear-gradient(90deg,#82b814,#b7f833,#e8ffae); box-shadow:0 0 10px rgba(183,248,51,.65); transition:width .2s ease; }
 .download-progress.is-indeterminate .download-progress-bar { width:42%; animation:download-scan 1.25s ease-in-out infinite; }
