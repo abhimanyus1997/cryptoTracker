@@ -4,7 +4,7 @@ const currencySymbols = { USD: '$', INR: '₹', EUR: '€', GBP: '£' };
 let portfolio = [];
 let dexPortfolio = [];
 let tradingPairs = [];
-let top500Tokens = new Set(); // Storage for top 500 tokens
+let top1000Tokens = new Set(); // Storage for top 1000 tokens
 let tokenContracts = new Map(); // Store contract addresses for tokens
 
 // Loading Snackbar Functions
@@ -104,16 +104,16 @@ function getPortfolioSummaryText(prices) {
 
 async function fetchTradingPairs() {
     // Only fetch limited pairs for dropdown - no need for 1000 pairs
-    console.log("Fetching limited trading pairs and top 500 tokens...");
+    console.log("Fetching limited trading pairs and top 1000 tokens...");
     try {
-        // Fetch top 500 tokens by market cap
-        const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1');
+        // Fetch top 1000 tokens by market cap
+        const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=1000&page=1');
         
-        // Populate top 500 tokens set
-        top500Tokens.clear();
+        // Populate top 1000 tokens set
+        top1000Tokens.clear();
         response.data.forEach(coin => {
-            top500Tokens.add(coin.symbol.toUpperCase() + 'USDT');
-            top500Tokens.add(coin.symbol.toUpperCase());
+            top1000Tokens.add(coin.symbol.toUpperCase() + 'USDT');
+            top1000Tokens.add(coin.symbol.toUpperCase());
             // Store contract addresses if available
             if (coin.platforms) {
                 Object.entries(coin.platforms).forEach(([platform, address]) => {
@@ -141,7 +141,7 @@ async function fetchTradingPairs() {
             ticker: sym.replace('USDT', '') 
         }));
         populateCoinDropdowns();
-        console.log("Top 500 tokens loaded:", top500Tokens.size);
+        console.log("Top 500 tokens loaded:", top1000Tokens.size);
         console.log("Trading pairs loaded:", tradingPairs.length);
     } catch (error) {
         console.error('Error setting trading pairs:', error);
@@ -321,9 +321,9 @@ async function updatePortfolio(prices) {
     }
 
     for (const [index, holding] of portfolio.entries()) {
-        // FILTER: Only show tokens in top 500 by market cap
-        if (!top500Tokens.has(holding.symbol) && !top500Tokens.has(holding.ticker)) {
-            console.log(`Skipping ${holding.symbol} - not in top 500`);
+        // FILTER: Only show tokens in top 1000 by market cap
+        if (!top1000Tokens.has(holding.symbol) && !top1000Tokens.has(holding.ticker)) {
+            console.log(`Skipping ${holding.symbol} - not in top 1000`);
             continue;
         }
         
@@ -452,9 +452,9 @@ async function updateDexPortfolio(prices) {
     tbody.innerHTML = '';
 
     for (const [index, holding] of dexPortfolio.entries()) {
-        // FILTER: Only show tokens in top 500 by market cap
-        if (!top500Tokens.has(holding.symbol) && !top500Tokens.has(holding.ticker)) {
-            console.log(`Skipping ${holding.symbol} - not in top 500`);
+        // FILTER: Only show tokens in top 1000 by market cap
+        if (!top1000Tokens.has(holding.symbol) && !top1000Tokens.has(holding.ticker)) {
+            console.log(`Skipping ${holding.symbol} - not in top 1000`);
             continue;
         }
         
@@ -1481,17 +1481,17 @@ document.addEventListener('DOMContentLoaded', function () {
             transactionsToImport = [];
             verificationTableBody.innerHTML = '';
 
-            // Fetch top 500 tokens by market cap for validation
+            // Fetch top 1000 tokens by market cap for validation
             let validSymbols = new Set();
             try {
-                const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1');
+                const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=1000&page=1');
                 response.data.forEach(coin => {
                     validSymbols.add(coin.symbol.toUpperCase() + 'USDT');
                     validSymbols.add(coin.symbol.toUpperCase());
                 });
-                console.log(`✅ Loaded ${validSymbols.size} valid symbols from top 500`);
+                console.log(`✅ Loaded ${validSymbols.size} valid symbols from top 1000`);
             } catch (err) {
-                console.warn('Could not fetch top 500 tokens, using all CSV entries');
+                console.warn('Could not fetch top 1000 tokens, using all CSV entries');
             }
 
             for (const line of lines) {
@@ -1506,9 +1506,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     amount = parseFloat(amount);
                     purchasePrice = parseFloat(purchasePrice);
                     
-                    // Skip tokens not in top 500 (if we have the list)
+                    // Skip tokens not in top 1000 (if we have the list)
                     if (validSymbols.size > 0 && !validSymbols.has(symbol)) {
-                        console.log(`⏭️ Skipping ${symbol} - not in top 500`);
+                        console.log(`⏭️ Skipping ${symbol} - not in top 1000`);
                         continue;
                     }
                     

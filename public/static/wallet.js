@@ -384,7 +384,7 @@
           // SECURITY CHECK: Skip blacklisted tokens
           if (typeof window.isTokenWhitelisted === 'function') {
             if (!window.isTokenWhitelisted(symbol)) {
-              console.log(`🚫 Skipping unknown token: ${symbol} (not in top 500)`);
+              console.log(`🚫 Skipping unknown token: ${symbol} (not in top 1000)`);
               continue;
             }
           }
@@ -458,7 +458,7 @@
             // SECURITY CHECK: Skip blacklisted tokens
             if (typeof window.isTokenWhitelisted === 'function') {
               if (!window.isTokenWhitelisted(symbol)) {
-                console.log(`🚫 Skipping unknown token: ${symbol} (not in top 500)`);
+                console.log(`🚫 Skipping unknown token: ${symbol} (not in top 1000)`);
                 continue;
               }
             }
@@ -754,7 +754,7 @@
 
     scanTokens.textContent = `RPC fallback: scanning ${mainnetChains.length} chains...`;
     try {
-      // Fetch top 500 tokens by market cap
+      // Fetch top 1000 tokens by market cap
       const markets = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1').then(r => r.json()).catch(() => []);
       const accountArg = address.slice(2).padStart(64, '0');
       const found = [];
@@ -903,12 +903,12 @@
   function addToHoldings(pairSymbol, name, ticker, amount, price) {
     if (!window.portfolio) return;
     
-    // SECURITY CHECK: Only allow whitelisted tokens (top 500 from CoinGecko)
+    // SECURITY CHECK: Only allow whitelisted tokens (top 1000 from CoinGecko)
     if (typeof window.isTokenWhitelisted === 'function') {
       if (!window.isTokenWhitelisted(ticker)) {
-        console.warn(`🚫 Blocked unknown token: ${ticker} - Not in top 500 verified tokens`);
+        console.warn(`🚫 Blocked unknown token: ${ticker} - Not in top 1000 verified tokens`);
         if (typeof window.blacklistToken === 'function') {
-          window.blacklistToken(ticker, 'Not in CoinGecko top 500');
+          window.blacklistToken(ticker, 'Not in CoinGecko top 1000');
         }
         return; // Block the token
       }
