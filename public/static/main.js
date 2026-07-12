@@ -288,7 +288,9 @@ async function fetchYesterdayPrice(symbol) {
         const yesterday = new Date();
         yesterday.setHours(yesterday.getHours() - 24);
         const timestamp = yesterday.getTime();
-        const response = await axios.get('https://api.binance.com/api/v3/klines', {
+        
+        // Use our API proxy to avoid CORS issues
+        const response = await axios.get('/api/binance', {
             params: {
                 symbol,
                 interval: '1h',
@@ -301,7 +303,7 @@ async function fetchYesterdayPrice(symbol) {
         console.log(`Yesterday's price for ${symbol}: ${yesterdayPrice}`);
         return yesterdayPrice;
     } catch (error) {
-        console.error(`Error fetching yesterday's price for ${symbol}:`, error);
+        console.error(`Error fetching yesterday's price for ${symbol}:`, error.message);
         return null;
     }
 }
@@ -319,6 +321,12 @@ async function updatePortfolio(prices) {
     }
 
     for (const [index, holding] of portfolio.entries()) {
+        // FILTER: Only show tokens in top 500 by market cap
+        if (!top500Tokens.has(holding.symbol) && !top500Tokens.has(holding.ticker)) {
+            console.log(`Skipping ${holding.symbol} - not in top 500`);
+            continue;
+        }
+        
         const price = prices[holding.symbol] || holding.purchasePrice;
         const yesterdayPrice = await fetchYesterdayPrice(holding.symbol);
         const value = holding.amount * price;
@@ -334,6 +342,18 @@ async function updatePortfolio(prices) {
         const imgHtml = coinImg
             ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.outerHTML='<div class=coin-logo-fallback>${holding.ticker.charAt(0)}</div>'">`
             : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
+        
+        // Get contract info for this token
+        const contractInfo = tokenContracts.get(holding.symbol);
+        const contractHtml = contractInfo ? `
+            <button class="copy-contract-btn" data-address="${contractInfo.address}" title="Copy contract address">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button class="add-to-wallet-btn" data-address="${contractInfo.address}" data-symbol="${holding.ticker}" data-decimals="${contractInfo.decimals}" title="Add to wallet">
+                <i class="fas fa-wallet"></i>
+            </button>
+        ` : '';
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="py-4 px-4" data-label="Asset">
@@ -358,6 +378,7 @@ async function updatePortfolio(prices) {
                 </span>
             </td>
             <td class="py-4 px-4 text-center">
+                ${contractHtml}
                 <button class="text-blue-400 mr-2 hover:text-blue-500" onclick="editHolding(${index})"><i class="fas fa-edit"></i></button>
                 <button class="text-red-400 hover:text-red-500" onclick="removeHolding(${index})"><i class="fas fa-trash"></i></button>
             </td>
@@ -431,6 +452,12 @@ async function updateDexPortfolio(prices) {
     tbody.innerHTML = '';
 
     for (const [index, holding] of dexPortfolio.entries()) {
+        // FILTER: Only show tokens in top 500 by market cap
+        if (!top500Tokens.has(holding.symbol) && !top500Tokens.has(holding.ticker)) {
+            console.log(`Skipping ${holding.symbol} - not in top 500`);
+            continue;
+        }
+        
         const price = prices[holding.symbol] || holding.purchasePrice;
         const yesterdayPrice = await fetchYesterdayPrice(holding.symbol);
         const value = holding.amount * price;
@@ -446,6 +473,18 @@ async function updateDexPortfolio(prices) {
         const imgHtml = coinImg
             ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.outerHTML='<div class=coin-logo-fallback>${holding.ticker.charAt(0)}</div>'">`
             : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
+        
+        // Get contract info for this token
+        const contractInfo = tokenContracts.get(holding.symbol);
+        const contractHtml = contractInfo ? `
+            <button class="copy-contract-btn" data-address="${contractInfo.address}" title="Copy contract address">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button class="add-to-wallet-btn" data-address="${contractInfo.address}" data-symbol="${holding.ticker}" data-decimals="${contractInfo.decimals}" title="Add to wallet">
+                <i class="fas fa-wallet"></i>
+            </button>
+        ` : '';
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="py-4 px-4">

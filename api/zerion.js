@@ -58,10 +58,14 @@ export default async function handler(req, res) {
     const apiKey = process.env.LITELLM_API_KEY || '';
     const apiBase = process.env.LITELLM_API_BASE || 'http://13.126.102.204:4000';
     if (!apiKey) {
-      return res.status(500).json({ error: 'Missing LITELLM_API_KEY on host environment' });
+      console.error('Missing LITELLM_API_KEY environment variable');
+      return res.status(500).json({ error: 'LiteLLM API key not configured' });
     }
 
     try {
+      console.log('Proxying LiteLLM request to:', `${apiBase}/v1/chat/completions`);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      
       const response = await fetch(`${apiBase}/v1/chat/completions`, {
         method: 'POST',
         headers: {
@@ -72,7 +76,12 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        return res.status(response.status).json({ error: `LiteLLM Proxy error: ${response.statusText}` });
+        const errorText = await response.text();
+        console.error('LiteLLM error response:', errorText);
+        return res.status(response.status).json({ 
+          error: `LiteLLM API error: ${response.statusText}`,
+          details: errorText
+        });
       }
 
       if (req.body.stream) {
@@ -88,9 +97,14 @@ export default async function handler(req, res) {
       }
 
       const data = await response.json();
+      console.log('LiteLLM response received successfully');
       return res.status(200).json(data);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      console.error('LiteLLM proxy error:', error);
+      return res.status(500).json({ 
+        error: 'Failed to connect to LiteLLM API',
+        details: error.message 
+      });
     }
   }
 
