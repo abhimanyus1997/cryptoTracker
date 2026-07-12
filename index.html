@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="./assets/icons/cryptotracker-orbit.png">
     <link rel="apple-touch-icon" href="./assets/icons/cryptotracker-orbit.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -40,13 +40,13 @@
             position: absolute;
             inset: 0;
             background-image: 
-                linear-gradient(to right, rgba(158, 240, 26, 0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(158, 240, 26, 0.15) 1px, transparent 1px);
+                linear-gradient(to right, rgba(158, 240, 26, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(158, 240, 26, 0.2) 1px, transparent 1px);
             background-size: var(--grid-size) var(--grid-size);
             z-index: -2;
         }
 
-        /* TRON Grid Perspective - Floor Effect */
+        /* TRON Grid Perspective - Floor Effect - Highway Grid */
         .grid-floor {
             position: absolute;
             bottom: 0;
@@ -54,59 +54,78 @@
             right: 0;
             height: 40%;
             background-image: 
-                linear-gradient(to right, rgba(158, 240, 26, 0.4) 1px, transparent 1px),
-                linear-gradient(to top, rgba(158, 240, 26, 0.3) 1px, transparent 1px);
-            background-size: 60px 2px;
-            transform: perspective(500px) rotateX(60deg);
+                linear-gradient(to right, rgba(158, 240, 26, 0.6) 2px, transparent 2px),
+                linear-gradient(to top, rgba(158, 240, 26, 0.4) 2px, transparent 2px);
+            background-size: 100px 3px, 3px 100px;
+            transform: perspective(800px) rotateX(70deg);
             transform-origin: bottom center;
-            mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
-            z-index: -2;
-            animation: gridZoomZ 3s ease-in-out infinite alternate;
+            mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+            z-index: -1;
+            animation: gridZoomZ 4s ease-in-out infinite alternate;
         }
 
-        /* Moving Light Ribbons - TRON Style with Enhanced Glow */
+        /* TRON Light Bike Trails - Following Grid Lines */
         .light-ribbon {
             position: absolute;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Horizontal Bike Trail */
+        .light-ribbon.bike-horizontal {
             height: 3px;
+            width: 150px;
             background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(158, 240, 26, 0.1) 15%,
-                rgba(158, 240, 26, 0.9) 35%,
+                transparent 0%,
+                rgba(158, 240, 26, 0.2) 10%,
+                rgba(158, 240, 26, 0.8) 30%,
                 rgba(158, 240, 26, 1) 50%,
-                rgba(158, 240, 26, 0.9) 65%,
-                rgba(158, 240, 26, 0.1) 85%,
+                rgba(158, 240, 26, 0.8) 70%,
+                rgba(158, 240, 26, 0.2) 90%,
                 transparent 100%);
             box-shadow: 
-                0 0 30px rgba(158, 240, 26, 1),
-                0 0 60px rgba(158, 240, 26, 0.8),
-                0 0 100px rgba(158, 240, 26, 0.5),
-                0 0 140px rgba(158, 240, 26, 0.3);
-            z-index: -1;
-            opacity: 1;
+                0 0 15px rgba(158, 240, 26, 1),
+                0 0 35px rgba(158, 240, 26, 0.8),
+                0 0 60px rgba(158, 240, 26, 0.5),
+                0 0 100px rgba(158, 240, 26, 0.3);
+            opacity: 0.9;
         }
 
-        .light-ribbon.diagonal {
-            width: 250px;
-            height: 2px;
-        }
-
-        .light-ribbon.vertical {
-            width: 2px;
-            height: 250px;
+        /* Vertical Bike Trail */
+        .light-ribbon.bike-vertical {
+            width: 3px;
+            height: 150px;
             background: linear-gradient(180deg, 
-                transparent 0%, 
-                rgba(158, 240, 26, 0.1) 15%,
-                rgba(158, 240, 26, 0.9) 35%,
+                transparent 0%,
+                rgba(158, 240, 26, 0.2) 10%,
+                rgba(158, 240, 26, 0.8) 30%,
                 rgba(158, 240, 26, 1) 50%,
-                rgba(158, 240, 26, 0.9) 65%,
-                rgba(158, 240, 26, 0.1) 85%,
+                rgba(158, 240, 26, 0.8) 70%,
+                rgba(158, 240, 26, 0.2) 90%,
                 transparent 100%);
             box-shadow: 
-                0 0 30px rgba(158, 240, 26, 1),
-                0 0 60px rgba(158, 240, 26, 0.8),
-                0 0 100px rgba(158, 240, 26, 0.5),
-                0 0 140px rgba(158, 240, 26, 0.3);
+                0 0 15px rgba(158, 240, 26, 1),
+                0 0 35px rgba(158, 240, 26, 0.8),
+                0 0 60px rgba(158, 240, 26, 0.5),
+                0 0 100px rgba(158, 240, 26, 0.3);
+            opacity: 0.9;
+        }
+
+        /* Trail Fade Effect */
+        .light-ribbon::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            filter: blur(10px);
+            opacity: 0.5;
+            animation: trailFade 2s ease-out infinite;
+        }
+
+        @keyframes trailFade {
+            0% { opacity: 0.8; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(2); }
         }
 
         @keyframes ribbonPath1 {
@@ -165,6 +184,7 @@
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(158, 240, 26, 0.8), 0 0 20px rgba(158, 240, 26, 0.4);
             animation: nodeGlow 2s ease-in-out infinite;
+            z-index: 0;
         }
 
         @keyframes nodeGlow {
@@ -393,26 +413,26 @@
         /* Ambient Glow Circle */
         .ambient-glow {
             position: absolute;
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(158, 240, 26, 0.08) 0%, transparent 70%);
+            width: 900px;
+            height: 900px;
+            background: radial-gradient(circle, rgba(158, 240, 26, 0.12) 0%, transparent 70%);
             top: 10%;
             left: 5%;
             z-index: -1;
-            filter: blur(100px);
+            filter: blur(120px);
             pointer-events: none;
             animation: ambientPulse 8s ease-in-out infinite;
         }
 
         .ambient-glow-2 {
             position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(74, 222, 128, 0.06) 0%, transparent 70%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(74, 222, 128, 0.1) 0%, transparent 70%);
             top: 40%;
             right: 10%;
             z-index: -1;
-            filter: blur(90px);
+            filter: blur(100px);
             pointer-events: none;
             animation: ambientPulse 10s ease-in-out infinite;
             animation-delay: -3s;
@@ -538,6 +558,91 @@
             background: rgba(158, 240, 26, 0.08);
             color: var(--accent);
         }
+
+        /* Professional Header Typography */
+        .brand-icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-orbit {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 10px rgba(158, 240, 26, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .brand-orbit:hover {
+            filter: drop-shadow(0 0 20px rgba(158, 240, 26, 0.8));
+            transform: scale(1.1);
+        }
+
+        .brand-glow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(158, 240, 26, 0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(20px);
+            animation: brandPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes brandPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .brand-name {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            background: linear-gradient(135deg, #ffffff 0%, #9ef01a 50%, #22c55e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-tagline {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: rgba(158, 240, 26, 0.7);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .nav-link-hover {
+            position: relative;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            padding: 0.5rem 0;
+        }
+
+        .nav-link-hover::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link-hover:hover::after {
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -561,15 +666,21 @@
 
     <!-- Navigation Header -->
     <nav class="w-full py-6 px-6 md:px-12 flex justify-between items-center z-50">
-        <div class="flex items-center gap-2">
-            <img src="./assets/icons/cryptotracker-orbit.png" alt="" class="brand-orbit w-8 h-8" width="32" height="32">
-            <span class="font-bold text-xl tracking-tight text-white">CryptoTracker</span>
+        <div class="flex items-center gap-3">
+            <div class="brand-icon-container">
+                <img src="./assets/icons/cryptotracker-orbit.png" alt="CryptoTracker" class="brand-orbit w-10 h-10" width="40" height="40">
+                <div class="brand-glow"></div>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">CryptoTracker</span>
+                <span class="brand-tagline">AI-Powered Intelligence</span>
+            </div>
         </div>
         <div class="hidden md:flex gap-8 text-sm font-semibold text-gray-400">
-            <a href="#" class="hover:text-white transition">Markets</a>
-            <a href="#" class="hover:text-white transition">DEX Scan</a>
-            <a href="#" class="hover:text-white transition">AI Intel</a>
-            <a href="#" class="hover:text-white transition">Safety</a>
+            <a href="#" class="nav-link-hover hover:text-white transition">Markets</a>
+            <a href="#" class="nav-link-hover hover:text-white transition">DEX Scan</a>
+            <a href="#" class="nav-link-hover hover:text-white transition">AI Intel</a>
+            <a href="#" class="nav-link-hover hover:text-white transition">Safety</a>
         </div>
         <div>
             <a href="./dashboard.html" class="btn-accent-nav px-6 py-3 text-sm font-bold rounded-full transition-all duration-300 flex items-center gap-2">
@@ -825,66 +936,139 @@
         `;
         document.head.appendChild(style);
 
-        // TRON-Style Light Ribbons with Random Multiple Paths
+        // TRON Light Bike Trails - Following Grid Lines
         const lightRibbonsContainer = document.getElementById('lightRibbons');
-        const numRibbons = 12;
+        const gridSize = 50; // Match CSS --grid-size
+        const numBikes = 15;
 
-        // Create ribbons with different random paths
-        for (let i = 0; i < numRibbons; i++) {
+        // Create bike trails that follow grid lines
+        for (let i = 0; i < numBikes; i++) {
             const ribbon = document.createElement('div');
             
-            // Randomly determine type
-            const rand = Math.random();
-            let className = 'light-ribbon';
+            // Randomly choose direction
+            const isHorizontal = Math.random() > 0.5;
+            const duration = 4 + Math.random() * 4;
+            const delay = Math.random() * -8;
             
-            if (rand < 0.4) {
-                // Diagonal ribbon with random path
-                className += ' diagonal';
-                ribbon.className = className;
+            // Snap to grid - positions divisible by gridSize
+            if (isHorizontal) {
+                ribbon.classList.add('light-ribbon', 'bike-horizontal');
                 
-                // Choose a random curvy path
-                const paths = ['ribbonPath1', 'ribbonPath2', 'ribbonPath3', 'ribbonPath4'];
-                const randomPath = paths[Math.floor(Math.random() * paths.length)];
+                // Snap vertical position to grid
+                const gridY = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+                ribbon.style.top = `${gridY}px`;
+                ribbon.style.left = '-150px';
                 
-                const duration = 8 + Math.random() * 6;
-                const delay = Math.random() * -10;
+                // Create grid-following path
+                const keyframes = generateHorizontalPath();
+                const pathName = `bikePath${i}`;
                 
-                ribbon.style.animation = `${randomPath} ${duration}s ease-in-out infinite`;
+                // Add the keyframes dynamically
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes ${pathName} {
+                        ${keyframes}
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                ribbon.style.animation = `${pathName} ${duration}s linear infinite`;
                 ribbon.style.animationDelay = `${delay}s`;
-                
-            } else if (rand < 0.7) {
-                // Vertical ribbon
-                className += ' vertical';
-                ribbon.className = className;
-                
-                ribbon.style.left = `${Math.random() * 90 + 5}%`;
-                const duration = 6 + Math.random() * 4;
-                const delay = Math.random() * -8;
-                
-                ribbon.style.animation = `ribbonVerticalStraight ${duration}s linear infinite`;
-                ribbon.style.animationDelay = `${delay}s`;
-                
             } else {
-                // Horizontal ribbon with slight angle variation
-                ribbon.className = className;
-                ribbon.style.top = `${Math.random() * 90 + 5}%`;
-                ribbon.style.width = '250px';
+                ribbon.classList.add('light-ribbon', 'bike-vertical');
                 
-                const angle = (Math.random() - 0.5) * 30; // -15 to 15 degrees
-                const direction = Math.random() > 0.5 ? 1 : -1; // left or right
-                const duration = 5 + Math.random() * 5;
-                const delay = Math.random() * -10;
+                // Snap horizontal position to grid
+                const gridX = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
+                ribbon.style.left = `${gridX}px`;
+                ribbon.style.top = '-150px';
                 
-                if (direction > 0) {
-                    ribbon.style.animation = `ribbonHorizontalStraight ${duration}s linear infinite`;
-                } else {
-                    ribbon.style.animation = `ribbonHorizontalStraight ${duration}s linear infinite reverse`;
-                }
+                // Create grid-following path
+                const keyframes = generateVerticalPath();
+                const pathName = `bikePath${i}`;
+                
+                // Add the keyframes dynamically
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes ${pathName} {
+                        ${keyframes}
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                ribbon.style.animation = `${pathName} ${duration}s linear infinite`;
                 ribbon.style.animationDelay = `${delay}s`;
-                ribbon.style.transform = `rotate(${angle}deg)`;
             }
             
             lightRibbonsContainer.appendChild(ribbon);
+        }
+
+        // Generate path for horizontal bikes (with 90-degree turns)
+        function generateHorizontalPath() {
+            let keyframes = '0% { ';
+            const segments = 3 + Math.floor(Math.random() * 3); // 3-5 segments
+            const duration = 100 / segments;
+            const startY = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            
+            keyframes += `transform: translateX(-150px); }\n`;
+            
+            let currentY = startY;
+            for (let i = 1; i < segments; i++) {
+                const progress = (duration * i).toFixed(0);
+                const shouldTurn = Math.random() > 0.6; // 40% chance to turn
+                
+                if (shouldTurn && i < segments - 1) {
+                    // Turn 90 degrees up or down
+                    const turn = Math.random() > 0.5 ? gridSize : -gridSize;
+                    currentY = Math.max(0, Math.min(currentY + turn, window.innerHeight));
+                    keyframes += `${progress}% { transform: translate(${window.innerWidth / segments * i}px, ${currentY - startY}px); }\n`;
+                } else {
+                    keyframes += `${progress}% { transform: translate(${window.innerWidth / segments * i}px, ${currentY - startY}px); }\n`;
+                }
+            }
+            
+            keyframes += `100% { transform: translateX(calc(100vw + 150px)); }\n`;
+            return keyframes.join('\n');
+        }
+
+        // Generate path for vertical bikes (with 90-degree turns)
+        function generateVerticalPath() {
+            const startY = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            const segments = 3 + Math.floor(Math.random() * 3);
+            const segmentHeight = (window.innerHeight + 300) / segments;
+            
+            const keyframes = [`0% { transform: translateY(-150px); }`];
+            
+            for (let i = 1; i < segments; i++) {
+                const progress = ((100 / segments) * i).toFixed(0);
+                keyframes.push(`${progress}% { transform: translateY(${segmentHeight * i}px); }`);
+            }
+            
+            keyframes.push(`100% { transform: translateY(calc(100vh + 150px)); }\n`);
+            return keyframes.join('\n');
+        }
+
+        // Generate path keyframes dynamically
+        function generateBikePathKeyframes(pathName) {
+            let path;
+            const paths = {
+                'path1': [
+                    '0% { left: -150px; top: 100px; }',
+                    '25% { left: 30%; top: 100px; }',
+                    '30% { left: 30%; top: 250px; }',
+                    '50% { left: 30%; top: 250px; }',
+                    '60% { left: 50%; top: 250px; }',
+                    '100% { left: calc(100vw + 150px); top: 250px; }'
+                ],
+                'path2': [
+                    '0% { left: calc(100vw + 150px); top: 300px; }',
+                    '20% { left: 70%; top: 300px; }',
+                    '30% { left: 70%; top: 150px; }',
+                    '60% { left: 70%; top: 150px; }',
+                    '100% { left: -150px; top: 150px; }'
+                ]
+            };
+            
+            return paths[pathName] || paths['path1'];
         }
 
         // Create Grid Glow Nodes at intersections
