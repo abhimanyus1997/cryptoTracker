@@ -377,6 +377,12 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
             this.checkRateLimit();
             const context = this.retriever.context(query);
             this.ui.stats.classList.remove('hidden');
+            
+            // Clear typing indicator after response
+            const clearTypingIndicator = () => {
+                const indicator = bubble.querySelector('.typing-indicator');
+                if (indicator) indicator.remove();
+            };
             if (this.isSuperAdmin()) {
                 this.ui.stats.innerHTML = `<span style="color:var(--accent);">⚡ Super Admin</span> · RAG: ${context ? context.split('\n\n').length : 0} context snippets · Unlimited`;
             } else if (this.isSubscribed()) {
@@ -578,6 +584,22 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
                 content.style.display = isExpanded ? 'none' : 'block';
                 icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
             });
+        }
+        
+        // Clear typing indicator
+        const indicator = bubble.querySelector('.typing-indicator');
+        if (indicator) indicator.remove();
+        
+        // Add token usage at bottom
+        if (data.usage) {
+            const tokenDiv = document.createElement('div');
+            tokenDiv.className = 'token-usage';
+            tokenDiv.innerHTML = `
+                <small style="color: var(--text-muted); font-size: 0.75rem;">
+                    Tokens: ${data.usage.prompt_tokens || 0} prompt + ${data.usage.completion_tokens || 0} completion = ${data.usage.total_tokens || 0} total
+                </small>
+            `;
+            bubble.appendChild(tokenDiv);
         }
         
         // Simulate typing effect for response
