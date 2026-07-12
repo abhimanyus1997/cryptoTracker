@@ -52,7 +52,51 @@ export default async function handler(req, res) {
     }
   }
 
-  // 2. Normal Zerion API Proxy flow
+  // 2. Check if we should route to LiteLLM
+  const { litellm } = req.query;
+  if (litellm === 'true') {
+    const apiKey = process.env.LITELLM_API_KEY || '';
+    const apiBase = process.env.LITELLM_API_BASE || 'http://13.126.102.204:4000';
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Missing LITELLM_API_KEY on host environment' });
+    }
+
+    try {
+      // Proxy request body directly to the local LiteLLM server
+      const response = await fetch(`${apiBase}/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(req.body)
+      });
+
+      if (!response.ok) {
+        return res.status(response.status).json({ error: `LiteLLM Proxy error: ${response.statusText}` });
+      }
+
+      // Support Server-Sent Events (SSE) streaming for LiteLLM
+      if (req.body.stream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        
+        const reader = response.body;
+        if (reader.readable) {
+          response.body.pipe(res);
+          return;
+        }
+      }
+
+      const data = await response.json();
+      return res.status(200).json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  // 3. Normal Zerion API Proxy flow
   if (!path) {
     return res.status(400).json({ error: 'Missing path parameter' });
   }

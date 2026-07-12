@@ -350,12 +350,14 @@ class AIClient {
                 });
             }
             let response;
-            if (this.provider === 'litellm') response = await this.callLiteLLM(query, context);
+            if (this.provider === 'litellm') response = await this.callLiteLLM(query, context, bubble);
             else if (this.provider === 'webllm') response = await this.callWebLLM(query, context, bubble);
             else if (this.provider === 'litert') response = await this.callLiteRT(query, context, bubble);
             else if (this.provider === 'gemini') response = await this.callGemini(query, context);
             else response = await this.callGroq(query, context);
-            bubble.innerHTML = this.render(response);
+            if (this.provider !== 'litellm' && this.provider !== 'webllm' && this.provider !== 'litert') {
+                bubble.innerHTML = this.render(response);
+            }
             this.incrementMessageCount();
         } catch (error) {
             bubble.innerHTML = `<span class="text-red-400">⚠️ ${this.escapeHtml(error.message)}</span>`;
@@ -400,7 +402,7 @@ class AIClient {
         return data.choices?.[0]?.message?.content || 'No response.';
     }
 
-    async callLiteLLM(query, context) {
+    async callLiteLLM(query, context, bubble) {
         const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'https://cryptotracker.abhimanyu.fyi'
             : '';
@@ -410,6 +412,7 @@ class AIClient {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model,
+                stream: true,
                 messages: [
                     { role: 'system', content: this.systemPrompt(context) },
                     { role: 'user', content: query }
@@ -422,8 +425,41 @@ class AIClient {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.error || `LiteLLM proxy error: ${response.status}`);
         }
-        const data = await response.json();
-        return data.choices?.[0]?.message?.content || 'No response generated.';
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let fullText = '';
+        bubble.innerHTML = '';
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    const cleaned = line.trim();
+                    if (!cleaned || cleaned === 'data: [DONE]') continue;
+                    if (cleaned.startsWith('data: ')) {
+                        try {
+                            const parsed = JSON.parse(cleaned.substring(6));
+                            const text = parsed.choices?.[0]?.delta?.content || '';
+                            if (text) {
+                                fullText += text;
+                                bubble.innerHTML = this.render(fullText);
+                                this.ui.box.scrollTop = this.ui.box.scrollHeight;
+                            }
+                        } catch (e) {
+                            // Non-json SSE lines are ignored
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error reading stream', e);
+        }
+
+        return fullText || 'No response generated.';
     }
 
     saveSettings() {
