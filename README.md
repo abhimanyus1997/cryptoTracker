@@ -6,25 +6,6 @@ Live site: [cryptotracker.abhimanyu.fyi](https://cryptotracker.abhimanyu.fyi)
 
 ---
 
-## Architecture & Core Flow
-
-The application relies entirely on client-side infrastructure and serverless route helpers.
-
-```mermaid
-graph TD
-    A[Client Browser] -->|1. WebGPU / Local Model| B(LiteRT Gemma / Qwen)
-    A -->|2. Reads Local Data| C[lexical Retriever RAG]
-    A -->|3. API Request| D[Vercel Serverless Proxy /api/zerion]
-    D -->|4a. Wallet Holdings| E[Zerion API]
-    D -->|4b. Asset Valuation| F[CoinStats API]
-    A -->|5. Price Feed fallback| G[Binance API]
-```
-
-* **Serverless Backend Proxy**: Requests are routed via `/api/zerion` in [zerion.js](file:///home/abhimanyu/projects/cryptoTracker/api/zerion.js) which forwards requests safely to CoinStats and Zerion. Caching and key signing are processed securely server-side.
-* **On-Device LLM & RAG**: Prompt processing, dashboard parsing, and inference happen locally using `@litert-lm/core` via WebGPU.
-
----
-
 ## Key Features
 
 * **Comprehensive Holdings**: Automatically tracks assets, PnL parameters, transaction history, and NFT holdings.
