@@ -113,29 +113,51 @@
   const shortAddress = (address) => `${address.slice(0, 6)}…${address.slice(-4)}`;
 
   async function connectWallet() {
+    // Handle case where no Web3 provider exists at all
     if (!window.ethereum) {
-      button.querySelector('span').textContent = 'Install MetaMask';
+      if (button?.querySelector('span')) button.querySelector('span').textContent = 'Install MetaMask';
       window.open('https://metamask.io/download/', '_blank', 'noopener,noreferrer');
       return;
     }
-    button.disabled = true;
-    button.querySelector('span').textContent = 'Connecting…';
+    if (button) { button.disabled = true; button.querySelector('span').textContent = 'Connecting…'; }
     try {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      // Race eth_requestAccounts against a 30s timeout to unblock stuck pending requests
+      const accounts = await Promise.race([
+        window.ethereum.request({ method: 'eth_requestAccounts' }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
+      ]);
+      const account = accounts?.[0];
+      if (!account) throw new Error('No account returned');
       await refreshProfile(account);
-      button.querySelector('span').textContent = shortAddress(account);
-      button.classList.add('is-connected');
-      window.ethereum.on?.('accountsChanged', async ([next]) => {
-        button.querySelector('span').textContent = next ? shortAddress(next) : 'Connect wallet';
-        button.classList.toggle('is-connected', Boolean(next));
-        if (next) await refreshProfile(next); else resetProfile();
-      });
-      window.ethereum.on?.('chainChanged', () => window.ethereum.request({ method: 'eth_accounts' }).then(([a]) => a && refreshProfile(a)));
+      if (button) {
+        button.querySelector('span').textContent = shortAddress(account);
+        button.classList.add('is-connected');
+      }
+      // Only register listeners once
+      if (!window._ctWalletListening) {
+        window._ctWalletListening = true;
+        window.ethereum.on?.('accountsChanged', async ([next]) => {
+          if (button) {
+            button.querySelector('span').textContent = next ? shortAddress(next) : 'Connect wallet';
+            button.classList.toggle('is-connected', Boolean(next));
+          }
+          if (next) await refreshProfile(next); else resetProfile();
+        });
+        window.ethereum.on?.('chainChanged', () => window.ethereum.request({ method: 'eth_accounts' }).then(([a]) => a && refreshProfile(a)));
+      }
     } catch (error) {
-      button.querySelector('span').textContent = error.code === 4001 ? 'Connection declined' : 'Connect wallet';
-    } finally { button.disabled = false; }
+      if (button?.querySelector('span')) {
+        button.querySelector('span').textContent =
+          error.code === 4001 ? 'Connection declined' :
+          error.message === 'timeout' ? 'Timed out — retry' :
+          'Connect wallet';
+      }
+      console.warn('connectWallet error:', error);
+    } finally {
+      if (button) button.disabled = false;
+    }
   }
-  window.connectWallet = connectWallet; // expose for banner onclick
+  window.connectWallet = connectWallet; // expose for banner/inline onclick
 
   async function refreshProfile(account) {
     const [chainId, hexBalance, permissions] = await Promise.all([
@@ -607,6 +629,12 @@
 
   // Zerion API key save handler (from settings modal)
   window.addEventListener('DOMContentLoaded', () => {
+    // Safety-net: re-bind connect button in case IIFE ran before DOM was ready
+    const connectBtn = document.getElementById('connect-wallet');
+    if (connectBtn && !connectBtn._ctBound) {
+      connectBtn._ctBound = true;
+      connectBtn.addEventListener('click', connectWallet);
+    }
     initWalletTabs();
 
     const zerionInput = document.getElementById('zerion-key');
