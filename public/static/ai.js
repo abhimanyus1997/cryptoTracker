@@ -492,13 +492,9 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
         
         // Method 2: Check for natural thinking patterns
         if (!thinking) {
-            // Look for patterns like "Okay, the user asked..." or "Let me check..."
-            // Thinking is usually at the beginning, separated from response by double newline or specific markers
-            
             const lines = fullText.split('\n');
             const firstLine = lines[0] || '';
             
-            // Check if first line contains thinking indicators
             const isThinking = (
                 firstLine.toLowerCase().includes('user') ||
                 firstLine.toLowerCase().includes('let me') ||
@@ -507,43 +503,38 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
                 firstLine.toLowerCase().includes('looking at') ||
                 firstLine.toLowerCase().includes('checking') ||
                 firstLine.toLowerCase().includes('since') ||
-                firstLine.toLowerCase().includes('so,')
+                firstLine.toLowerCase().includes('so,') ||
+                firstLine.toLowerCase().includes('also,') ||
+                firstLine.toLowerCase().includes('that covers')
             );
             
             if (isThinking && lines.length > 3) {
-                // Find where thinking ends - look for double newline or specific markers
-                // Common patterns: "\n\n", or a line starting with a question/markdown
-                
                 let thinkingEndIndex = -1;
                 
-                // Pattern 1: Double newline
-                const doubleNewline = fullText.indexOf('\n\n');
-                if (doubleNewline > 0 && doubleNewline < fullText.length * 0.7) {
-                    thinkingEndIndex = doubleNewline;
+                // Look for  marker first
+                if (fullText.includes('')) {
+                    thinkingEndIndex = fullText.indexOf('');
                 }
                 
-                // Pattern 2: Look for emoji or response markers
+                // Or double newline
                 if (thinkingEndIndex === -1) {
-                    // Look for lines starting with numbers or clear answers
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (line && /^[\d]/.test(line) && line.length < 50) {
-                            thinkingEndIndex = fullText.indexOf(lines[i]);
-                            break;
-                        }
+                    const doubleNewline = fullText.indexOf('\n\n');
+                    if (doubleNewline > 0) {
+                        thinkingEndIndex = doubleNewline;
                     }
                 }
                 
-                // Pattern 3: Look for actual answer (starts with number or clear statement)
+                // Or greeting response
                 if (thinkingEndIndex === -1) {
                     for (let i = 1; i < lines.length; i++) {
                         const line = lines[i].trim();
-                        // Start of response: number, simple answer, greeting
                         if (line && (
-                            /^\d+\s*[\+\-\*\/=]/.test(line) || // Math: "1 + 2"
+                            line.startsWith('Hello') ||
+                            line.startsWith('Hi') ||
+                            line.startsWith('Hey') ||
                             /^Yes|^No|^Correct|^Sure/.test(line) ||
-                            line.includes('equals') ||
-                            !line.includes('user') && !line.includes('check') && !line.includes('context')
+                            /^\d+\s*[\+\-\*\/=]/.test(line) ||
+                            (line.includes('!') && line.length < 100)
                         )) {
                             thinkingEndIndex = fullText.indexOf(lines[i]);
                             break;
@@ -551,10 +542,12 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
                     }
                 }
                 
-                if (thinkingEndIndex > 50) { // Ensure thinking is substantial
+                if (thinkingEndIndex > 20) {
                     thinking = fullText.substring(0, thinkingEndIndex).trim();
                     responseText = fullText.substring(thinkingEndIndex).trim();
                 }
+            }
+        }
             }
         }
         
