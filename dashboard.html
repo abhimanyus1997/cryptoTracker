@@ -90,9 +90,10 @@
             </div>
         </div>
 
-        <!-- Wallet Profile Panel (toggled from profile button) -->
-        <div id="wallet-profile-panel" class="hidden mb-6">
-            <section class="card wallet-profile fade-in p-5" aria-labelledby="wallet-title">
+        <!-- Wallet Profile Panel (Fixed Dropdown Modal) -->
+        <div id="wallet-profile-panel" class="hidden" style="position:fixed; top:80px; right:20px; width:400px; max-width:90vw; z-index:10000;">
+            <div style="position:absolute; top:-8px; right:30px; width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:8px solid rgba(38,50,56,0.98);"></div>
+            <section class="card wallet-profile fade-in p-5" style="background:rgba(38,50,56,0.98); backdrop-filter:blur(16px); max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.6);" aria-labelledby="wallet-title">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div><h2 id="wallet-title" class="text-lg font-bold text-white">Wallet Profile</h2></div>
                     <div class="flex items-center gap-2">
