@@ -661,10 +661,28 @@
       for (const col of data.data) {
         const { collection_info, nfts_count, total_floor_price } = col.attributes;
         const name = collection_info?.name || 'Unknown';
-        const icon = collection_info?.content?.icon?.url || '';
+        const icon = collection_info?.content?.icon?.url || collection_info?.content?.image?.url || '';
+        const description = collection_info?.description || '';
+        const chain = col.relationships?.chain?.data?.id || '';
+        
         const row = document.createElement('div');
         row.className = 'wallet-token-row';
-        row.style.gridTemplateColumns = '1fr auto auto';
+        row.style.cssText = 'grid-template-columns: auto 1fr auto auto; padding:.75rem; gap:.75rem; align-items:center;';
+        row.innerHTML = `
+          ${icon ? `<img src="${icon}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">` : '<div style="width:48px;height:48px;background:#1a1f27;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="color:#6f786d;font-size:1.2rem;"></i></div>'}
+          <div>
+            <strong style="font-size:.75rem;">${name}</strong>
+            <div style="font-size:.6rem; color:#6f786d; margin-top:.2rem;">
+              ${nfts_count} NFT${nfts_count !== 1 ? 's' : ''}
+              ${chain ? ` · ${chain}` : ''}
+            </div>
+            ${description ? `<div style="font-size:.6rem; color:#94a3b8; margin-top:.3rem; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${description.slice(0, 60)}${description.length > 60 ? '...' : ''}</div>` : ''}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:.72rem; color:#6f786d;">Floor Price</div>
+            <strong style="color:var(--accent); font-size:.8rem;">${total_floor_price ? '$' + total_floor_price.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '—'}</strong>
+          </div>
+        `;
         row.innerHTML = `
           <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
             ${icon ? `<img src="${icon}" style="width:18px;height:18px;border-radius:4px;" onerror="this.style.display='none'">` : ''}
@@ -698,7 +716,8 @@
 
     scanTokens.textContent = `RPC fallback: scanning ${mainnetChains.length} chains...`;
     try {
-      const markets = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1').then(r => r.json()).catch(() => []);
+      // Fetch top 500 tokens by market cap
+      const markets = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1').then(r => r.json()).catch(() => []);
       const accountArg = address.slice(2).padStart(64, '0');
       const found = [];
       let checked = 0;
@@ -727,7 +746,10 @@
           const arr = Array.isArray(results) ? results : [];
           for (let j = 0; j < batch.length; j++) {
             const value = arr.find(r => r.id === j)?.result || '0x0';
-            if (BigInt(value) > 0n) found.push({ ...batch[j], chainName });
+            if (BigInt(value) > 0n) {
+              const quantity = Number(BigInt(value)) / 1e18; // Convert from wei
+              found.push({ ...batch[j], chainName, quantity });
+            }
           }
           checked += batch.length;
           tokenList.textContent = `Scanning ${chainName} · ${checked} tokens checked…`;
@@ -740,15 +762,71 @@
         return;
       }
 
-      for (const item of found) {
-        const row = document.createElement('div');
-        row.className = 'wallet-token-row';
-        row.innerHTML = `<strong>${item.market.symbol.toUpperCase()}</strong><span>${item.chainName}</span><span>$${item.market.current_price?.toLocaleString('en-US') || '—'}</span>`;
-        tokenList.appendChild(row);
-        if (item.market.current_price) {
-          addToHoldings(item.market.symbol.toUpperCase() + 'USDT', item.market.name, item.market.symbol.toUpperCase(), 0, item.market.current_price);
+      // Sort by value descending
+      found.sort((a, b) => (b.quantity * b.market.current_price) - (a.quantity * a.market.current_price));
+
+      // Add sorting controls
+      const sortControls = document.createElement('div');
+      sortControls.style.cssText = 'display:flex; gap:.5rem; margin-bottom:.5rem; font-size:.65rem;';
+      sortControls.innerHTML = `
+        <button id="sort-value" style="background:var(--accent);color:#111;padding:.25rem .5rem;border-radius:4px;border:none;cursor:pointer;font-weight:700;">Sort by Value ↓</button>
+        <button id="sort-name" style="background:none;color:var(--accent);padding:.25rem .5rem;border-radius:4px;border:1px solid var(--accent);cursor:pointer;">Sort by Name ↑</button>
+        <button id="sort-rank" style="background:none;color:var(--accent);padding:.25rem .5rem;border-radius:4px;border:1px solid var(--accent);cursor:pointer;">Sort by Rank ↑</button>
+      `;
+      tokenList.appendChild(sortControls);
+
+      const renderTokens = (sortedTokens) => {
+        // Remove existing token rows
+        while (tokenList.children.length > 1) {
+          tokenList.removeChild(tokenList.lastChild);
         }
-      }
+        
+        for (const item of sortedTokens) {
+          const symbol = item.market.symbol.toUpperCase();
+          const rank = item.market.market_cap_rank;
+          const quantity = item.quantity;
+          const price = item.market.current_price || 0;
+          const value = quantity * price;
+          
+          const row = document.createElement('div');
+          row.className = 'wallet-token-row';
+          row.style.cssText = 'grid-template-columns: 1fr auto auto auto auto; padding:.55rem .6rem; gap:.5rem;';
+          row.innerHTML = `
+            <div style="display:flex; align-items:center; gap:.5rem;">
+              <span style="font-size:.55rem; color:#6f786d; font-weight:700;">#${rank}</span>
+              <strong>${symbol}</strong>
+              <span style="font-size:.6rem; color:#6f786d;">${item.market.name}</span>
+            </div>
+            <span style="font-size:.65rem; color:#6f786d;">${item.chainName}</span>
+            <span>${quantity.toLocaleString('en-US', { maximumFractionDigits: 6 })}</span>
+            <span>$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+            <span style="color:var(--accent); font-weight:700;">$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+          `;
+          tokenList.appendChild(row);
+          
+          if (price > 0) {
+            addToHoldings(symbol + 'USDT', item.market.name, symbol, quantity, price);
+          }
+        }
+      };
+      
+      renderTokens(found);
+      
+      // Add sorting event listeners
+      document.getElementById('sort-value')?.addEventListener('click', () => {
+        const sorted = [...found].sort((a, b) => (b.quantity * b.market.current_price) - (a.quantity * a.market.current_price));
+        renderTokens(sorted);
+      });
+      
+      document.getElementById('sort-name')?.addEventListener('click', () => {
+        const sorted = [...found].sort((a, b) => a.market.symbol.localeCompare(b.market.symbol));
+        renderTokens(sorted);
+      });
+      
+      document.getElementById('sort-rank')?.addEventListener('click', () => {
+        const sorted = [...found].sort((a, b) => a.market.market_cap_rank - b.market.market_cap_rank);
+        renderTokens(sorted);
+      });
     } catch (e) {
       tokenList.textContent = 'Scan failed.';
     } finally {
