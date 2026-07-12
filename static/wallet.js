@@ -157,10 +157,8 @@
       document.getElementById('detail-permissions').textContent = permissions.length ? permissions.map(p => p.parentCapability || 'account').join(', ') : 'Read-only (no write access)';
     }
 
-    if (hasZerionKey()) {
-      loadZerionPortfolio(account);
-      loadZerionPnL(account);
-    }
+    loadZerionPortfolio(account);
+    loadZerionPnL(account);
   }
 
   function resetProfile() {
@@ -569,18 +567,16 @@
         : '<i class="fas fa-radar"></i> Scan tokens (limited — add Zerion key for full scan)';
     }
 
-    // Auto-load portfolio with default wallet if Zerion key is available
-    if (hasZerionKey()) {
-      const addr = getActiveAddress();
-      profile.address.textContent = shortAddress(addr);
-      profile.address.title = addr;
-      profile.state.textContent = 'Viewing';
-      if (document.getElementById('detail-full-address')) {
-        document.getElementById('detail-full-address').textContent = addr;
-      }
-      loadZerionPortfolio(addr);
-      loadZerionPnL(addr);
+    // Auto-load portfolio with default wallet
+    const addr = getActiveAddress();
+    profile.address.textContent = shortAddress(addr);
+    profile.address.title = addr;
+    profile.state.textContent = 'Viewing';
+    if (document.getElementById('detail-full-address')) {
+      document.getElementById('detail-full-address').textContent = addr;
     }
+    loadZerionPortfolio(addr);
+    loadZerionPnL(addr);
   });
 
   window.addEventListener('load', () => {
