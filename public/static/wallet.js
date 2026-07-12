@@ -219,6 +219,19 @@
   console.log('✅ connectWallet exposed to window.connectWallet');
 
   async function refreshProfile(account) {
+    console.log('🔄 Refreshing profile for account:', account);
+    
+    // Ask user before fetching wallet data
+    const shouldFetch = window._ctAutoFetch || confirm('Fetch wallet portfolio data?\n\nClick OK to load your portfolio and transactions.\nClick Cancel to just view the connected address.');
+    
+    if (!shouldFetch) {
+      console.log('⏭️ User opted out of fetching wallet data');
+      profile.state.textContent = 'Connected (data not loaded)';
+      profile.address.textContent = shortAddress(account);
+      profile.address.title = account;
+      return;
+    }
+    
     const [chainId, hexBalance, permissions] = await Promise.all([
       window.ethereum.request({ method: 'eth_chainId' }),
       window.ethereum.request({ method: 'eth_getBalance', params: [account, 'latest'] }),
@@ -755,33 +768,20 @@
         : '<i class="fas fa-radar"></i> Scan tokens (limited — add Zerion key for full scan)';
     }
 
-    // Auto-load portfolio with default wallet
+    // Show default wallet address but don't auto-fetch data
     const addr = getActiveAddress();
     profile.address.textContent = shortAddress(addr);
     profile.address.title = addr;
-    profile.state.textContent = 'Viewing';
+    profile.state.textContent = 'Ready to connect';
     if (document.getElementById('detail-full-address')) {
       document.getElementById('detail-full-address').textContent = addr;
     }
-    loadZerionPortfolio(addr);
-    loadZerionPnL(addr);
+    // Don't auto-fetch - wait for user action
   });
 
   window.addEventListener('load', () => {
-    if (!sessionStorage.getItem('ct_web3_checked')) {
-      sessionStorage.setItem('ct_web3_checked', '1');
-      if (window.ethereum) {
-        // Show a non-blocking banner instead of window.confirm (blocked by browsers on HTTPS)
-        const banner = document.createElement('div');
-        banner.id = 'web3-connect-banner';
-        banner.style.cssText = 'position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(22,28,36,.95);border:1px solid rgba(52,211,153,.3);border-radius:12px;padding:.7rem 1.2rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 8px 32px rgba(0,0,0,.4);font-size:.8rem;color:#e2e8f0;backdrop-filter:blur(12px);';
-        banner.innerHTML = `<i class="fas fa-fingerprint" style="color:var(--accent);"></i><span>Web3 wallet detected &mdash; connect to see your live portfolio</span><button onclick="connectWallet();this.closest('#web3-connect-banner').remove();" style="background:var(--accent);color:#111;border:none;border-radius:8px;padding:.3rem .8rem;cursor:pointer;font-weight:700;font-size:.75rem;white-space:nowrap;">Connect</button><button onclick="this.closest('#web3-connect-banner').remove();" style="background:none;border:none;color:#6f786d;cursor:pointer;font-size:1rem;line-height:1;">&times;</button>`;
-        document.body.appendChild(banner);
-        setTimeout(() => banner?.remove(), 10000);
-      } else if (button?.querySelector('span')) {
-        button.querySelector('span').textContent = 'Install MetaMask';
-      }
-    }
+    // Don't auto-prompt on load - let user click Connect button manually
+    // No wallet detection banner - user must explicitly click "Connect wallet"
   });
 
   preview?.addEventListener('click', () => {
