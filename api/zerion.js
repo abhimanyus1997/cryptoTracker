@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     }
 
     // Default or custom endpoint matching CoinStats coins request
-    const targetUrl = 'https://open-api.coinstats.app/v1/coins?limit=1000';
+    const targetUrl = 'https://api.coinstats.app/v1/coins?limit=1000';
 
     try {
       const headers = {
