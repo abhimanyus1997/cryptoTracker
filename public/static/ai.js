@@ -461,21 +461,47 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
         const data = await response.json();
         const fullText = data.choices?.[0]?.message?.content || 'No response.';
         
-        // Extract thinking section if present
-        const thinkingMatch = fullText.match(/<thinking>([\s\S]*?)<\/thinking>/);
-        const thinking = thinkingMatch ? thinkingMatch[1].trim() : null;
-        const responseText = thinking 
-            ? fullText.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim()
-            : fullText;
+        // Extract thinking - look for explicit tags OR natural thinking patterns
+        let thinking = null;
+        let responseText = fullText;
         
-        // Display thinking in collapsible section if enabled
-        if (thinking && AI_CONFIG.litellm.showThinking) {
+        // Method 1: Check for <thinking> tags
+        const thinkingMatch = fullText.match(/<thinking>([\s\S]*?)<\/thinking>/);
+        if (thinkingMatch) {
+            thinking = thinkingMatch[1].trim();
+            responseText = fullText.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim();
+        }
+        
+        // Method 2: Check for natural thinking (text before first newline or "Let me...")
+        if (!thinking) {
+            // Look for patterns like "Okay, the user asked..." or "Let me check..."
+            const lines = fullText.split('\n');
+            if (lines.length > 1 && (
+                lines[0].toLowerCase().includes('user') ||
+                lines[0].toLowerCase().includes('let me') ||
+                lines[0].toLowerCase().includes('okay') ||
+                lines[0].toLowerCase().includes('the user')
+            )) {
+                // Find where thinking ends (usually before actual response)
+                const thinkingEndIndex = fullText.indexOf('\n\n') !== -1 
+                    ? fullText.indexOf('\n\n') 
+                    : fullText.indexOf('\n');
+                
+                if (thinkingEndIndex > 0) {
+                    thinking = fullText.substring(0, thinkingEndIndex).trim();
+                    responseText = fullText.substring(thinkingEndIndex).trim();
+                }
+            }
+        }
+        
+        // Display thinking in collapsible section if found
+        if (thinking && AI_CONFIG.litellm.showThinking && thinking.length > 20) {
             const thinkingSection = document.createElement('div');
             thinkingSection.className = 'ai-thinking-section';
             thinkingSection.innerHTML = `
                 <div class="ai-thinking-header" onclick="this.parentElement.classList.toggle('expanded')">
                     <i class="fas fa-brain"></i>
-                    <span>AI Thinking</span>
+                    <span>AI Reasoning</span>
                     <i class="fas fa-chevron-down" style="margin-left: auto; transition: transform 0.2s;"></i>
                 </div>
                 <div class="ai-thinking-content" style="display: none;">
