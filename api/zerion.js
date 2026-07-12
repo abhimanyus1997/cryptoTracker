@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
     try {
       console.log('Proxying LiteLLM request to:', `${apiBase}/v1/chat/completions`);
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.log('Model:', req.body.model);
       
       const response = await fetch(`${apiBase}/v1/chat/completions`, {
         method: 'POST',
@@ -74,6 +74,9 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify(req.body),
         signal: AbortSignal.timeout(30000) // 30 second timeout
+      }).catch(err => {
+        console.error('Fetch failed:', err.message);
+        throw new Error(`Cannot connect to LiteLLM at ${apiBase}: ${err.message}`);
       });
 
       if (!response.ok) {
