@@ -28,7 +28,8 @@ const AI_CONFIG = {
     litellm: {
         apiBase: 'http://13.126.102.204:4000',
         apiKey: '',
-        model: 'nvidia.nemotron-nano-9b-v2'
+        model: 'nvidia.nemotron-nano-9b-v2',
+        showThinking: true // Enable thinking display
     },
     rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 },
     superAdmin: (window.ENV_SUPERUSER_WALLET || '').toLowerCase(),
@@ -304,7 +305,16 @@ class AIClient {
     }
 
     systemPrompt(retrieved) {
-        return `You are CryptoTracker's helpful AI analyst. Provide clear, actionable insights about cryptocurrency holdings, market trends, and portfolio management. 
+        return `You are CryptoTracker's helpful AI analyst. Provide clear, actionable insights about cryptocurrency holdings, market trends, and portfolio management.
+
+<thinking>
+Before responding, think through:
+1. What is the user asking?
+2. What data is available in the context?
+3. What insights can I provide?
+4. Is this general chat or specific analysis?
+5. What's the best way to present this?
+</thinking>
 
 When context is available:
 - Cite sources using [1], [2], etc.
@@ -318,7 +328,7 @@ When asked general questions (greetings, general crypto questions):
 
 Always:
 - Be helpful and engaging
--Avoid disclaimers unless discussing actual financial advice
+- Avoid disclaimers unless discussing actual financial advice
 - Keep responses under 2 paragraphs for simple questions
 - Provide detailed analysis when asked about holdings
 
@@ -451,18 +461,56 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
         const data = await response.json();
         const fullText = data.choices?.[0]?.message?.content || 'No response.';
         
-        // Simulate typing effect
-        await this.simulateTyping(fullText, bubble);
-        return fullText;
+        // Extract thinking section if present
+        const thinkingMatch = fullText.match(/<thinking>([\s\S]*?)<\/thinking>/);
+        const thinking = thinkingMatch ? thinkingMatch[1].trim() : null;
+        const responseText = thinking 
+            ? fullText.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim()
+            : fullText;
+        
+        // Display thinking in collapsible section if enabled
+        if (thinking && AI_CONFIG.litellm.showThinking) {
+            const thinkingSection = document.createElement('div');
+            thinkingSection.className = 'ai-thinking-section';
+            thinkingSection.innerHTML = `
+                <div class="ai-thinking-header" onclick="this.parentElement.classList.toggle('expanded')">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Thinking</span>
+                    <i class="fas fa-chevron-down" style="margin-left: auto; transition: transform 0.2s;"></i>
+                </div>
+                <div class="ai-thinking-content" style="display: none;">
+                    ${this.render(thinking)}
+                </div>
+            `;
+            bubble.appendChild(thinkingSection);
+            
+            // Add toggle functionality
+            const header = thinkingSection.querySelector('.ai-thinking-header');
+            const content = thinkingSection.querySelector('.ai-thinking-content');
+            const icon = thinkingSection.querySelector('.fa-chevron-down');
+            
+            header.addEventListener('click', () => {
+                const isExpanded = thinkingSection.classList.contains('expanded');
+                content.style.display = isExpanded ? 'none' : 'block';
+                icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        }
+        
+        // Simulate typing effect for response
+        await this.simulateTyping(responseText, bubble);
+        return responseText;
     }
     
     async simulateTyping(text, bubble) {
-        bubble.innerHTML = '';
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'bot-message';
+        bubble.appendChild(messageDiv);
+        
         const words = text.split(' ');
         
         // Faster typing for better UX
         for (let i = 0; i < words.length; i++) {
-            bubble.innerHTML = this.render(words.slice(0, i + 1).join(' '));
+            messageDiv.innerHTML = this.render(words.slice(0, i + 1).join(' '));
             this.ui.box.scrollTop = this.ui.box.scrollHeight;
             
             // Variable speed: 10-30ms for natural feel
