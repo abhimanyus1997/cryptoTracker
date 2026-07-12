@@ -27,7 +27,7 @@ const AI_CONFIG = {
     groqModel: 'openai/gpt-oss-120b',
     litellm: {
         apiBase: 'http://13.126.102.204:4000',
-        apiKey: 'REDACTED_LITELLM_KEY',
+        apiKey: window.ENV_LITELLM_KEY || 'sk-Q8oyqZuoy7zUDhMljWwmrw',
         model: 'nvidia.nemotron-nano-9b-v2'
     },
     rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 },
