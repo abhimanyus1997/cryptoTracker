@@ -1,4 +1,4 @@
-# 🟢 CryptoTracker
+# CryptoTracker
 
 A high-performance, privacy-first cryptocurrency portfolio dashboard. It integrates real-time DEX scanning, local WebGPU AI analytics, and historical metric evaluation without server custody.
 
@@ -6,7 +6,7 @@ Live site: [cryptotracker.abhimanyu.fyi](https://cryptotracker.abhimanyu.fyi)
 
 ---
 
-## 🛠️ Architecture & Core Flow
+## Architecture & Core Flow
 
 The application relies entirely on client-side infrastructure and serverless route helpers.
 
@@ -25,17 +25,17 @@ graph TD
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-* 💼 **Comprehensive Holdings**: Automatically tracks assets, PnL parameters, transaction history, and NFT holdings.
-* ⚡ **CoinStats Integration**: First-choice pricing data retrieved via the secure backend proxy with instant fallback support.
-* 🛡️ **Dynamic Cache Bypass**: Superuser logins automatically bypass serverless cache pools to query real-time valuation updates.
-* 🤖 **Local-First AI Chat**: Gemini, Groq, and on-device LiteRT models analyze your active portfolio state fully privately.
-* 🎨 **Aurora Design System**: Interactive animated grids and premium glowing green light rays crafted entirely with CSS.
+* **Comprehensive Holdings**: Automatically tracks assets, PnL parameters, transaction history, and NFT holdings.
+* **CoinStats Integration**: First-choice pricing data retrieved via the secure backend proxy with instant fallback support.
+* **Dynamic Cache Bypass**: Superuser logins automatically bypass serverless cache pools to query real-time valuation updates.
+* **Local-First AI Chat**: Gemini, Groq, and on-device LiteRT models analyze your active portfolio state fully privately.
+* **Aurora Design System**: Interactive animated grids and premium glowing green light rays crafted entirely with CSS.
 
 ---
 
-## ⚙️ Development & Deployment
+## Development & Deployment
 
 ### Run Locally
 
@@ -63,13 +63,13 @@ vercel --prod
 
 ---
 
-## 🔒 Security & Privacy
+## Security & Privacy
 
 * **Zero Custody**: Private keys, credentials, and seeds are never requested.
 * **Secured Configs**: Sensitive keys are kept server-side to prevent client-side leakage.
 
 ---
 
-## 📄 License
+## License
 
 MIT © [abhimanyus1997](https://github.com/abhimanyus1997)
