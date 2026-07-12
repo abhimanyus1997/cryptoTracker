@@ -164,25 +164,39 @@
         button.classList.add('is-connected');
       }
       
-      // Only register listeners once
-      if (!window._ctWalletListening) {
-        console.log('👂 Registering wallet event listeners');
-        window._ctWalletListening = true;
-        window.ethereum.on?.('accountsChanged', async ([next]) => {
-          console.log('🔄 Account changed:', next);
-          if (button) {
-            button.querySelector('span').textContent = next ? shortAddress(next) : 'Connect wallet';
-            button.classList.toggle('is-connected', Boolean(next));
-          }
-          if (next) await refreshProfile(next); else resetProfile();
+      // Remove existing listeners before adding new ones to prevent memory leaks
+      if (window._ctWalletListeners) {
+        console.log('🧹 Removing old wallet event listeners');
+        window._ctWalletListeners.accountsChanged?.forEach(handler => {
+          window.ethereum.removeListener?.('accountsChanged', handler);
         });
-        window.ethereum.on?.('chainChanged', () => {
-          console.log('🔗 Chain changed, refreshing account');
-          window.ethereum.request({ method: 'eth_accounts' }).then(([a]) => a && refreshProfile(a));
+        window._ctWalletListeners.chainChanged?.forEach(handler => {
+          window.ethereum.removeListener?.('chainChanged', handler);
         });
-      } else {
-        console.log('✋ Event listeners already registered, skipping');
       }
+      window._ctWalletListeners = { accountsChanged: [], chainChanged: [] };
+
+      console.log('👂 Registering wallet event listeners');
+      
+      const accountsChangedHandler = async ([next]) => {
+        console.log('🔄 Account changed:', next);
+        if (button) {
+          button.querySelector('span').textContent = next ? shortAddress(next) : 'Connect wallet';
+          button.classList.toggle('is-connected', Boolean(next));
+        }
+        if (next) await refreshProfile(next); else resetProfile();
+      };
+      
+      const chainChangedHandler = () => {
+        console.log('🔗 Chain changed, refreshing account');
+        window.ethereum.request({ method: 'eth_accounts' }).then(([a]) => a && refreshProfile(a));
+      };
+      
+      window.ethereum.on?.('accountsChanged', accountsChangedHandler);
+      window.ethereum.on?.('chainChanged', chainChangedHandler);
+      
+      window._ctWalletListeners.accountsChanged.push(accountsChangedHandler);
+      window._ctWalletListeners.chainChanged.push(chainChangedHandler);
     } catch (error) {
       console.error('❌ connectWallet error:', error);
       console.error('Error code:', error.code);

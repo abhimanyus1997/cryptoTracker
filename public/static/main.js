@@ -100,7 +100,7 @@ function populateCoinDropdowns() {
 
     predictSelect.value = 'ETHUSDT';
     updatePredictionChart('ETHUSDT'); // Initial load
-    console.log("Coin dropdowns populated");
+    console.log("Coin dropdowns populated with", tradingPairs.length, "pairs");
 }
 
 async function fetchHistoricalPrice(symbol, date) {
@@ -118,7 +118,16 @@ async function fetchHistoricalPrice(symbol, date) {
     }
 }
 
+let lastPriceFetch = 0;
+const PRICE_FETCH_DEBOUNCE = 5000; // 5 seconds
+
 async function fetchPrices() {
+    const now = Date.now();
+    if (now - lastPriceFetch < PRICE_FETCH_DEBOUNCE) {
+        console.log("⏭️ Skipping duplicate price fetch (debounced)");
+        return;
+    }
+    lastPriceFetch = now;
     console.log("Fetching prices...");
 
     // Portfolio & Summary Skeletons on initial load
