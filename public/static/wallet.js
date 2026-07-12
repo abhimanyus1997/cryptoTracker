@@ -263,6 +263,11 @@
           if (qty > 0 && price > 0) totalValue += qty * price;
         }
       }
+      window.walletPortfolioSummary = {
+        totalValue,
+        holdingCount: balances.reduce((count, item) => count + (item.balances || []).filter(token => Number(token.amount || 0) > 0).length, 0)
+      };
+      if (typeof initPerformanceChart === 'function') initPerformanceChart();
 
       if (portfolioEl) {
         portfolioEl.innerHTML = `
@@ -305,6 +310,8 @@
       const totalValue = attrs.total.positions;
       const change24h = attrs.changes?.absolute_1d ?? 0;
       const changePct = attrs.changes?.percent_1d ?? 0;
+      window.walletPortfolioSummary = { totalValue, holdingCount: 'multiple' };
+      if (typeof initPerformanceChart === 'function') initPerformanceChart();
       
       const portfolioHtml = `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
@@ -341,6 +348,8 @@
         if (qty > 0 && price > 0) totalValue += qty * price;
       }
     }
+    window.walletPortfolioSummary = { totalValue, holdingCount: balances.reduce((count, item) => count + (item.balances || []).filter(token => Number(token.amount || 0) > 0).length, 0) };
+    if (typeof initPerformanceChart === 'function') initPerformanceChart();
     el.innerHTML = `
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
         <div><span>Total Value</span><strong>$${totalValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>

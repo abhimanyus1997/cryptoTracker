@@ -687,6 +687,26 @@ async function initPerformanceChart(timeframe = '1M') {
     console.log("Initializing performance chart with timeframe:", timeframe);
     let interval, limit;
     const allHoldings = [...portfolio, ...dexPortfolio];
+    const walletValue = Number(window.walletPortfolioSummary?.totalValue);
+    if (allHoldings.length === 0 && Number.isFinite(walletValue)) {
+        const labels = Array.from({ length: 30 }, (_, index) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (29 - index));
+            return date.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+        });
+        const perfCtx = document.getElementById('performanceChart')?.getContext('2d');
+        if (!perfCtx) return;
+        if (perfChart) perfChart.destroy();
+        perfChart = new Chart(perfCtx, {
+            type: 'line',
+            data: { labels, datasets: [{ label: `Connected Wallet Value (${selectedCurrency})`, data: labels.map(() => walletValue), borderColor: '#9EF01A', backgroundColor: 'rgba(158, 240, 26, 0.18)', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: true }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#94a3b8', callback: value => `${currencySymbols[selectedCurrency] || selectedCurrency}${value.toFixed(0)}` } }, x: { ticks: { color: '#94a3b8' } } }, plugins: { legend: { display: false } } }
+        });
+        document.getElementById('return-30d').textContent = '0.00%';
+        document.getElementById('max-drawdown').textContent = '0.0%';
+        document.getElementById('volatility').textContent = 'Low';
+        return;
+    }
     switch (timeframe) {
         case '1D': interval = '5m'; limit = 288; break;
         case '7D': interval = '1h'; limit = 168; break;

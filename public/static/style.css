@@ -930,6 +930,23 @@ tr:hover td {
   cursor: not-allowed;
 }
 
+.mobile-ai-fab {
+  min-height: 3.25rem;
+  gap: .45rem;
+  padding: .65rem .9rem;
+  font: 700 .72rem 'DM Mono', monospace;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.mobile-ai-fab .ai-fab-icon { width: 1.35rem; height: 1.35rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.4; }
+.mobile-ai-fab:active { transform: scale(.96); }
+
+@media (max-width: 380px) {
+  .mobile-ai-fab { width: 3.25rem; padding: .7rem; border-radius: 999px; }
+  .mobile-ai-fab span { display: none; }
+}
+
 /* Chat Stats Bar */
 .chat-stats-bar {
   padding: 0.35rem 1rem;
