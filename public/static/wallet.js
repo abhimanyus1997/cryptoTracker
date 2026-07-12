@@ -375,6 +375,8 @@
           const quantity = token.amount || 0;
           const price = token.price || 0;
           const value = quantity * price;
+          const icon = token.icon || token.image || '';
+          const name = token.name || token.symbol || 'Unknown';
           if (quantity <= 0) continue;
           foundAny = true;
 
@@ -383,6 +385,7 @@
           row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
           row.innerHTML = `
             <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
+              ${icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">` : ''}
               <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${token.symbol || '???'}</strong>
             </div>
             <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
@@ -425,6 +428,7 @@
             const quantity = token.amount || 0;
             const price = token.price || 0;
             const value = quantity * price;
+            const icon = token.icon || token.image || '';
             if (quantity <= 0) continue;
             foundAny = true;
 
@@ -433,6 +437,7 @@
             row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
             row.innerHTML = `
               <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
+                ${icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">` : ''}
                 <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${token.symbol || '???'}</strong>
               </div>
               <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
@@ -483,7 +488,7 @@
           row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
           row.innerHTML = `
             <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
-              ${icon ? `<img src="${icon}" style="width:16px;height:16px;border-radius:50%;" onerror="this.style.display='none'">` : ''}
+              ${icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">` : ''}
               <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${symbol}</strong>
             </div>
             <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
@@ -787,12 +792,14 @@
           const quantity = item.quantity;
           const price = item.market.current_price || 0;
           const value = quantity * price;
+          const icon = item.market.image || ''; // CoinGecko provides token images
           
           const row = document.createElement('div');
           row.className = 'wallet-token-row';
           row.style.cssText = 'grid-template-columns: 1fr auto auto auto auto; padding:.55rem .6rem; gap:.5rem;';
           row.innerHTML = `
             <div style="display:flex; align-items:center; gap:.5rem;">
+              ${icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">` : ''}
               <span style="font-size:.55rem; color:#6f786d; font-weight:700;">#${rank}</span>
               <strong>${symbol}</strong>
               <span style="font-size:.6rem; color:#6f786d;">${item.market.name}</span>
