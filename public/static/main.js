@@ -66,18 +66,20 @@ function getPortfolioSummaryText(prices) {
 }
 
 async function fetchTradingPairs() {
-    console.log("Fetching trading pairs...");
+    // Only fetch limited pairs for dropdown - no need for 1000 pairs
+    console.log("Fetching limited trading pairs...");
     try {
-        const response = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
-        tradingPairs = response.data.symbols
-            .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
-            .slice(0, 1000)
-            .map(s => ({ symbol: s.symbol, name: s.baseAsset, ticker: s.baseAsset }))
-            .sort((a, b) => a.name.localeCompare(b.name));
+        // Use a smaller subset of popular coins
+        const popularCoins = ['ETHUSDT', 'BTCUSDT', 'SOLUSDT', 'MATICUSDT', 'ADAUSDT', 'DOGEUSDT', 'DOTUSDT', 'LINKUSDT', 'AVAXUSDT', 'XRPUSDT', 'SCRUSDT'];
+        tradingPairs = popularCoins.map(sym => ({ 
+            symbol: sym, 
+            name: sym.replace('USDT', ''), 
+            ticker: sym.replace('USDT', '') 
+        }));
         populateCoinDropdowns();
-        console.log("Trading pairs fetched:", tradingPairs.length);
+        console.log("Trading pairs loaded:", tradingPairs.length);
     } catch (error) {
-        console.error('Error fetching trading pairs:', error);
+        console.error('Error setting trading pairs:', error);
     }
 }
 
@@ -144,38 +146,53 @@ async function fetchPrices() {
     let prices = {};
     let fetched = false;
 
-    // 1. Try CoinStats first as requested (with caching bypass for superuser)
+    // ONLY fetch prices for coins that are actually displayed or in portfolio
+    const neededSymbols = new Set([
+        'ETHUSDT', 'BTCUSDT', 'SOLUSDT', 'MATICUSDT', 'ADAUSDT', 
+        'DOGEUSDT', 'DOTUSDT', 'LINKUSDT', 'AVAXUSDT', 'XRPUSDT', 'SCRUSDT'
+    ]);
+    
+    // Add symbols from user's portfolio
+    if (window.portfolio && Array.isArray(window.portfolio)) {
+        window.portfolio.forEach(holding => neededSymbols.add(holding.symbol));
+    }
+    if (window.dexPortfolio && Array.isArray(window.dexPortfolio)) {
+        window.dexPortfolio.forEach(holding => neededSymbols.add(holding.symbol));
+    }
+
+    // 1. Try CoinStats first (only for needed coins)
     try {
-        const address = document.getElementById('wallet-address')?.title || '';
-        const isSuperAdmin = window.aiClient && typeof window.aiClient.isSuperAdmin === 'function' ? window.aiClient.isSuperAdmin() : false;
-        
         const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'https://cryptotracker.abhimanyu.fyi'
             : '';
-        const url = `${host}/api/zerion?coinstats=true${isSuperAdmin ? '&bypassCache=true' : ''}`;
+        const url = `${host}/api/zerion?coinstats=true`;
         const response = await axios.get(url);
         
         if (response.data && response.data.result) {
             response.data.result.forEach(coin => {
                 const sym = `${coin.symbol.toUpperCase()}USDT`;
-                prices[sym] = parseFloat(coin.price);
+                if (neededSymbols.has(sym)) {
+                    prices[sym] = parseFloat(coin.price);
+                }
             });
             fetched = true;
-            console.log("Prices fetched successfully via CoinStats API");
+            console.log("Prices fetched successfully via CoinStats API for", Object.keys(prices).length, "coins");
         }
     } catch (e) {
         console.warn("CoinStats fetch failed, trying Binance fallback...", e);
     }
 
-    // 2. Fall back to Binance if CoinStats is down or has issues
-    if (!fetched) {
+    // 2. Fall back to Binance - only fetch needed symbols
+    if (!fetched || Object.keys(prices).length < neededSymbols.size) {
         try {
+            // Fetch all prices but only keep what we need
             const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
-            prices = response.data.reduce((acc, item) => {
-                acc[item.symbol] = parseFloat(item.price);
-                return acc;
-            }, {});
-            console.log("Prices fetched successfully via Binance API");
+            response.data.forEach(item => {
+                if (neededSymbols.has(item.symbol)) {
+                    prices[item.symbol] = parseFloat(item.price);
+                }
+            });
+            console.log("Prices fetched successfully via Binance API for", Object.keys(prices).length, "coins");
         } catch (error) {
             console.error('Error fetching prices from fallback:', error);
         }

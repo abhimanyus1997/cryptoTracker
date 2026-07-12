@@ -533,42 +533,75 @@
   ];
 
   async function fallbackRpcScan(address) {
-    scanTokens.textContent = `Scanning top 250 tokens across ${scanChains.length} chains (slower, no API key)…`;
+    // Only scan top 50 tokens on main chains to reduce API calls
+    const mainnetChains = [
+      ['Ethereum', 'ethereum', 'https://eth.llamarpc.com'],
+      ['Polygon', 'polygon-pos', 'https://polygon-bor.publicnode.com'],
+      ['Arbitrum', 'arbitrum-one', 'https://arbitrum-one.publicnode.com']
+    ];
+    
+    scanTokens.textContent = `Scanning top 50 tokens across ${mainnetChains.length} main chains...`;
     try {
-      const markets = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1').then(r => r.json()).catch(() => []);
-      const coinList = await fetch('https://api.coingecko.com/api/v3/coins/list?include_platform=true').then(r => r.json()).catch(() => []);
-      const byId = new Map(coinList.map(coin => [coin.id, coin]));
+      // Only fetch top 50 by market cap instead of 250
+      const markets = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1').then(r => r.json()).catch(() => []);
       const accountArg = address.slice(2).padStart(64, '0');
       const found = [];
       let checked = 0;
 
-      for (const [chainName, platform, rpc] of scanChains) {
-        const candidates = markets.map(m => ({ market: m, address: byId.get(m.id)?.platforms?.[platform] })).filter(item => /^0x[a-fA-F0-9]{40}$/.test(item.address));
+      for (const [chainName, platform, rpc] of mainnetChains) {
+        // Get contract addresses from the market data directly (platforms field)
+        const candidates = markets.filter(m => m.platforms && m.platforms[platform]).map(m => ({ 
+          market: m, 
+          address: m.platforms[platform] 
+        })).filter(item => /^0x[a-fA-F0-9]{40}$/.test(item.address));
+        
         for (let i = 0; i < candidates.length; i += 20) {
           const batch = candidates.slice(i, i + 20);
-          const payload = batch.map((item, idx) => ({ jsonrpc: '2.0', id: idx, method: 'eth_call', params: [{ to: item.address, data: `0x70a08231${accountArg}` }, 'latest'] }));
-          const results = await fetch(rpc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(r => r.ok ? r.json() : []).catch(() => []);
+          const payload = batch.map((item, idx) => ({ 
+            jsonrpc: '2.0', 
+            id: idx, 
+            method: 'eth_call', 
+            params: [{ to: item.address, data: `0x70a08231${accountArg}` }, 'latest'] 
+          }));
+          
+          const results = await fetch(rpc, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(payload) 
+          }).then(r => r.ok ? r.json() : []).catch(() => []);
+          
           const arr = Array.isArray(results) ? results : [];
           for (let j = 0; j < batch.length; j++) {
             const value = arr.find(r => r.id === j)?.result || '0x0';
             if (BigInt(value) > 0n) found.push({ ...batch[j], chainName });
           }
           checked += batch.length;
-          tokenList.textContent = `Scanning ${chainName} · ${checked} contracts checked…`;
+          tokenList.textContent = `Scanning ${chainName} · ${checked} tokens checked…`;
         }
       }
 
       tokenList.innerHTML = '';
-      if (!found.length) { tokenList.textContent = `No balances found. Add a Zerion API key in Settings for full multi-chain coverage.`; return; }
+      if (!found.length) { 
+        tokenList.textContent = `No balances found on ${mainnetChains.length} main chains. Add a Zerion API key for full coverage.`; 
+        return; 
+      }
+      
       for (const item of found) {
         const row = document.createElement('div');
         row.className = 'wallet-token-row';
         row.innerHTML = `<strong>${item.market.symbol.toUpperCase()}</strong><span>${item.chainName}</span><span>$${item.market.current_price?.toLocaleString('en-US') || '—'}</span>`;
         tokenList.appendChild(row);
-        if (item.market.current_price) addToHoldings(item.market.symbol.toUpperCase() + 'USDT', item.market.name, item.market.symbol.toUpperCase(), 0, item.market.current_price);
+        if (item.market.current_price) {
+          addToHoldings(item.market.symbol.toUpperCase() + 'USDT', item.market.name, item.market.symbol.toUpperCase(), 0, item.market.current_price);
+        }
       }
-    } catch (e) { tokenList.textContent = 'Scan failed. Add a Zerion API key for reliable multi-chain scanning.'; }
-    finally { scanTokens.disabled = false; scanTokens.innerHTML = `<i class="fas fa-radar"></i> Scan tokens (${scanChains.length} chains, limited)`; }
+    } catch (e) { 
+      tokenList.textContent = 'Scan failed. Add a Zerion API key for reliable multi-chain scanning.'; 
+    }
+    finally { 
+      scanTokens.disabled = false; 
+      scanTokens.innerHTML = `<i class="fas fa-radar"></i> Scan tokens (${mainnetChains.length} main chains)`; 
+    }
   }
 
   // ──────────────────────────────────────────────────
