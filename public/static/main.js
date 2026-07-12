@@ -424,6 +424,101 @@ async function updateSummary(prices) {
     console.log("Summary updated");
 }
 
+// Holdings Tab Navigation
+document.addEventListener('DOMContentLoaded', () => {
+    const tabBtns = document.querySelectorAll('.holdings-tab-btn');
+    const panels = document.querySelectorAll('.holdings-tab-panel');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.borderColor = 'transparent';
+                b.style.color = '#6f786d';
+            });
+            panels.forEach(p => p.classList.add('hidden'));
+            
+            btn.classList.add('active');
+            btn.style.borderColor = 'var(--accent)';
+            btn.style.color = 'var(--accent)';
+            const target = document.getElementById(btn.dataset.panel);
+            if (target) target.classList.remove('hidden');
+        });
+    });
+    
+    // Sortable columns
+    const headers = document.querySelectorAll('#portfolio-table th.sortable');
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', () => {
+            const sortKey = header.dataset.sort;
+            sortPortfolioTable(sortKey, header);
+        });
+    });
+});
+
+let currentSort = { key: null, direction: 'asc' };
+
+async function sortPortfolioTable(sortKey, headerElement) {
+    const tbody = document.getElementById('portfolio-body');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    // Toggle direction
+    if (currentSort.key === sortKey) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.key = sortKey;
+        currentSort.direction = 'asc';
+    }
+    
+    // Update header icons
+    document.querySelectorAll('#portfolio-table th.sortable i').forEach(icon => {
+        icon.className = 'fas fa-sort';
+    });
+    const icon = headerElement.querySelector('i');
+    icon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+    
+    // Sort rows
+    rows.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(sortKey) {
+            case 'asset':
+                aVal = a.children[0].textContent.trim();
+                bVal = b.children[0].textContent.trim();
+                break;
+            case 'balance':
+                aVal = parseFloat(a.children[1].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(b.children[1].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                break;
+            case 'price':
+                aVal = parseFloat(a.children[2].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(b.children[2].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                break;
+            case 'value':
+                aVal = parseFloat(a.children[3].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(b.children[3].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                break;
+            case 'change':
+                aVal = parseFloat(a.children[4].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(b.children[4].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                break;
+            case 'roi':
+                aVal = parseFloat(a.children[5].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(b.children[5].textContent.replace(/[^0-9.-]/g, '')) || 0;
+                break;
+        }
+        
+        if (typeof aVal === 'string') {
+            return currentSort.direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+        return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => tbody.appendChild(row));
+}
+
 async function initPerformanceChart(timeframe = '1M') {
     console.log("Initializing performance chart with timeframe:", timeframe);
     let interval, limit;
