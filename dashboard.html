@@ -301,6 +301,22 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Portfolio Distribution Chart -->
+                        <div class="mt-6 p-6" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
+                            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">
+                                <i class="fas fa-chart-pie mr-2" style="color: var(--accent);"></i>
+                                Portfolio Distribution
+                            </h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
+                                <div style="position: relative; height: 300px;">
+                                    <canvas id="portfolioPieChart"></canvas>
+                                </div>
+                                <div id="pieChartLegend" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <!-- JS Populated -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- NFTs Panel -->
