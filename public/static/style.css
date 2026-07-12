@@ -194,6 +194,131 @@ tr:hover td {
   background-color: var(--bg-hover);
 }
 
+/* Mobile-Friendly Table Cards */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: visible;
+  }
+  
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  
+  thead {
+    display: none;
+  }
+  
+  tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+    padding: 1rem;
+  }
+  
+  td {
+    border: none;
+    position: relative;
+    padding: 0.75rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 1rem;
+  }
+  
+  td:nth-child(1) {
+    justify-content: flex-start;
+    font-size: 1.1rem;
+  }
+  
+  td:nth-child(1):before {
+    display: none;
+  }
+  
+  .remove-holding-btn {
+    margin-top: 0.5rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Loading Snackbar */
+.loading-snackbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(38, 50, 56, 0.98);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+  animation: slideUp 0.3s ease-out;
+  max-width: 90vw;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.loading-snackbar .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(52, 211, 153, 0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-snackbar .loading-text {
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.loading-snackbar.success {
+  border-color: var(--accent);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.loading-snackbar.success .loading-spinner {
+  display: none;
+}
+
+.loading-snackbar.success::before {
+  content: '✓';
+  color: var(--accent);
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
 /* AI Chat Modal Adjustments */
 #ai-chat-modal .card {
   background-color: var(--bg-card);

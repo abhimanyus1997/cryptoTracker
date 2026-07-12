@@ -7,6 +7,40 @@ let tradingPairs = [];
 let top500Tokens = new Set(); // Storage for top 500 tokens
 let tokenContracts = new Map(); // Store contract addresses for tokens
 
+// Loading Snackbar Functions
+function showLoadingSnackbar(message) {
+    // Remove existing snackbar
+    hideLoadingSnackbar();
+    
+    const snackbar = document.createElement('div');
+    snackbar.id = 'loading-snackbar';
+    snackbar.className = 'loading-snackbar';
+    snackbar.innerHTML = `
+        <div class="loading-spinner"></div>
+        <span class="loading-text">${message}</span>
+    `;
+    document.body.appendChild(snackbar);
+}
+
+function updateLoadingSnackbar(message, isSuccess = false) {
+    const snackbar = document.getElementById('loading-snackbar');
+    if (snackbar) {
+        snackbar.querySelector('.loading-text').textContent = message;
+        if (isSuccess) {
+            snackbar.classList.add('success');
+            setTimeout(() => hideLoadingSnackbar(), 2000);
+        }
+    }
+}
+
+function hideLoadingSnackbar() {
+    const snackbar = document.getElementById('loading-snackbar');
+    if (snackbar) {
+        snackbar.style.animation = 'slideUp 0.3s ease-out reverse';
+        setTimeout(() => snackbar.remove(), 300);
+    }
+}
+
 const coinImages = {
     'ETHUSDT': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
     'AVAXUSDT': 'https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png',
@@ -274,11 +308,13 @@ async function fetchYesterdayPrice(symbol) {
 
 async function updatePortfolio(prices) {
     console.log("Updating portfolio...");
+    showLoadingSnackbar('Loading portfolio...');
     const tbody = document.getElementById('portfolio-body');
     tbody.innerHTML = '';
 
     if (portfolio.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="py-10 px-4 text-center text-gray-500">Connect a wallet, import a CSV, or add your first holding to start tracking.</td></tr>';
+        hideLoadingSnackbar();
         return;
     }
 
@@ -300,7 +336,7 @@ async function updatePortfolio(prices) {
             : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td class="py-4 px-4">
+            <td class="py-4 px-4" data-label="Asset">
                 <div class="flex items-center">
                     <div class="mr-3">
                         ${imgHtml}
@@ -311,11 +347,11 @@ async function updatePortfolio(prices) {
                     </div>
                 </div>
             </td>
-            <td class="py-4 px-4 text-right">${holding.amount.toFixed(8)}</td>
-            <td class="py-4 px-4 text-right">${formatCurrency(price)}</td>
-            <td class="py-4 px-4 text-right font-medium">${formatCurrency(value)}</td>
-            <td class="py-4 px-4 text-right ${change24h >= 0 ? 'text-accent' : 'text-red-400'}">${change24h >= 0 ? '+' : ''}${change24h}%</td>
-            <td class="py-4 px-4 text-right">
+            <td class="py-4 px-4 text-right" data-label="Balance">${holding.amount.toFixed(8)}</td>
+            <td class="py-4 px-4 text-right" data-label="Price">${formatCurrency(price)}</td>
+            <td class="py-4 px-4 text-right font-medium" data-label="Value">${formatCurrency(value)}</td>
+            <td class="py-4 px-4 text-right ${change24h >= 0 ? 'text-accent' : 'text-red-400'}" data-label="24h Change">${change24h >= 0 ? '+' : ''}${change24h}%</td>
+            <td class="py-4 px-4 text-right" data-label="ROI">
                 <span class="${profitLossPercent >= 0 ? 'text-accent' : 'text-red-400'}"
                       title="${formatCurrency(profitLossAmount)}">
                     ${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent}%
@@ -384,6 +420,8 @@ async function updatePortfolio(prices) {
         });
     });
     
+    updateLoadingSnackbar('Portfolio loaded! ✅', true);
+    setTimeout(() => hideLoadingSnackbar(), 2500);
     console.log("Portfolio updated");
 }
 
