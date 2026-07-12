@@ -22,7 +22,9 @@
             --text-muted: #5a7566;
             --text-heading: #e8f5ec;
             --border-color: rgba(30, 51, 41, 0.5);
-            --grid-size: 40px;
+            --grid-size: 50px;
+            --tron-cyan: #00ffff;
+            --tron-blue: #0080ff;
         }
 
         body {
@@ -33,84 +35,348 @@
             position: relative;
         }
 
-        /* Moving Grid Background */
+        /* TRON-Style Cyber Grid */
         .grid-bg {
             position: absolute;
             inset: 0;
             background-image: 
-                linear-gradient(to right, rgba(30, 51, 41, 0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(30, 51, 41, 0.15) 1px, transparent 1px);
+                linear-gradient(to right, rgba(158, 240, 26, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(158, 240, 26, 0.15) 1px, transparent 1px);
             background-size: var(--grid-size) var(--grid-size);
-            mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 95%);
-            -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 95%);
             z-index: -2;
-            animation: gridMove 20s linear infinite;
         }
 
-        @keyframes gridMove {
-            0% {
-                background-position: 0 0;
-            }
-            100% {
-                background-position: var(--grid-size) var(--grid-size);
-            }
+        /* TRON Grid Perspective - Floor Effect */
+        .grid-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background-image: 
+                linear-gradient(to right, rgba(158, 240, 26, 0.4) 1px, transparent 1px),
+                linear-gradient(to top, rgba(158, 240, 26, 0.3) 1px, transparent 1px);
+            background-size: 60px 2px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: bottom center;
+            mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            z-index: -2;
+            animation: gridZoomZ 3s ease-in-out infinite alternate;
         }
 
-        /* Realistic CSS-only Green Aurora Rays */
+        /* Moving Light Ribbons - TRON Style with Enhanced Glow */
+        .light-ribbon {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(158, 240, 26, 0.1) 15%,
+                rgba(158, 240, 26, 0.9) 35%,
+                rgba(158, 240, 26, 1) 50%,
+                rgba(158, 240, 26, 0.9) 65%,
+                rgba(158, 240, 26, 0.1) 85%,
+                transparent 100%);
+            box-shadow: 
+                0 0 30px rgba(158, 240, 26, 1),
+                0 0 60px rgba(158, 240, 26, 0.8),
+                0 0 100px rgba(158, 240, 26, 0.5),
+                0 0 140px rgba(158, 240, 26, 0.3);
+            z-index: -1;
+            opacity: 1;
+        }
+
+        .light-ribbon.diagonal {
+            width: 250px;
+            height: 2px;
+        }
+
+        .light-ribbon.vertical {
+            width: 2px;
+            height: 250px;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(158, 240, 26, 0.1) 15%,
+                rgba(158, 240, 26, 0.9) 35%,
+                rgba(158, 240, 26, 1) 50%,
+                rgba(158, 240, 26, 0.9) 65%,
+                rgba(158, 240, 26, 0.1) 85%,
+                transparent 100%);
+            box-shadow: 
+                0 0 30px rgba(158, 240, 26, 1),
+                0 0 60px rgba(158, 240, 26, 0.8),
+                0 0 100px rgba(158, 240, 26, 0.5),
+                0 0 140px rgba(158, 240, 26, 0.3);
+        }
+
+        @keyframes ribbonPath1 {
+            0% { left: -250px; top: 20%; transform: rotate(0deg); }
+            25% { top: 40%; transform: rotate(15deg); }
+            50% { top: 30%; transform: rotate(-10deg); }
+            75% { top: 60%; transform: rotate(20deg); }
+            100% { left: calc(100vw + 250px); top: 50%; transform: rotate(0deg); }
+        }
+
+        @keyframes ribbonPath2 {
+            0% { left: 110%; top: 80%; transform: rotate(180deg); }
+            25% { top: 60%; transform: rotate(200deg); }
+            50% { top: 70%; transform: rotate(170deg); }
+            75% { top: 40%; transform: rotate(190deg); }
+            100% { left: -250px; top: 30%; transform: rotate(180deg); }
+        }
+
+        @keyframes ribbonPath3 {
+            0% { left: 30%; top: -250px; transform: rotate(90deg); }
+            25% { left: 40%; transform: rotate(100deg); }
+            50% { left: 35%; transform: rotate(85deg); }
+            75% { left: 60%; transform: rotate(95deg); }
+            100% { left: 50%; top: calc(100vh + 250px); transform: rotate(90deg); }
+        }
+
+        @keyframes ribbonPath4 {
+            0% { left: 70%; top: calc(100vh + 250px); transform: rotate(-90deg); }
+            25% { left: 60%; transform: rotate(-80deg); }
+            50% { left: 65%; transform: rotate(-95deg); }
+            75% { left: 45%; transform: rotate(-85deg); }
+            100% { left: 55%; top: -250px; transform: rotate(-90deg); }
+        }
+
+        @keyframes ribbonVerticalStraight {
+            0% { transform: translateY(-250px); }
+            100% { transform: translateY(calc(100vh + 250px)); }
+        }
+
+        @keyframes ribbonHorizontalStraight {
+            0% { transform: translateX(-250px); }
+            100% { transform: translateX(calc(100vw + 250px)); }
+        }
+
+        @keyframes gridZoomZ {
+            0% { opacity: 0.6; transform: perspective(500px) rotateX(60deg) scale(1); }
+            100% { opacity: 0.9; transform: perspective(500px) rotateX(60deg) scale(1.05); }
+        }
+
+        /* Grid Glow Nodes */
+        .grid-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(158, 240, 26, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(158, 240, 26, 0.8), 0 0 20px rgba(158, 240, 26, 0.4);
+            animation: nodeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes nodeGlow {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Enhanced Stars/Sparkles with Neon Glow */
+        .sparkles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .sparkle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(158, 240, 26, 1) 0%, rgba(158, 240, 26, 0.8) 40%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 10px rgba(158, 240, 26, 0.8),
+                0 0 20px rgba(158, 240, 26, 0.6),
+                0 0 30px rgba(158, 240, 26, 0.4),
+                0 0 40px rgba(158, 240, 26, 0.2);
+            animation: sparkle 3s infinite ease-in-out;
+        }
+
+        .sparkle.tiny {
+            width: 2px;
+            height: 2px;
+            animation: twinkleTiny 2s infinite ease-in-out;
+        }
+
+        .sparkle.small {
+            width: 3px;
+            height: 3px;
+            animation: twinkleSmall 2.5s infinite ease-in-out;
+        }
+
+        .sparkle.medium {
+            width: 4px;
+            height: 4px;
+            animation: twinkleMedium 3s infinite ease-in-out;
+        }
+
+        .sparkle.large {
+            width: 5px;
+            height: 5px;
+            animation: twinkleLarge 3.5s infinite ease-in-out;
+        }
+
+        .sparkle:hover {
+            transform: scale(2);
+            box-shadow: 
+                0 0 20px rgba(158, 240, 26, 1),
+                0 0 40px rgba(158, 240, 26, 0.8),
+                0 0 60px rgba(158, 240, 26, 0.6),
+                0 0 80px rgba(158, 240, 26, 0.4);
+        }
+
+        @keyframes twinkleTiny {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 0.9; transform: scale(1.2); }
+        }
+
+        @keyframes twinkleSmall {
+            0%, 100% { opacity: 0.3; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        @keyframes twinkleMedium {
+            0%, 100% { opacity: 0.25; transform: scale(0.85); }
+            50% { opacity: 0.95; transform: scale(1.4); }
+        }
+
+        @keyframes twinkleLarge {
+            0%, 100% { opacity: 0.35; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* Enhanced Aurora Cloud Dust - More Visible */
         .aurora-container {
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 70%;
-            height: 600px;
+            top: -200px;
+            right: -100px;
+            width: 100%;
+            height: 1200px;
             overflow: hidden;
             z-index: -1;
             pointer-events: none;
             filter: blur(60px);
-            mask-image: radial-gradient(ellipse at 80% 0%, black 30%, transparent 80%);
-            -webkit-mask-image: radial-gradient(ellipse at 80% 0%, black 30%, transparent 80%);
+            opacity: 1;
         }
 
         .aurora-ray {
             position: absolute;
-            top: -150px;
-            right: 10%;
-            width: 180px;
-            height: 800px;
+            width: 400px;
+            height: 900px;
             background: linear-gradient(180deg, 
-                rgba(158, 240, 26, 0.25) 0%, 
-                rgba(34, 197, 94, 0.05) 50%, 
+                rgba(158, 240, 26, 0.6) 0%, 
+                rgba(74, 222, 128, 0.35) 25%,
+                rgba(158, 240, 26, 0.2) 50%,
+                rgba(74, 222, 128, 0.1) 75%,
                 transparent 100%);
-            transform: rotate(-35deg);
-            transform-origin: top right;
-            opacity: 0.8;
-            animation: raySway 12s ease-in-out infinite alternate;
+            transform-origin: top center;
+            animation: auroraFlow 18s ease-in-out infinite;
+        }
+
+        .aurora-ray:nth-child(1) {
+            top: -200px;
+            right: 5%;
+            transform: rotate(-30deg);
+            animation-delay: 0s;
         }
 
         .aurora-ray:nth-child(2) {
-            right: 25%;
-            width: 140px;
+            top: -200px;
+            right: 15%;
+            width: 350px;
             background: linear-gradient(180deg, 
-                rgba(158, 240, 26, 0.18) 0%, 
-                rgba(16, 185, 129, 0.03) 60%, 
+                rgba(158, 240, 26, 0.7) 0%, 
+                rgba(74, 222, 128, 0.4) 30%,
+                rgba(158, 240, 26, 0.25) 60%,
                 transparent 100%);
             transform: rotate(-35deg);
-            transform-origin: top right;
-            animation-duration: 8s;
-            animation-delay: -2s;
+            animation-delay: -5s;
+            animation-duration: 14s;
         }
 
         .aurora-ray:nth-child(3) {
+            top: -200px;
             right: -5%;
-            width: 220px;
+            width: 450px;
             background: linear-gradient(180deg, 
-                rgba(158, 240, 26, 0.3) 0%, 
-                rgba(74, 222, 128, 0.08) 40%, 
+                rgba(158, 240, 26, 0.8) 0%, 
+                rgba(74, 222, 128, 0.5) 20%,
+                rgba(158, 240, 26, 0.3) 40%,
+                rgba(74, 222, 128, 0.15) 70%,
                 transparent 100%);
-            transform: rotate(-35deg);
-            transform-origin: top right;
-            animation-duration: 15s;
-            animation-delay: -4s;
+            transform: rotate(-32deg);
+            animation-delay: -3s;
+            animation-duration: 22s;
+        }
+
+        .aurora-ray:nth-child(4) {
+            top: -200px;
+            right: 30%;
+            width: 380px;
+            background: linear-gradient(180deg, 
+                rgba(158, 240, 26, 0.55) 0%, 
+                rgba(74, 222, 128, 0.35) 35%,
+                rgba(158, 240, 26, 0.15) 65%,
+                transparent 100%);
+            transform: rotate(-38deg);
+            animation-delay: -8s;
+            animation-duration: 16s;
+        }
+
+        .aurora-ray:nth-child(5) {
+            top: -200px;
+            right: 45%;
+            width: 420px;
+            background: linear-gradient(180deg, 
+                rgba(158, 240, 26, 0.65) 0%, 
+                rgba(74, 222, 128, 0.4) 30%,
+                rgba(158, 240, 26, 0.2) 60%,
+                transparent 100%);
+            transform: rotate(-28deg);
+            animation-delay: -12s;
+            animation-duration: 20s;
+        }
+
+        @keyframes auroraFlow {
+            0%, 100% {
+                transform: rotate(-30deg) translateX(0) scaleY(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: rotate(-35deg) translateX(50px) scaleY(1.3);
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced Mouse Tracking Star with Neon Glow */
+        .mouse-tracker {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, rgba(158, 240, 26, 1) 0%, rgba(158, 240, 26, 0.6) 50%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 
+                0 0 20px rgba(158, 240, 26, 1),
+                0 0 40px rgba(158, 240, 26, 0.8),
+                0 0 60px rgba(158, 240, 26, 0.6),
+                0 0 80px rgba(158, 240, 26, 0.4);
+            transition: transform 0.15s ease-out;
+        }
+
+        .mouse-tracker-trail {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(158, 240, 26, 0.7) 0%, transparent 70%);
         }
 
         @keyframes raySway {
@@ -127,14 +393,34 @@
         /* Ambient Glow Circle */
         .ambient-glow {
             position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(158, 240, 26, 0.08) 0%, transparent 70%);
+            top: 10%;
+            left: 5%;
+            z-index: -1;
+            filter: blur(100px);
+            pointer-events: none;
+            animation: ambientPulse 8s ease-in-out infinite;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(158, 240, 26, 0.05) 0%, transparent 70%);
-            top: 20%;
-            left: 10%;
+            background: radial-gradient(circle, rgba(74, 222, 128, 0.06) 0%, transparent 70%);
+            top: 40%;
+            right: 10%;
             z-index: -1;
-            filter: blur(80px);
+            filter: blur(90px);
             pointer-events: none;
+            animation: ambientPulse 10s ease-in-out infinite;
+            animation-delay: -3s;
+        }
+
+        @keyframes ambientPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
         /* Buttons styling */
@@ -152,6 +438,27 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(158, 240, 26, 0.45);
             background: var(--accent-hover);
+        }
+
+        .btn-accent-nav {
+            background: linear-gradient(135deg, var(--accent) 0%, #8bd815 100%);
+            color: #050807;
+            font-weight: 700;
+            box-shadow: 
+                0 4px 15px rgba(158, 240, 26, 0.4),
+                0 0 20px rgba(158, 240, 26, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(158, 240, 26, 0.5);
+        }
+
+        .btn-accent-nav:hover {
+            background: linear-gradient(135deg, #b8ff33 0%, var(--accent) 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 25px rgba(158, 240, 26, 0.6),
+                0 0 40px rgba(158, 240, 26, 0.4),
+                0 0 60px rgba(158, 240, 26, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary-glow {
@@ -237,12 +544,20 @@
 <body class="antialiased min-h-screen flex flex-col">
 
     <div class="grid-bg"></div>
+    <div class="grid-floor"></div>
     <div class="aurora-container">
+        <div class="aurora-ray"></div>
+        <div class="aurora-ray"></div>
         <div class="aurora-ray"></div>
         <div class="aurora-ray"></div>
         <div class="aurora-ray"></div>
     </div>
     <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+    <div class="sparkle-container" id="sparkles"></div>
+    <div class="mouse-tracker" id="mouseTracker"></div>
+    <div id="lightRibbons"></div>
+    <div id="gridNodes"></div>
 
     <!-- Navigation Header -->
     <nav class="w-full py-6 px-6 md:px-12 flex justify-between items-center z-50">
@@ -257,8 +572,8 @@
             <a href="#" class="hover:text-white transition">Safety</a>
         </div>
         <div>
-            <a href="./dashboard.html" class="px-5 py-2 text-sm font-semibold text-gray-900 bg-accent hover:bg-opacity-90 rounded-full transition shadow-lg shadow-accent/20">
-                <i class="fas fa-rocket mr-2"></i>Launch App
+            <a href="./dashboard.html" class="btn-accent-nav px-6 py-3 text-sm font-bold rounded-full transition-all duration-300 flex items-center gap-2">
+                <i class="fas fa-rocket"></i>Launch Workspace
             </a>
         </div>
     </nav>
@@ -283,10 +598,10 @@
 
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 w-full justify-center mb-20">
-            <a href="./dashboard.html" class="btn-premium text-center flex items-center justify-center gap-2">
+            <a href="./dashboard.html" class="btn-accent-nav px-8 py-4 text-sm font-bold rounded-full transition-all duration-300 flex items-center justify-center gap-2">
                 Launch Workspace <i class="fas fa-arrow-right"></i>
             </a>
-            <a href="#features" class="btn-secondary-glow text-center">
+            <a href="#features" class="btn-secondary-glow px-8 py-4 text-sm font-bold flex items-center justify-center gap-2">
                 Explore Features
             </a>
         </div>
@@ -385,5 +700,231 @@
         <p class="text-xs text-gray-700">Maintained by <span class="text-accent">abhimanyus1997</span></p>
     </footer>
 
+    <script>
+        // Enhanced Star Field Generation with Dense Professional Starfield
+        document.addEventListener('DOMContentLoaded', function() {
+            const sparkleContainer = document.getElementById('sparkles');
+            const numberOfSparkles = 150; // Increased from 80 to 150
+            const sizes = ['tiny', 'small', 'medium', 'large'];
+            const sizeWeights = [45, 35, 15, 5]; // More tiny stars for professional look
+            
+            for (let i = 0; i < numberOfSparkles; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                
+                // Weighted random size selection
+                const totalWeight = sizeWeights.reduce((a, b) => a + b, 0);
+                let random = Math.random() * totalWeight;
+                let sizeClass = 'tiny';
+                for (let j = 0; j < sizes.length; j++) {
+                    random -= sizeWeights[j];
+                    if (random <= 0) {
+                        sizeClass = sizes[j];
+                        break;
+                    }
+                }
+                sparkle.classList.add(sizeClass);
+                
+                // Random position
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
+                sparkle.style.left = `${x}%`;
+                sparkle.style.top = `${y}%`;
+                
+                // Random animation delay and duration
+                sparkle.style.animationDelay = `${Math.random() * 6}s`;
+                sparkle.style.animationDuration = `${2 + Math.random() * 4}s`;
+                
+                sparkleContainer.appendChild(sparkle);
+            }
+        });
+        
+        // Neon Mouse Tracker with Trail Effect
+        const mouseTracker = document.getElementById('mouseTracker');
+        const trails = [];
+        const numTrails = 15; // Increased from 10 to 15
+        
+        // Create trail elements
+        for (let i = 0; i < numTrails; i++) {
+            const trail = document.createElement('div');
+            trail.classList.add('mouse-tracker-trail');
+            const size = 10 - (i * 0.6);
+            trail.style.width = `${size}px`;
+            trail.style.height = `${size}px`;
+            trail.style.opacity = 1 - (i / numTrails);
+            document.body.appendChild(trail);
+            trails.push({
+                element: trail,
+                x: 0,
+                y: 0
+            });
+        }
+        
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Update main tracker position
+            mouseTracker.style.left = `${mouseX - 4}px`;
+            mouseTracker.style.top = `${mouseY - 4}px`;
+        });
+        
+        // Animate trails with smooth following
+        function animateTrails() {
+            let x = mouseX;
+            let y = mouseY;
+            
+            trails.forEach((trail, index) => {
+                const speed = 0.3 - (index * 0.02);
+                trail.x += (x - trail.x) * speed;
+                trail.y += (y - trail.y) * speed;
+                
+                trail.element.style.left = `${trail.x - (4 - index * 0.3)}px`;
+                trail.element.style.top = `${trail.y - (4 - index * 0.3)}px`;
+                
+                x = trail.x;
+                y = trail.y;
+            });
+            
+            requestAnimationFrame(animateTrails);
+        }
+        
+        animateTrails();
+        
+        // Add neon glow on click
+        document.addEventListener('click', (e) => {
+            const burst = document.createElement('div');
+            burst.style.cssText = `
+                position: fixed;
+                left: ${e.clientX}px;
+                top: ${e.clientY}px;
+                width: 20px;
+                height: 20px;
+                background: radial-gradient(circle, rgba(158, 240, 26, 1) 0%, transparent 70%);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9997;
+                animation: burstEffect 0.6s ease-out forwards;
+            `;
+            document.body.appendChild(burst);
+            
+            setTimeout(() => burst.remove(), 600);
+        });
+        
+        // Add burst animation dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes burstEffect {
+                0% { transform: scale(0); opacity: 1; }
+                100% { transform: scale(4); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // TRON-Style Light Ribbons with Random Multiple Paths
+        const lightRibbonsContainer = document.getElementById('lightRibbons');
+        const numRibbons = 12;
+
+        // Create ribbons with different random paths
+        for (let i = 0; i < numRibbons; i++) {
+            const ribbon = document.createElement('div');
+            
+            // Randomly determine type
+            const rand = Math.random();
+            let className = 'light-ribbon';
+            
+            if (rand < 0.4) {
+                // Diagonal ribbon with random path
+                className += ' diagonal';
+                ribbon.className = className;
+                
+                // Choose a random curvy path
+                const paths = ['ribbonPath1', 'ribbonPath2', 'ribbonPath3', 'ribbonPath4'];
+                const randomPath = paths[Math.floor(Math.random() * paths.length)];
+                
+                const duration = 8 + Math.random() * 6;
+                const delay = Math.random() * -10;
+                
+                ribbon.style.animation = `${randomPath} ${duration}s ease-in-out infinite`;
+                ribbon.style.animationDelay = `${delay}s`;
+                
+            } else if (rand < 0.7) {
+                // Vertical ribbon
+                className += ' vertical';
+                ribbon.className = className;
+                
+                ribbon.style.left = `${Math.random() * 90 + 5}%`;
+                const duration = 6 + Math.random() * 4;
+                const delay = Math.random() * -8;
+                
+                ribbon.style.animation = `ribbonVerticalStraight ${duration}s linear infinite`;
+                ribbon.style.animationDelay = `${delay}s`;
+                
+            } else {
+                // Horizontal ribbon with slight angle variation
+                ribbon.className = className;
+                ribbon.style.top = `${Math.random() * 90 + 5}%`;
+                ribbon.style.width = '250px';
+                
+                const angle = (Math.random() - 0.5) * 30; // -15 to 15 degrees
+                const direction = Math.random() > 0.5 ? 1 : -1; // left or right
+                const duration = 5 + Math.random() * 5;
+                const delay = Math.random() * -10;
+                
+                if (direction > 0) {
+                    ribbon.style.animation = `ribbonHorizontalStraight ${duration}s linear infinite`;
+                } else {
+                    ribbon.style.animation = `ribbonHorizontalStraight ${duration}s linear infinite reverse`;
+                }
+                ribbon.style.animationDelay = `${delay}s`;
+                ribbon.style.transform = `rotate(${angle}deg)`;
+            }
+            
+            lightRibbonsContainer.appendChild(ribbon);
+        }
+
+        // Create Grid Glow Nodes at intersections
+        const gridNodesContainer = document.getElementById('gridNodes');
+        const gridSize = 50; // Same as CSS --grid-size
+        const numNodes = 40;
+
+        for (let i = 0; i < numNodes; i++) {
+            const node = document.createElement('div');
+            node.classList.add('grid-node');
+            
+            // Position at grid intersections
+            const x = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
+            const y = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.style.animationDelay = `${Math.random() * 2}s`;
+            
+            gridNodesContainer.appendChild(node);
+        }
+
+        // Recreate nodes on resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                gridNodesContainer.innerHTML = '';
+                for (let i = 0; i < numNodes; i++) {
+                    const node = document.createElement('div');
+                    node.classList.add('grid-node');
+                    const x = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
+                    const y = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+                    node.style.left = `${x}px`;
+                    node.style.top = `${y}px`;
+                    node.style.animationDelay = `${Math.random() * 2}s`;
+                    gridNodesContainer.appendChild(node);
+                }
+            }, 250);
+        });
+    </script>
 </body>
 </html>

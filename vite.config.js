@@ -1,13 +1,12 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
-import { copyFileSync, cpSync } from 'node:fs';
+import { copyFileSync } from 'node:fs';
 
 function copyRuntimeFiles() {
   return {
     name: 'copy-runtime-files',
     closeBundle() {
       const output = resolve(import.meta.dirname, 'dist');
-      cpSync(resolve(import.meta.dirname, 'static'), resolve(output, 'static'), { recursive: true });
       copyFileSync(resolve(import.meta.dirname, 'robots.txt'), resolve(output, 'robots.txt'));
       copyFileSync(resolve(import.meta.dirname, 'sitemap.xml'), resolve(output, 'sitemap.xml'));
     }
