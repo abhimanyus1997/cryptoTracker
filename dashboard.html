@@ -354,12 +354,35 @@
                         </div>
                     </div>
 
-                    <div class="wallet-token-add">
-                        <input id="wallet-token-address" class="input-adaptive" inputmode="text" placeholder="ERC-20 contract address (0x…)" aria-label="ERC-20 contract address">
-                        <button id="add-wallet-token" class="bot-preview" type="button"><i class="fas fa-plus"></i> Add token</button>
+                    <!-- Zerion Portfolio Summary -->
+                    <div id="zerion-portfolio-summary" class="wallet-grid" style="margin-top:.75rem;"></div>
+
+                    <!-- Zerion PnL Summary -->
+                    <div id="zerion-pnl-summary" class="wallet-grid" style="margin-top:.5rem;"></div>
+
+                    <!-- Wallet Tabs -->
+                    <div style="display:flex; gap:0; margin-top:.9rem; border-bottom:1px solid var(--line-soft); overflow-x:auto;" class="noscroll">
+                        <button class="wallet-tab-btn active" data-panel="wallet-positions-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid var(--accent); color:var(--accent); cursor:pointer;">Positions</button>
+                        <button class="wallet-tab-btn" data-panel="zerion-tx-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid transparent; color:#6f786d; cursor:pointer;">Transactions</button>
+                        <button class="wallet-tab-btn" data-panel="zerion-nft-panel" style="padding:.45rem .7rem; font:.68rem 'DM Mono',monospace; font-weight:700; background:none; border:none; border-bottom:2px solid transparent; color:#6f786d; cursor:pointer;">NFTs</button>
                     </div>
-                    <button id="scan-top-tokens" class="wallet-scan" type="button"><i class="fas fa-radar"></i> Scan top 1000 tokens across 40 chains</button>
-                    <div id="wallet-token-list" class="wallet-token-list" aria-live="polite"></div>
+
+                    <!-- Positions Panel (default visible) -->
+                    <div id="wallet-positions-panel" class="wallet-tab-panel" style="margin-top:.5rem;">
+                        <div class="wallet-token-add">
+                            <input id="wallet-token-address" class="input-adaptive" inputmode="text" placeholder="ERC-20 contract address (0x…)" aria-label="ERC-20 contract address">
+                            <button id="add-wallet-token" class="bot-preview" type="button"><i class="fas fa-plus"></i> Add</button>
+                        </div>
+                        <button id="scan-top-tokens" class="wallet-scan" type="button"><i class="fas fa-radar"></i> Scan all tokens (Zerion API — all chains)</button>
+                        <div id="wallet-token-list" class="wallet-token-list" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Transactions Panel -->
+                    <div id="zerion-tx-panel" class="wallet-tab-panel hidden" style="margin-top:.5rem; max-height:320px; overflow-y:auto;"></div>
+
+                    <!-- NFTs Panel -->
+                    <div id="zerion-nft-panel" class="wallet-tab-panel hidden" style="margin-top:.5rem; max-height:280px; overflow-y:auto;"></div>
+
                     <p class="bot-output"><i class="fas fa-shield-halved" style="margin-right:.3rem;"></i>Non-custodial viewer — only public account data you approve is read. Private keys, seed phrases, and transaction signing are never requested.</p>
                 </section>
 
@@ -472,7 +495,8 @@
                         <label class="block text-gray-500 text-xs uppercase mb-1">Provider</label>
                         <select id="ai-provider"
                             class="w-full bg-gray-700 border border-gray-600 rounded text-white text-xs py-1.5 px-2 focus:outline-none">
-                            <option value="webllm">WebLLM Local RAG (recommended)</option>
+                            <option value="litellm">Nemotron 9B (default)</option>
+                            <option value="webllm">WebLLM Local RAG</option>
                             <option value="litert">LiteRT Local RAG</option>
                             <option value="gemini">Google Gemini</option>
                             <option value="groq">Groq (Fast)</option>
@@ -541,6 +565,13 @@
 
             <div class="space-y-4">
                 <div>
+                    <label class="block text-muted text-xs mb-1">Zerion API Key (wallet data)</label>
+                    <input type="password" id="zerion-key" placeholder="Enter Zerion API Key (zk_…)"
+                        class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none">
+                    <p class="text-xs text-muted mt-1">Get free key at <a href="https://dashboard.zerion.io" target="_blank" rel="noopener" class="text-accent hover:underline">dashboard.zerion.io</a></p>
+                </div>
+                <hr class="border-gray-700">
+                <div>
                     <input type="password" id="gemini-key" placeholder="Enter Gemini API Key"
                         class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none">
                 </div>
@@ -552,7 +583,8 @@
                 <div>
                     <select id="ai-provider-select"
                         class="w-full input-adaptive rounded-lg py-2 px-3 focus:outline-none text-sm">
-                        <option value="webllm">WebLLM Local RAG (recommended)</option>
+                        <option value="litellm">Nemotron 9B (default)</option>
+                        <option value="webllm">WebLLM Local RAG</option>
                         <option value="litert">LiteRT Local RAG</option>
                         <option value="gemini">Google Gemini</option>
                         <option value="groq">Groq</option>
@@ -644,6 +676,12 @@
         </div>
     </div>
 
+    <script>
+        // Pre-set Zerion API key if not already configured
+        if (!localStorage.getItem('ct_zerion_key')) {
+            localStorage.setItem('ct_zerion_key', 'REDACTED_ZERION_KEY');
+        }
+    </script>
     <script src="./static/main.js"></script>
     <script src="./static/wallet.js"></script>
     <script src="./static/ai.js"></script>

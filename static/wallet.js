@@ -1,4 +1,21 @@
 (() => {
+  const ZERION_BASE = 'https://api.zerion.io/v1';
+  const DEFAULT_WALLET = '0xd7e9d18153de624713C18b1cA18A238C42033EA5';
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  function cacheGet(key) {
+    try {
+      const raw = localStorage.getItem(`ct_cache_${key}`);
+      if (!raw) return null;
+      const { data, ts } = JSON.parse(raw);
+      if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(`ct_cache_${key}`); return null; }
+      return data;
+    } catch { return null; }
+  }
+  function cacheSet(key, data) {
+    try { localStorage.setItem(`ct_cache_${key}`, JSON.stringify({ data, ts: Date.now() })); } catch {}
+  }
+
   const button = document.getElementById('connect-wallet');
   const output = document.getElementById('bot-output');
   const preview = document.getElementById('bot-preview');
@@ -17,64 +34,62 @@
     '0xa86a': ['Avalanche', 'AVAX'], '0xfa': ['Fantom', 'FTM'], '0x64': ['Gnosis', 'xDAI'],
     '0xa4ec': ['Celo', 'CELO'], '0x44d': ['Polygon zkEVM', 'ETH'], '0xe708': ['Linea', 'ETH'],
     '0x8274f': ['Scroll', 'ETH'], '0x144': ['zkSync Era', 'ETH'], '0x1388': ['Mantle', 'MNT'],
-    '0x82750': ['Blast', 'ETH'], '0xa': ['Optimism', 'ETH'], '0x2329': ['Moonbeam', 'GLMR'],
-    '0x504': ['Moonriver', 'MOVR'], '0x19': ['Cronos', 'CRO'], '0x171': ['Pulse', 'PLS'],
-    '0x28c58': ['Taiko', 'ETH'], '0x76adf1': ['ZKsync', 'ETH'], '0x46f': ['Telos', 'TLOS'],
-    '0x1e': ['RSK', 'RBTC'], '0x6a': ['Kaia', 'KLAY'], '0x63564c40': ['Harmony', 'ONE'],
-    '0x128': ['HECO', 'HT'], '0x505': ['Astar', 'ASTR'], '0x2019': ['Metis', 'METIS'],
-    '0x440': ['Fuse', 'FUSE'], '0x1a4': ['Oasis Emerald', 'ROSE']
+    '0x82750': ['Blast', 'ETH'], '0x2329': ['Moonbeam', 'GLMR'], '0x504': ['Moonriver', 'MOVR'],
+    '0x19': ['Cronos', 'CRO'], '0x171': ['Pulse', 'PLS'], '0x6a': ['Kaia', 'KLAY'],
+    '0x63564c40': ['Harmony', 'ONE'], '0x505': ['Astar', 'ASTR'], '0x2019': ['Metis', 'METIS']
   };
-  const platforms = {
-    '0x1': 'ethereum', '0x89': 'polygon-pos', '0xa': 'optimistic-ethereum',
-    '0xa4b1': 'arbitrum-one', '0x2105': 'base', '0x38': 'binance-smart-chain',
-    '0xa86a': 'avalanche', '0xfa': 'fantom', '0x64': 'xdai', '0xa4ec': 'celo',
-    '0x44d': 'polygon-zkevm', '0xe708': 'linea', '0x144': 'zksync',
-    '0x1388': 'mantle', '0x19': 'cronos', '0x2329': 'moonbeam',
-    '0x504': 'moonriver', '0x505': 'astar', '0x2019': 'metis-andromeda'
-  };
-  const scanChains = [
-    ['Ethereum', 'ethereum', 'https://ethereum-rpc.publicnode.com'],
-    ['Polygon', 'polygon-pos', 'https://polygon-bor-rpc.publicnode.com'],
-    ['BNB Chain', 'binance-smart-chain', 'https://bsc-rpc.publicnode.com'],
-    ['Arbitrum', 'arbitrum-one', 'https://arbitrum-one-rpc.publicnode.com'],
-    ['Optimism', 'optimistic-ethereum', 'https://optimism-rpc.publicnode.com'],
-    ['Base', 'base', 'https://base-rpc.publicnode.com'],
-    ['Avalanche', 'avalanche', 'https://avalanche-c-chain-rpc.publicnode.com'],
-    ['Fantom', 'fantom', 'https://fantom-rpc.publicnode.com'],
-    ['Gnosis', 'xdai', 'https://gnosis-rpc.publicnode.com'],
-    ['Celo', 'celo', 'https://celo-rpc.publicnode.com'],
-    ['Linea', 'linea', 'https://linea-rpc.publicnode.com'],
-    ['Scroll', 'scroll', 'https://scroll-rpc.publicnode.com'],
-    ['zkSync Era', 'zksync', 'https://zksync-rpc.publicnode.com'],
-    ['Mantle', 'mantle', 'https://mantle-rpc.publicnode.com'],
-    ['Blast', 'blast', 'https://blast-rpc.publicnode.com'],
-    ['Polygon zkEVM', 'polygon-zkevm', 'https://polygon-zkevm-rpc.publicnode.com'],
-    ['Moonbeam', 'moonbeam', 'https://moonbeam-rpc.publicnode.com'],
-    ['Moonriver', 'moonriver', 'https://moonriver-rpc.publicnode.com'],
-    ['Cronos', 'cronos', 'https://cronos-evm-rpc.publicnode.com'],
-    ['Metis', 'metis-andromeda', 'https://metis-pokt.nodies.app'],
-    ['Kaia', 'klay-token', 'https://klaytn-rpc.publicnode.com'],
-    ['Harmony', 'harmony-shard-0', 'https://harmony-0-rpc.publicnode.com'],
-    ['Astar', 'astar', 'https://astar-rpc.publicnode.com'],
-    ['Taiko', 'taiko', 'https://taiko-rpc.publicnode.com'],
-    ['Telos', 'telos', 'https://telos-rpc.publicnode.com'],
-    ['Fuse', 'fuse', 'https://fuse-rpc.publicnode.com'],
-    ['Mode', 'mode', 'https://mode-rpc.publicnode.com'],
-    ['Manta Pacific', 'manta-pacific', 'https://manta-pacific-rpc.publicnode.com'],
-    ['opBNB', 'opbnb', 'https://opbnb-rpc.publicnode.com'],
-    ['Aurora', 'aurora', 'https://aurora-rpc.publicnode.com'],
-    ['Canto', 'canto', 'https://canto-rpc.publicnode.com'],
-    ['Boba', 'boba', 'https://boba-ethereum-rpc.publicnode.com'],
-    ['Kava', 'kava', 'https://kava-evm-rpc.publicnode.com'],
-    ['Sei', 'sei-network', 'https://sei-rpc.publicnode.com'],
-    ['Merlin', 'merlin-chain', 'https://merlin-rpc.publicnode.com'],
-    ['Core DAO', 'core', 'https://core-rpc.publicnode.com'],
-    ['Flare', 'flare-network', 'https://flare-rpc.publicnode.com'],
-    ['Fraxtal', 'fraxtal', 'https://fraxtal-rpc.publicnode.com'],
-    ['Zora', 'zora', 'https://zora-rpc.publicnode.com'],
-    ['World Chain', 'world-chain', 'https://worldchain-mainnet.g.alchemy.com/public']
-  ];
   let activeAccount = null;
+
+  function getZerionKey() {
+    return localStorage.getItem('ct_zerion_key') || '';
+  }
+
+  function zerionHeaders() {
+    const key = getZerionKey();
+    return {
+      accept: 'application/json',
+      authorization: `Basic ${btoa(key + ':')}`
+    };
+  }
+
+  function hasZerionKey() {
+    return getZerionKey().length > 10;
+  }
+
+  async function zerionFetch(path, retries = 2) {
+    const cacheKey = path.replace(/[^a-z0-9]/gi, '_').slice(0, 80);
+    const cached = cacheGet(cacheKey);
+    if (cached) return cached;
+
+    const res = await fetch(`${ZERION_BASE}${path}`, { headers: zerionHeaders() });
+    if (res.status === 429) {
+      showApiKeyPrompt();
+      throw new Error('Rate limited — enter your own Zerion API key in Settings.');
+    }
+    if (res.status === 503 && retries > 0) {
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '3', 10);
+      await new Promise(r => setTimeout(r, retryAfter * 1000));
+      return zerionFetch(path, retries - 1);
+    }
+    if (!res.ok) throw new Error(`Zerion API error: ${res.status}`);
+    const data = await res.json();
+    cacheSet(cacheKey, data);
+    return data;
+  }
+
+  function showApiKeyPrompt() {
+    const existing = document.getElementById('zerion-key-prompt');
+    if (existing) return;
+    const prompt = document.createElement('div');
+    prompt.id = 'zerion-key-prompt';
+    prompt.className = 'wallet-token-row';
+    prompt.style.cssText = 'grid-template-columns:1fr auto; border-color:rgba(239,68,68,.4); margin-top:.5rem;';
+    prompt.innerHTML = `
+      <span style="color:#ef4444; font-size:.7rem;">Rate limited. Enter your Zerion API key in Settings or get one at dashboard.zerion.io</span>
+      <button onclick="document.getElementById('settings-toggle')?.click(); this.parentElement.remove();" class="bot-preview" style="font-size:.65rem; padding:.3rem .5rem;">Open Settings</button>
+    `;
+    tokenList?.after(prompt);
+  }
 
   const shortAddress = (address) => `${address.slice(0, 6)}…${address.slice(-4)}`;
 
@@ -96,7 +111,7 @@
         button.classList.toggle('is-connected', Boolean(next));
         if (next) await refreshProfile(next); else resetProfile();
       });
-      window.ethereum.on?.('chainChanged', () => window.ethereum.request({ method: 'eth_accounts' }).then(([account]) => account && refreshProfile(account)));
+      window.ethereum.on?.('chainChanged', () => window.ethereum.request({ method: 'eth_accounts' }).then(([a]) => a && refreshProfile(a)));
     } catch (error) {
       button.querySelector('span').textContent = error.code === 4001 ? 'Connection declined' : 'Connect wallet';
     } finally { button.disabled = false; }
@@ -125,6 +140,11 @@
       document.getElementById('detail-balance-full').textContent = `${(Number(BigInt(hexBalance)) / 1e18).toFixed(18)} ${symbol}`;
       document.getElementById('detail-permissions').textContent = permissions.length ? permissions.map(p => p.parentCapability || 'account').join(', ') : 'Read-only (no write access)';
     }
+
+    if (hasZerionKey()) {
+      loadZerionPortfolio(account);
+      loadZerionPnL(account);
+    }
   }
 
   function resetProfile() {
@@ -146,6 +166,315 @@
     accountDetailsBtn.querySelector('i').classList.toggle('fa-chevron-up');
   });
 
+  // ──────────────────────────────────────────────────
+  // Zerion-powered portfolio (replaces batch RPC scanning)
+  // ──────────────────────────────────────────────────
+
+  async function loadZerionPortfolio(address) {
+    const portfolioEl = document.getElementById('zerion-portfolio-summary');
+    if (portfolioEl) portfolioEl.textContent = 'Loading portfolio…';
+    try {
+      const data = await zerionFetch(`/wallets/${address}/portfolio?currency=usd`);
+      const attrs = data.data.attributes;
+      const totalValue = attrs.total.positions;
+      const change24h = attrs.changes?.absolute_1d ?? 0;
+      const changePct = attrs.changes?.percent_1d ?? 0;
+      if (portfolioEl) {
+        portfolioEl.innerHTML = `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
+            <div><span>Total Value</span><strong>$${totalValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
+            <div><span>24h Change</span><strong class="${change24h >= 0 ? 'text-accent' : ''}" style="${change24h < 0 ? 'color:#ef4444' : ''}">${change24h >= 0 ? '+' : ''}$${Math.abs(change24h).toLocaleString('en-US', { maximumFractionDigits: 2 })} (${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%)</strong></div>
+          </div>
+        `;
+      }
+    } catch (e) {
+      if (portfolioEl) portfolioEl.textContent = e.message;
+    }
+  }
+
+  async function loadZerionPnL(address) {
+    const pnlEl = document.getElementById('zerion-pnl-summary');
+    if (!pnlEl) return;
+    pnlEl.textContent = 'Loading PnL…';
+    try {
+      const data = await zerionFetch(`/wallets/${address}/pnl?currency=usd`);
+      const pnl = data.data.attributes;
+      pnlEl.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
+          <div><span>Realized</span><strong class="${pnl.realized_gain >= 0 ? 'text-accent' : ''}" style="${pnl.realized_gain < 0 ? 'color:#ef4444' : ''}">${pnl.realized_gain >= 0 ? '+' : ''}$${Math.abs(pnl.realized_gain).toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
+          <div><span>Unrealized</span><strong class="${pnl.unrealized_gain >= 0 ? 'text-accent' : ''}" style="${pnl.unrealized_gain < 0 ? 'color:#ef4444' : ''}">${pnl.unrealized_gain >= 0 ? '+' : ''}$${Math.abs(pnl.unrealized_gain).toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
+          <div><span>Net Invested</span><strong>$${Math.abs(pnl.net_invested).toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
+          <div><span>Total Fees</span><strong>$${pnl.total_fee.toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
+        </div>
+      `;
+    } catch (e) {
+      pnlEl.textContent = e.message;
+    }
+  }
+
+  async function scanWithZerion(address) {
+    tokenList.textContent = 'Fetching all positions via Zerion (all chains, no rate limits)…';
+    const positions = [];
+    let url = `/wallets/${address}/positions/?filter[positions]=only_simple&filter[trash]=only_non_trash&sort=-value&currency=usd&page[size]=100`;
+    while (url) {
+      const data = await zerionFetch(url);
+      positions.push(...data.data);
+      url = data.links?.next ? data.links.next.replace(ZERION_BASE, '') : null;
+    }
+    return positions;
+  }
+
+  async function scanTopTokens() {
+    const address = getActiveAddress();
+    if (!address) { tokenList.textContent = 'Connect a wallet first.'; return; }
+    scanTokens.disabled = true;
+
+    if (hasZerionKey()) {
+      scanTokens.textContent = 'Scanning via Zerion API (all chains)…';
+      try {
+        const positions = await scanWithZerion(address);
+        tokenList.innerHTML = '';
+        if (!positions.length) { tokenList.textContent = 'No token positions found.'; return; }
+
+        let addedCount = 0;
+        for (const pos of positions) {
+          const attrs = pos.attributes;
+          const fungible = attrs.fungible_info;
+          const chain = pos.relationships?.chain?.data?.id || 'unknown';
+          const quantity = attrs.quantity?.float ?? 0;
+          const value = attrs.value ?? 0;
+          const price = attrs.price ?? 0;
+          const symbol = fungible?.symbol || '???';
+          const name = fungible?.name || symbol;
+          const icon = fungible?.icon?.url || '';
+          const change24h = attrs.changes?.absolute_1d;
+
+          const row = document.createElement('div');
+          row.className = 'wallet-token-row';
+          row.innerHTML = `
+            <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
+              ${icon ? `<img src="${icon}" style="width:16px;height:16px;border-radius:50%;" onerror="this.style.display='none'">` : ''}
+              <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${symbol}</strong>
+            </div>
+            <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
+            <span>${quantity > 0.001 ? quantity.toLocaleString('en-US', { maximumFractionDigits: 6 }) : quantity.toExponential(2)}</span>
+            <span>$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+            ${change24h != null ? `<span style="color:${change24h >= 0 ? 'var(--accent)' : '#ef4444'}; font-size:.65rem;">${change24h >= 0 ? '+' : ''}$${Math.abs(change24h).toFixed(2)}</span>` : '<span></span>'}
+          `;
+          row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
+          tokenList.appendChild(row);
+
+          if (quantity > 0 && price > 0) {
+            addToHoldings(symbol.toUpperCase() + 'USDT', name, symbol.toUpperCase(), quantity, price);
+            addedCount++;
+          }
+        }
+
+        scanTokens.innerHTML = `<i class="fas fa-check"></i> Found ${positions.length} positions across all chains`;
+        if (addedCount > 0 && typeof window.fetchPrices === 'function') window.fetchPrices();
+      } catch (e) {
+        tokenList.textContent = e.message;
+        if (e.message.includes('Rate limited')) {
+          scanTokens.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Rate limited — add API key in Settings';
+        }
+      } finally { setTimeout(() => { scanTokens.disabled = false; scanTokens.innerHTML = '<i class="fas fa-radar"></i> Scan all tokens (Zerion API)'; }, 3000); }
+    } else {
+      scanTokens.textContent = 'No Zerion API key — using fallback RPC scan…';
+      await fallbackRpcScan(address);
+    }
+  }
+
+  // ──────────────────────────────────────────────────
+  // Transaction History (Zerion)
+  // ──────────────────────────────────────────────────
+
+  async function loadTransactionHistory() {
+    const address = getActiveAddress();
+    if (!address || !hasZerionKey()) return;
+    const txPanel = document.getElementById('zerion-tx-panel');
+    if (!txPanel) return;
+    txPanel.innerHTML = '<p style="color:#6f786d; font-size:.7rem;">Loading transactions…</p>';
+    try {
+      const data = await zerionFetch(`/wallets/${address}/transactions/?currency=usd&page[size]=15`);
+      if (!data.data.length) { txPanel.innerHTML = '<p style="color:#6f786d; font-size:.72rem;">No recent transactions.</p>'; return; }
+      txPanel.innerHTML = '';
+      for (const tx of data.data) {
+        const { operation_type, mined_at, transfers, fee, application_metadata } = tx.attributes;
+        const chain = tx.relationships?.chain?.data?.id || '';
+        const time = mined_at ? new Date(mined_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const app = application_metadata?.name || '';
+        const typeColors = { trade: '#6366f1', send: '#ef4444', receive: '#22c55e', deposit: '#3b82f6', withdraw: '#f59e0b', mint: '#a855f7', approve: '#64748b', claim: '#14b8a6' };
+        const color = typeColors[operation_type] || '#6f786d';
+
+        let transfersHtml = '';
+        for (const t of (transfers || []).slice(0, 3)) {
+          const sym = t.fungible_info?.symbol || 'NFT';
+          const dir = t.direction === 'out' ? '-' : '+';
+          const val = t.value != null ? `$${Math.abs(t.value).toFixed(2)}` : '';
+          const qty = t.quantity?.float ? parseFloat(t.quantity.float).toLocaleString('en-US', { maximumFractionDigits: 6 }) : '';
+          transfersHtml += `<span style="color:${t.direction === 'out' ? '#ef4444' : 'var(--accent)'};">${dir}${qty} ${sym} ${val}</span>`;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'wallet-token-row';
+        row.style.cssText = 'grid-template-columns: auto 1fr auto; padding:.55rem .6rem; gap:.5rem;';
+        row.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:flex-start; gap:.15rem;">
+            <span style="background:${color}22; color:${color}; font-size:.6rem; font-weight:700; padding:.1rem .35rem; border-radius:4px; text-transform:uppercase;">${operation_type}</span>
+            <span style="font-size:.58rem; color:#6f786d;">${chain}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:.1rem; overflow:hidden;">
+            ${app ? `<span style="font-size:.62rem; color:#94a3b8;">via ${app}</span>` : ''}
+            <div style="display:flex; flex-wrap:wrap; gap:.3rem; font-size:.68rem;">${transfersHtml}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:.58rem; color:#6f786d;">${time}</span>
+            ${fee?.value != null ? `<span style="display:block; font-size:.55rem; color:#475569;">fee $${fee.value.toFixed(2)}</span>` : ''}
+          </div>
+        `;
+        txPanel.appendChild(row);
+      }
+    } catch (e) {
+      txPanel.innerHTML = `<p style="color:#ef4444; font-size:.7rem;">${e.message}</p>`;
+    }
+  }
+
+  // ──────────────────────────────────────────────────
+  // NFT Portfolio (Zerion)
+  // ──────────────────────────────────────────────────
+
+  async function loadNFTPortfolio() {
+    const address = getActiveAddress();
+    if (!address || !hasZerionKey()) return;
+    const nftPanel = document.getElementById('zerion-nft-panel');
+    if (!nftPanel) return;
+    nftPanel.innerHTML = '<p style="color:#6f786d; font-size:.7rem;">Loading NFTs…</p>';
+    try {
+      const data = await zerionFetch(`/wallets/${address}/nft-collections/?currency=usd&sort=-total_floor_price&page[size]=10`);
+      if (!data.data.length) { nftPanel.innerHTML = '<p style="color:#6f786d; font-size:.72rem;">No NFTs found.</p>'; return; }
+      nftPanel.innerHTML = '';
+      for (const col of data.data) {
+        const { collection_info, nfts_count, total_floor_price } = col.attributes;
+        const name = collection_info?.name || 'Unknown';
+        const icon = collection_info?.content?.icon?.url || '';
+        const row = document.createElement('div');
+        row.className = 'wallet-token-row';
+        row.style.gridTemplateColumns = '1fr auto auto';
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
+            ${icon ? `<img src="${icon}" style="width:18px;height:18px;border-radius:4px;" onerror="this.style.display='none'">` : ''}
+            <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap; font-size:.72rem;">${name}</strong>
+          </div>
+          <span style="font-size:.65rem; color:#6f786d;">${nfts_count} NFT${nfts_count > 1 ? 's' : ''}</span>
+          <span style="font-size:.7rem;">${total_floor_price != null ? `$${total_floor_price.toFixed(2)}` : '—'}</span>
+        `;
+        nftPanel.appendChild(row);
+      }
+    } catch (e) {
+      nftPanel.innerHTML = `<p style="color:#ef4444; font-size:.7rem;">${e.message}</p>`;
+    }
+  }
+
+  // ──────────────────────────────────────────────────
+  // Fallback: RPC batch scan (when no Zerion key)
+  // ──────────────────────────────────────────────────
+
+  const scanChains = [
+    ['Ethereum', 'ethereum', 'https://ethereum-rpc.publicnode.com'],
+    ['Polygon', 'polygon-pos', 'https://polygon-bor-rpc.publicnode.com'],
+    ['BNB Chain', 'binance-smart-chain', 'https://bsc-rpc.publicnode.com'],
+    ['Arbitrum', 'arbitrum-one', 'https://arbitrum-one-rpc.publicnode.com'],
+    ['Optimism', 'optimistic-ethereum', 'https://optimism-rpc.publicnode.com'],
+    ['Base', 'base', 'https://base-rpc.publicnode.com'],
+    ['Avalanche', 'avalanche', 'https://avalanche-c-chain-rpc.publicnode.com'],
+    ['Fantom', 'fantom', 'https://fantom-rpc.publicnode.com'],
+    ['Linea', 'linea', 'https://linea-rpc.publicnode.com'],
+    ['Scroll', 'scroll', 'https://scroll-rpc.publicnode.com']
+  ];
+
+  async function fallbackRpcScan(address) {
+    scanTokens.textContent = `Scanning top 250 tokens across ${scanChains.length} chains (slower, no API key)…`;
+    try {
+      const markets = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1').then(r => r.json()).catch(() => []);
+      const coinList = await fetch('https://api.coingecko.com/api/v3/coins/list?include_platform=true').then(r => r.json()).catch(() => []);
+      const byId = new Map(coinList.map(coin => [coin.id, coin]));
+      const accountArg = address.slice(2).padStart(64, '0');
+      const found = [];
+      let checked = 0;
+
+      for (const [chainName, platform, rpc] of scanChains) {
+        const candidates = markets.map(m => ({ market: m, address: byId.get(m.id)?.platforms?.[platform] })).filter(item => /^0x[a-fA-F0-9]{40}$/.test(item.address));
+        for (let i = 0; i < candidates.length; i += 20) {
+          const batch = candidates.slice(i, i + 20);
+          const payload = batch.map((item, idx) => ({ jsonrpc: '2.0', id: idx, method: 'eth_call', params: [{ to: item.address, data: `0x70a08231${accountArg}` }, 'latest'] }));
+          const results = await fetch(rpc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(r => r.ok ? r.json() : []).catch(() => []);
+          const arr = Array.isArray(results) ? results : [];
+          for (let j = 0; j < batch.length; j++) {
+            const value = arr.find(r => r.id === j)?.result || '0x0';
+            if (BigInt(value) > 0n) found.push({ ...batch[j], chainName });
+          }
+          checked += batch.length;
+          tokenList.textContent = `Scanning ${chainName} · ${checked} contracts checked…`;
+        }
+      }
+
+      tokenList.innerHTML = '';
+      if (!found.length) { tokenList.textContent = `No balances found. Add a Zerion API key in Settings for full multi-chain coverage.`; return; }
+      for (const item of found) {
+        const row = document.createElement('div');
+        row.className = 'wallet-token-row';
+        row.innerHTML = `<strong>${item.market.symbol.toUpperCase()}</strong><span>${item.chainName}</span><span>$${item.market.current_price?.toLocaleString('en-US') || '—'}</span>`;
+        tokenList.appendChild(row);
+        if (item.market.current_price) addToHoldings(item.market.symbol.toUpperCase() + 'USDT', item.market.name, item.market.symbol.toUpperCase(), 0, item.market.current_price);
+      }
+    } catch (e) { tokenList.textContent = 'Scan failed. Add a Zerion API key for reliable multi-chain scanning.'; }
+    finally { scanTokens.disabled = false; scanTokens.innerHTML = `<i class="fas fa-radar"></i> Scan tokens (${scanChains.length} chains, limited)`; }
+  }
+
+  // ──────────────────────────────────────────────────
+  // Tab Navigation for wallet sections
+  // ──────────────────────────────────────────────────
+
+  function initWalletTabs() {
+    const tabs = document.querySelectorAll('.wallet-tab-btn');
+    const panels = document.querySelectorAll('.wallet-tab-panel');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => { t.classList.remove('active'); t.style.borderColor = 'transparent'; t.style.color = '#6f786d'; });
+        panels.forEach(p => p.classList.add('hidden'));
+        tab.classList.add('active'); tab.style.borderColor = 'var(--accent)'; tab.style.color = 'var(--accent)';
+        const target = document.getElementById(tab.dataset.panel);
+        if (target) target.classList.remove('hidden');
+
+        if (tab.dataset.panel === 'zerion-tx-panel' && activeAccount && hasZerionKey()) loadTransactionHistory();
+        if (tab.dataset.panel === 'zerion-nft-panel' && activeAccount && hasZerionKey()) loadNFTPortfolio();
+      });
+    });
+  }
+
+  // ──────────────────────────────────────────────────
+  // Add token to portfolio holdings
+  // ──────────────────────────────────────────────────
+
+  function addToHoldings(pairSymbol, name, ticker, amount, price) {
+    if (!window.portfolio) return;
+    const existing = window.portfolio.find(h => h.ticker === ticker);
+    if (existing) {
+      if (amount > 0) {
+        const totalAmount = existing.amount + amount;
+        const avgPrice = ((existing.amount * existing.purchasePrice) + (amount * price)) / totalAmount;
+        existing.amount = totalAmount;
+        existing.purchasePrice = avgPrice;
+      }
+    } else if (amount > 0) {
+      window.portfolio.push({ symbol: pairSymbol, name, ticker, amount, purchasePrice: price });
+    }
+  }
+
+  // ──────────────────────────────────────────────────
+  // Manual token add (via contract address + RPC)
+  // ──────────────────────────────────────────────────
+
   const decodeUint = (hex) => Number(BigInt(hex));
   const decodeSymbol = (hex) => {
     try { const offset = Number(BigInt(`0x${hex.slice(2, 66)}`)) * 2 + 2; const size = Number(BigInt(`0x${hex.slice(offset, offset + 64)}`)); return new TextDecoder().decode(Uint8Array.from(hex.slice(offset + 64, offset + 64 + size * 2).match(/.{1,2}/g).map(byte => parseInt(byte, 16)))); } catch { return 'TOKEN'; }
@@ -155,7 +484,6 @@
     const address = tokenInput?.value.trim();
     if (!activeAccount) { tokenList.textContent = 'Connect a wallet first.'; return; }
     if (!/^0x[a-fA-F0-9]{40}$/.test(address)) { tokenList.textContent = 'Enter a valid ERC-20 contract address.'; return; }
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     const accountArg = activeAccount.slice(2).padStart(64, '0');
     try {
       const [balanceHex, decimalsHex, symbolHex] = await Promise.all([
@@ -164,86 +492,55 @@
         window.ethereum.request({ method: 'eth_call', params: [{ to: address, data: '0x95d89b41' }, 'latest'] })
       ]);
       const decimals = decodeUint(decimalsHex); const amount = decodeUint(balanceHex) / 10 ** decimals; const symbol = decodeSymbol(symbolHex);
-      const platform = platforms[chainId]; let usd = null;
-      if (platform) { const price = await fetch(`https://api.coingecko.com/api/v3/simple/token_price/${platform}?contract_addresses=${address}&vs_currencies=usd`).then(r => r.ok ? r.json() : {}); usd = price[address.toLowerCase()]?.usd; }
-      const row = document.createElement('div'); row.className = 'wallet-token-row'; row.innerHTML = `<strong>${symbol}</strong><span>${amount.toLocaleString('en-US', { maximumFractionDigits: 6 })}</span><span>${usd ? `$${(amount * usd).toLocaleString('en-US', { maximumFractionDigits: 2 })}` : 'Price unavailable'}</span>`;
+      const row = document.createElement('div'); row.className = 'wallet-token-row'; row.innerHTML = `<strong>${symbol}</strong><span>${amount.toLocaleString('en-US', { maximumFractionDigits: 6 })}</span><span>—</span>`;
       tokenList.prepend(row); tokenInput.value = '';
-
-      if (amount > 0 && usd) {
-        addToHoldings(symbol + 'USDT', symbol, symbol, amount, usd);
-      }
+      if (amount > 0) addToHoldings(symbol + 'USDT', symbol, symbol, amount, 0);
     } catch { tokenList.textContent = 'Could not read this token on the active network.'; }
   }
 
-  function addToHoldings(pairSymbol, name, ticker, amount, price) {
-    if (!window.portfolio) return;
-    const existing = window.portfolio.find(h => h.ticker === ticker);
-    if (existing) {
-      const totalAmount = existing.amount + amount;
-      const avgPrice = ((existing.amount * existing.purchasePrice) + (amount * price)) / totalAmount;
-      existing.amount = totalAmount;
-      existing.purchasePrice = avgPrice;
-    } else {
-      window.portfolio.push({ symbol: pairSymbol, name, ticker, amount, purchasePrice: price });
-    }
-  }
+  // ──────────────────────────────────────────────────
+  // Event listeners
+  // ──────────────────────────────────────────────────
 
   addToken?.addEventListener('click', addTokenBalance);
-
-  async function scanTopTokens() {
-    if (!activeAccount) { tokenList.textContent = 'Connect a wallet first.'; return; }
-    scanTokens.disabled = true; scanTokens.textContent = `Scanning top 1000 tokens across ${scanChains.length} chains…`; tokenList.textContent = 'Loading public market and contract metadata…';
-    try {
-      const pages = [1, 2, 3, 4];
-      const marketPages = await Promise.all(pages.map(page =>
-        fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=${page}`).then(r => r.json()).catch(() => [])
-      ));
-      const markets = marketPages.flat();
-      const coinList = await fetch('https://api.coingecko.com/api/v3/coins/list?include_platform=true').then(r => r.json());
-      const byId = new Map(coinList.map(coin => [coin.id, coin]));
-      const accountArg = activeAccount.slice(2).padStart(64, '0');
-      const found = [];
-      let checked = 0;
-      const totalChains = scanChains.length;
-
-      for (const [chainName, platform, rpc] of scanChains) {
-        const candidates = markets.map(market => ({ market, address: byId.get(market.id)?.platforms?.[platform] })).filter(item => /^0x[a-fA-F0-9]{40}$/.test(item.address));
-        for (let index = 0; index < candidates.length; index += 20) {
-          const batch = candidates.slice(index, index + 20);
-          const payload = batch.map((item, i) => ({ jsonrpc: '2.0', id: i, method: 'eth_call', params: [{ to: item.address, data: `0x70a08231${accountArg}` }, 'latest'] }));
-          const rawResults = await fetch(rpc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(r => r.ok ? r.json() : []).catch(() => []);
-          const results = Array.isArray(rawResults) ? rawResults : [];
-          for (let i = 0; i < batch.length; i++) { const value = results.find(result => result.id === i)?.result || '0x0'; if (BigInt(value) > 0n) found.push({ ...batch[i], chainName }); }
-          checked += batch.length;
-          tokenList.textContent = `Scanning ${chainName} · ${checked} contracts checked across ${totalChains} chains…`;
-        }
-      }
-      tokenList.innerHTML = '';
-      if (!found.length) tokenList.textContent = `No balances found among top-1000 token contracts across ${totalChains} supported chains.`;
-      for (const item of found) {
-        const row = document.createElement('div'); row.className = 'wallet-token-row';
-        row.innerHTML = `<strong>${item.market.symbol.toUpperCase()}</strong><span>${item.chainName}</span><span>$${item.market.current_price?.toLocaleString('en-US') || '—'}</span>`;
-        tokenList.appendChild(row);
-
-        if (item.market.current_price) {
-          addToHoldings(
-            item.market.symbol.toUpperCase() + 'USDT',
-            item.market.name,
-            item.market.symbol.toUpperCase(),
-            0,
-            item.market.current_price
-          );
-        }
-      }
-      if (found.length && typeof window.fetchPrices === 'function') {
-        window.fetchPrices();
-      }
-    } catch { tokenList.textContent = 'Public token data is temporarily rate-limited. Try again shortly.'; }
-    finally { scanTokens.disabled = false; scanTokens.innerHTML = `<i class="fas fa-radar"></i> Scan top 1000 tokens across ${scanChains.length} chains`; }
-  }
-
   scanTokens?.addEventListener('click', scanTopTokens);
   button?.addEventListener('click', connectWallet);
+
+  function getActiveAddress() {
+    return activeAccount || DEFAULT_WALLET;
+  }
+
+  // Zerion API key save handler (from settings modal)
+  window.addEventListener('DOMContentLoaded', () => {
+    initWalletTabs();
+
+    const zerionInput = document.getElementById('zerion-key');
+    const saveBtn = document.getElementById('save-settings');
+    if (zerionInput) zerionInput.value = getZerionKey();
+    saveBtn?.addEventListener('click', () => {
+      if (zerionInput) localStorage.setItem('ct_zerion_key', zerionInput.value.trim());
+    });
+
+    // Update scan button label based on key
+    if (scanTokens) {
+      scanTokens.innerHTML = hasZerionKey()
+        ? '<i class="fas fa-radar"></i> Scan all tokens (Zerion API — all chains)'
+        : '<i class="fas fa-radar"></i> Scan tokens (limited — add Zerion key for full scan)';
+    }
+
+    // Auto-load portfolio with default wallet if Zerion key is available
+    if (hasZerionKey()) {
+      const addr = getActiveAddress();
+      profile.address.textContent = shortAddress(addr);
+      profile.address.title = addr;
+      profile.state.textContent = 'Viewing';
+      if (document.getElementById('detail-full-address')) {
+        document.getElementById('detail-full-address').textContent = addr;
+      }
+      loadZerionPortfolio(addr);
+      loadZerionPnL(addr);
+    }
+  });
 
   window.addEventListener('load', () => {
     if (!sessionStorage.getItem('ct_web3_checked')) {

@@ -24,7 +24,13 @@ const LOCAL_MODELS = {
 const AI_CONFIG = {
     keys: { provider: 'ct_ai_provider', localModel: 'ct_local_model', webllmModel: 'ct_webllm_model', gemini: 'gemini_api_key', groq: 'groq_api_key' },
     geminiModel: 'gemini-2.5-flash',
-    groqModel: 'openai/gpt-oss-120b'
+    groqModel: 'openai/gpt-oss-120b',
+    litellm: {
+        apiBase: 'http://13.126.102.204:4000',
+        apiKey: 'REDACTED_LITELLM_KEY',
+        model: 'nvidia.nemotron-nano-9b-v2'
+    },
+    rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 }
 };
 
 class LocalRetriever {
@@ -76,7 +82,7 @@ class LocalRetriever {
 
 class AIClient {
     constructor() {
-        this.provider = localStorage.getItem(AI_CONFIG.keys.provider) || 'webllm';
+        this.provider = localStorage.getItem(AI_CONFIG.keys.provider) || 'litellm';
         this.localModel = localStorage.getItem(AI_CONFIG.keys.localModel) || 'e2b';
         this.webllmModel = localStorage.getItem(AI_CONFIG.keys.webllmModel) || 'Qwen2-0.5B-Instruct-q4f16_1-MLC';
         this.geminiKey = localStorage.getItem(AI_CONFIG.keys.gemini) || '';
@@ -87,7 +93,34 @@ class AIClient {
         this.webllmEngine = null;
         this.retriever = new LocalRetriever();
         this.isGenerating = false;
+        this.messageCount = parseInt(sessionStorage.getItem('ct_msg_count') || '0', 10);
+        this.sessionStart = parseInt(sessionStorage.getItem('ct_session_start') || Date.now().toString(), 10);
+        if (!sessionStorage.getItem('ct_session_start')) sessionStorage.setItem('ct_session_start', this.sessionStart.toString());
         this.initUI();
+    }
+
+    checkRateLimit() {
+        if (Date.now() - this.sessionStart > AI_CONFIG.rateLimit.windowMs) {
+            this.messageCount = 0; this.sessionStart = Date.now();
+            sessionStorage.setItem('ct_session_start', this.sessionStart.toString());
+            sessionStorage.setItem('ct_msg_count', '0');
+        }
+        if (this.messageCount >= AI_CONFIG.rateLimit.maxPerSession) {
+            throw new Error(`Rate limit reached (${AI_CONFIG.rateLimit.maxPerSession} messages/hour). Connect your wallet or wait.`);
+        }
+    }
+
+    requireAuth() {
+        const walletState = document.getElementById('wallet-state')?.textContent;
+        const isConnected = walletState === 'Connected' || walletState === 'Viewing';
+        if (!isConnected && this.provider === 'litellm') {
+            throw new Error('Connect your wallet or click "Scan" in Wallet Profile to use the AI assistant. This prevents abuse of the shared model endpoint.');
+        }
+    }
+
+    incrementMessageCount() {
+        this.messageCount++;
+        sessionStorage.setItem('ct_msg_count', this.messageCount.toString());
     }
 
     initUI() {
@@ -148,8 +181,13 @@ class AIClient {
     updateUIState() {
         const local = this.provider === 'litert' || this.provider === 'webllm';
         this.ui.localControls.classList.toggle('hidden', !local);
-        this.ui.badge.textContent = this.provider === 'webllm' ? 'WebLLM · local RAG' : local ? 'LiteRT · local RAG' : this.provider === 'gemini' ? 'Gemini' : 'Groq';
-        this.ui.send.disabled = this.provider === 'webllm' ? !this.webllmEngine : local ? !this.conversation : (this.provider === 'gemini' ? !this.geminiKey : !this.groqKey);
+        const labels = { webllm: 'WebLLM · local RAG', litert: 'LiteRT · local RAG', gemini: 'Gemini', groq: 'Groq', litellm: 'Nemotron 9B' };
+        this.ui.badge.textContent = labels[this.provider] || this.provider;
+        if (this.provider === 'litellm') this.ui.send.disabled = false;
+        else if (this.provider === 'webllm') this.ui.send.disabled = !this.webllmEngine;
+        else if (this.provider === 'litert') this.ui.send.disabled = !this.conversation;
+        else if (this.provider === 'gemini') this.ui.send.disabled = !this.geminiKey;
+        else this.ui.send.disabled = !this.groqKey;
     }
 
     async loadWebLLMModels() {
@@ -257,15 +295,19 @@ class AIClient {
         this.appendMessage('user', this.escapeHtml(query));
         const bubble = this.appendMessage('assistant', '<div class="typing-indicator"><span></span><span></span><span></span></div>');
         try {
+            this.requireAuth();
+            this.checkRateLimit();
             const context = this.retriever.context(query);
             this.ui.stats.classList.remove('hidden');
-            this.ui.stats.textContent = `Local RAG retrieved ${context ? context.split('\n\n').length : 0} dashboard context snippets.`;
+            this.ui.stats.textContent = `RAG: ${context ? context.split('\n\n').length : 0} context snippets · ${AI_CONFIG.rateLimit.maxPerSession - this.messageCount} messages remaining`;
             let response;
-            if (this.provider === 'webllm') response = await this.callWebLLM(query, context, bubble);
+            if (this.provider === 'litellm') response = await this.callLiteLLM(query, context);
+            else if (this.provider === 'webllm') response = await this.callWebLLM(query, context, bubble);
             else if (this.provider === 'litert') response = await this.callLiteRT(query, context, bubble);
             else if (this.provider === 'gemini') response = await this.callGemini(query, context);
             else response = await this.callGroq(query, context);
             bubble.innerHTML = this.render(response);
+            this.incrementMessageCount();
         } catch (error) {
             bubble.innerHTML = `<span class="text-red-400">⚠️ ${this.escapeHtml(error.message)}</span>`;
         } finally {
@@ -307,6 +349,29 @@ class AIClient {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { Authorization: `Bearer ${this.groqKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: AI_CONFIG.groqModel, messages: [{ role: 'system', content: this.systemPrompt(context) }, { role: 'user', content: query }] }) });
         const data = await response.json(); if (!response.ok) throw new Error(data.error?.message || 'Groq request failed.');
         return data.choices?.[0]?.message?.content || 'No response.';
+    }
+
+    async callLiteLLM(query, context) {
+        const { apiBase, apiKey, model } = AI_CONFIG.litellm;
+        const response = await fetch(`${apiBase}/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model,
+                messages: [
+                    { role: 'system', content: this.systemPrompt(context) },
+                    { role: 'user', content: query }
+                ],
+                max_tokens: 1024,
+                temperature: 0.7
+            })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `LiteLLM error: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || 'No response generated.';
     }
 
     saveSettings() {
