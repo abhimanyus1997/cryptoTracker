@@ -135,6 +135,7 @@
       button.querySelector('span').textContent = error.code === 4001 ? 'Connection declined' : 'Connect wallet';
     } finally { button.disabled = false; }
   }
+  window.connectWallet = connectWallet; // expose for banner onclick
 
   async function refreshProfile(account) {
     const [chainId, hexBalance, permissions] = await Promise.all([
@@ -637,8 +638,17 @@
   window.addEventListener('load', () => {
     if (!sessionStorage.getItem('ct_web3_checked')) {
       sessionStorage.setItem('ct_web3_checked', '1');
-      if (window.ethereum && window.confirm('Web3 wallet detected. Would you like to connect it to CryptoTracker?')) connectWallet();
-      if (!window.ethereum && button?.querySelector('span')) button.querySelector('span').textContent = 'Check Web3 wallet';
+      if (window.ethereum) {
+        // Show a non-blocking banner instead of window.confirm (blocked by browsers on HTTPS)
+        const banner = document.createElement('div');
+        banner.id = 'web3-connect-banner';
+        banner.style.cssText = 'position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(22,28,36,.95);border:1px solid rgba(52,211,153,.3);border-radius:12px;padding:.7rem 1.2rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 8px 32px rgba(0,0,0,.4);font-size:.8rem;color:#e2e8f0;backdrop-filter:blur(12px);';
+        banner.innerHTML = `<i class="fas fa-fingerprint" style="color:var(--accent);"></i><span>Web3 wallet detected &mdash; connect to see your live portfolio</span><button onclick="connectWallet();this.closest('#web3-connect-banner').remove();" style="background:var(--accent);color:#111;border:none;border-radius:8px;padding:.3rem .8rem;cursor:pointer;font-weight:700;font-size:.75rem;white-space:nowrap;">Connect</button><button onclick="this.closest('#web3-connect-banner').remove();" style="background:none;border:none;color:#6f786d;cursor:pointer;font-size:1rem;line-height:1;">&times;</button>`;
+        document.body.appendChild(banner);
+        setTimeout(() => banner?.remove(), 10000);
+      } else if (button?.querySelector('span')) {
+        button.querySelector('span').textContent = 'Install MetaMask';
+      }
     }
   });
 
