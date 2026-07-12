@@ -1,77 +1,75 @@
-# CryptoTracker
+# 🟢 CryptoTracker
 
-A privacy-minded, static cryptocurrency portfolio dashboard with live market data, technical forecasts, CSV import, and an on-device AI analyst.
+A high-performance, privacy-first cryptocurrency portfolio dashboard. It integrates real-time DEX scanning, local WebGPU AI analytics, and historical metric evaluation without server custody.
 
 Live site: [cryptotracker.abhimanyu.fyi](https://cryptotracker.abhimanyu.fyi)
 
-## Highlights
+---
 
-- Designed and custom-crafted entirely by abhimanyus1997
-- Portfolio and DEX holding views with live Binance prices
-- Performance charts, basic technical projections, CSV import, and CSV export
-- Local WebGPU RAG: choose LiteRT Gemma or Qwen 3.5 models while retrieving relevant holdings, prices, ROI, and dashboard scope before answering
-- Optional Gemini and Groq providers for users who prefer an API-backed assistant
-- Static deployment on Vercel; no application backend or server-side database
+## 🛠️ Architecture & Core Flow
 
-## Local AI and RAG
+The application relies entirely on client-side infrastructure and serverless route helpers.
 
-The default AI provider is **Local WebGPU RAG**. It offers LiteRT-LM Gemma models and the [Qwen 3.5 0.8B LiteRT bundle](https://huggingface.co/GabrieleConte/Qwen3.5-0.8B-LiteRT) through WebGPU.
+```mermaid
+graph TD
+    A[Client Browser] -->|1. WebGPU / Local Model| B(LiteRT Gemma / Qwen)
+    A -->|2. Reads Local Data| C[lexical Retriever RAG]
+    A -->|3. API Request| D[Vercel Serverless Proxy /api/zerion]
+    D -->|4a. Wallet Holdings| E[Zerion API]
+    D -->|4b. Asset Valuation| F[CoinStats API]
+    A -->|5. Price Feed fallback| G[Binance API]
+```
 
-At query time, CryptoTracker builds small local documents from the holdings and the latest loaded prices. A lightweight lexical retriever selects the most relevant snippets, adds them to the model prompt, and the response cites them as `[1]`, `[2]`, and so on. The portfolio context and model inference remain in the browser.
+* **Serverless Backend Proxy**: Requests are routed via `/api/zerion` in [zerion.js](file:///home/abhimanyu/projects/cryptoTracker/api/zerion.js) which forwards requests safely to CoinStats and Zerion. Caching and key signing are processed securely server-side.
+* **On-Device LLM & RAG**: Prompt processing, dashboard parsing, and inference happen locally using `@litert-lm/core` via WebGPU.
 
-Users can choose one of these local models in the chat panel:
+---
 
-| Model | First download | Use case |
-| --- | ---: | --- |
-| Gemma 4 E2B | about 2.6 GB | Default; best balance for most devices |
-| Gemma 4 E4B | about 3.7 GB | Higher quality on high-memory devices |
-| Qwen 3.5 0.8B LiteRT | about 1.2 GB | Multimodal LiteRT bundle; currently offered as a text-chat beta in the browser |
+## 🚀 Key Features
 
-Use a recent Chrome or Edge build with hardware acceleration and WebGPU enabled. The first model load can take time; subsequent use may reuse browser-cached assets. These models are best suited to desktop or capable laptop devices.
+* 💼 **Comprehensive Holdings**: Automatically tracks assets, PnL parameters, transaction history, and NFT holdings.
+* ⚡ **CoinStats Integration**: First-choice pricing data retrieved via the secure backend proxy with instant fallback support.
+* 🛡️ **Dynamic Cache Bypass**: Superuser logins automatically bypass serverless cache pools to query real-time valuation updates.
+* 🤖 **Local-First AI Chat**: Gemini, Groq, and on-device LiteRT models analyze your active portfolio state fully privately.
+* 🎨 **Aurora Design System**: Interactive animated grids and premium glowing green light rays crafted entirely with CSS.
 
-The assistant is informational only and is not financial advice. It can explain the dashboard data, but it cannot guarantee price movements or execute trades.
+---
 
-## Run locally
+## ⚙️ Development & Deployment
 
-CryptoTracker uses Vite for local development and production builds.
+### Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL shown by Vite, then open the dashboard. Serve over `localhost` or HTTPS so WebGPU is available.
+### Environment Variables
 
-## Deploy to Vercel
+Configure these settings in Vercel or your local `.env`:
+
+```ini
+ZERION_API_KEY=your_zerion_key
+COINSTATS_API_KEY=your_coinstats_key
+LITELLM_API_KEY=your_litellm_key
+SUPERUSER_WALLET=superuser_address
+```
+
+### Deploy to Production
 
 ```bash
 vercel --prod
 ```
 
-For `cryptotracker.abhimanyu.fyi`, attach the subdomain to the Vercel project and create the CNAME record Vercel provides. Make it the project’s primary domain if the `*.vercel.app` URL should redirect to it.
+---
 
-### Future GitHub Pages deployment
+## 🔒 Security & Privacy
 
-Vercel is the primary deployment target. If you later deploy to GitHub Pages, build with the repository base path and publish `dist/`:
+* **Zero Custody**: Private keys, credentials, and seeds are never requested.
+* **Secured Configs**: Sensitive keys are kept server-side to prevent client-side leakage.
 
-```bash
-VITE_BASE_PATH=/cryptoTracker/ npm run build
-```
+---
 
-Set `VITE_BASE_PATH=/` for Vercel or a custom domain. The project does not include a GitHub Actions workflow, so GitHub Pages remains opt-in.
+## 📄 License
 
-## Technology
-
-- HTML, CSS, JavaScript, Tailwind CSS, Chart.js
-- Binance public market-data API
-- [LiteRT-LM](https://github.com/google-ai-edge/LiteRT) Web SDK (`@litert-lm/core`) and WebGPU
-- [LiteRT Community web models](https://huggingface.co/collections/litert-community/web-llm-models) and [Qwen 3.5 0.8B LiteRT](https://huggingface.co/GabrieleConte/Qwen3.5-0.8B-LiteRT)
-- Vercel static hosting
-
-## Privacy
-
-Local WebGPU RAG does not require an API key and does not send prompts or retrieved portfolio context to an application server. Optional Gemini and Groq modes send their prompts to the provider selected by the user; their API keys are stored in that browser’s local storage.
-
-## License
-
-MIT
+MIT © [abhimanyus1997](https://github.com/abhimanyus1997)
