@@ -344,8 +344,20 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
 
     escapeHtml(text) { const node = document.createElement('div'); node.textContent = text; return node.innerHTML; }
     render(text) {
-        // Render model output as text so a prompt cannot inject executable markup into the dashboard.
-        return this.escapeHtml(text).replace(/\n/g, '<br>');
+        // Render markdown-style formatting
+        let rendered = this.escapeHtml(text);
+        
+        // Bold: **text** → <strong>text</strong>
+        rendered = rendered.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Italic: *text* or _text_ → <em>text</em>
+        rendered = rendered.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        rendered = rendered.replace(/_(.*?)_/g, '<em>$1</em>');
+        
+        // Newlines to <br>
+        rendered = rendered.replace(/\n/g, '<br>');
+        
+        return rendered;
     }
     appendMessage(role, html) {
         const row = document.createElement('div'); row.className = `chat-msg ${role}`;
@@ -472,22 +484,68 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
             responseText = fullText.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim();
         }
         
-        // Method 2: Check for natural thinking (text before first newline or "Let me...")
+        // Method 2: Check for natural thinking patterns
         if (!thinking) {
             // Look for patterns like "Okay, the user asked..." or "Let me check..."
+            // Thinking is usually at the beginning, separated from response by double newline or specific markers
+            
             const lines = fullText.split('\n');
-            if (lines.length > 1 && (
-                lines[0].toLowerCase().includes('user') ||
-                lines[0].toLowerCase().includes('let me') ||
-                lines[0].toLowerCase().includes('okay') ||
-                lines[0].toLowerCase().includes('the user')
-            )) {
-                // Find where thinking ends (usually before actual response)
-                const thinkingEndIndex = fullText.indexOf('\n\n') !== -1 
-                    ? fullText.indexOf('\n\n') 
-                    : fullText.indexOf('\n');
+            const firstLine = lines[0] || '';
+            
+            // Check if first line contains thinking indicators
+            const isThinking = (
+                firstLine.toLowerCase().includes('user') ||
+                firstLine.toLowerCase().includes('let me') ||
+                firstLine.toLowerCase().includes('okay') ||
+                firstLine.toLowerCase().includes('the user') ||
+                firstLine.toLowerCase().includes('looking at') ||
+                firstLine.toLowerCase().includes('checking') ||
+                firstLine.toLowerCase().includes('since') ||
+                firstLine.toLowerCase().includes('so,')
+            );
+            
+            if (isThinking && lines.length > 3) {
+                // Find where thinking ends - look for double newline or specific markers
+                // Common patterns: "\n\n", or a line starting with a question/markdown
                 
-                if (thinkingEndIndex > 0) {
+                let thinkingEndIndex = -1;
+                
+                // Pattern 1: Double newline
+                const doubleNewline = fullText.indexOf('\n\n');
+                if (doubleNewline > 0 && doubleNewline < fullText.length * 0.7) {
+                    thinkingEndIndex = doubleNewline;
+                }
+                
+                // Pattern 2: Look for emoji or response markers
+                if (thinkingEndIndex === -1) {
+                    // Look for lines starting with numbers or clear answers
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line && /^[\d]/.test(line) && line.length < 50) {
+                            thinkingEndIndex = fullText.indexOf(lines[i]);
+                            break;
+                        }
+                    }
+                }
+                
+                // Pattern 3: Look for actual answer (starts with number or clear statement)
+                if (thinkingEndIndex === -1) {
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        // Start of response: number, simple answer, greeting
+                        if (line && (
+                            /^\d+\s*[\+\-\*\/=]/.test(line) || // Math: "1 + 2"
+                            /^Yes|^No|^Correct|^Sure/.test(line) ||
+                            line.includes('equals') ||
+                            !line.includes('user') && !line.includes('check') && !line.includes('context')
+                        )) {
+                            thinkingEndIndex = fullText.indexOf(lines[i]);
+                            break;
+                        }
+                    }
+                }
+                
+                if (thinkingEndIndex > 50) { // Ensure thinking is substantial
                     thinking = fullText.substring(0, thinkingEndIndex).trim();
                     responseText = fullText.substring(thinkingEndIndex).trim();
                 }
