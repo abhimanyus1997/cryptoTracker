@@ -4,6 +4,9 @@ const currencySymbols = { USD: '$', INR: '₹', EUR: '€', GBP: '£' };
 let portfolio = [];
 let dexPortfolio = [];
 let tradingPairs = [];
+let top500Tokens = new Set(); // Storage for top 500 tokens
+let tokenContracts = new Map(); // Store contract addresses for tokens
+
 const coinImages = {
     'ETHUSDT': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
     'AVAXUSDT': 'https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png',
@@ -67,9 +70,31 @@ function getPortfolioSummaryText(prices) {
 
 async function fetchTradingPairs() {
     // Only fetch limited pairs for dropdown - no need for 1000 pairs
-    console.log("Fetching limited trading pairs...");
+    console.log("Fetching limited trading pairs and top 500 tokens...");
     try {
-        // Use a smaller subset of popular coins
+        // Fetch top 500 tokens by market cap
+        const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1');
+        
+        // Populate top 500 tokens set
+        top500Tokens.clear();
+        response.data.forEach(coin => {
+            top500Tokens.add(coin.symbol.toUpperCase() + 'USDT');
+            top500Tokens.add(coin.symbol.toUpperCase());
+            // Store contract addresses if available
+            if (coin.platforms) {
+                Object.entries(coin.platforms).forEach(([platform, address]) => {
+                    if (address && address.startsWith('0x')) {
+                        tokenContracts.set(coin.symbol.toUpperCase() + 'USDT', { address, platform, decimals: 18 });
+                    }
+                });
+            }
+            // Store CoinGecko image
+            if (coin.image) {
+                coinImages[coin.symbol.toUpperCase() + 'USDT'] = coin.image;
+            }
+        });
+        
+        // Use a smaller subset of popular coins for dropdown
         const popularCoins = ['ETHUSDT', 'BTCUSDT', 'SOLUSDT', 'MATICUSDT', 'ADAUSDT', 'DOGEUSDT', 'DOTUSDT', 'LINKUSDT', 'AVAXUSDT', 'XRPUSDT', 'SCRUSDT'];
         tradingPairs = popularCoins.map(sym => ({ 
             symbol: sym, 
@@ -77,6 +102,7 @@ async function fetchTradingPairs() {
             ticker: sym.replace('USDT', '') 
         }));
         populateCoinDropdowns();
+        console.log("Top 500 tokens loaded:", top500Tokens.size);
         console.log("Trading pairs loaded:", tradingPairs.length);
     } catch (error) {
         console.error('Error setting trading pairs:', error);
@@ -297,6 +323,62 @@ async function updatePortfolio(prices) {
         `;
         tbody.appendChild(row);
     }
+    
+    // Add event listeners for copy contract buttons
+    document.querySelectorAll('.copy-contract-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const address = btn.dataset.address;
+            try {
+                await navigator.clipboard.writeText(address);
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+                console.log('✅ Contract address copied:', address);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+    });
+    
+    // Add event listeners for add-to-wallet buttons
+    document.querySelectorAll('.add-to-wallet-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const address = btn.dataset.address;
+            const symbol = btn.dataset.symbol;
+            const decimals = parseInt(btn.dataset.decimals);
+            
+            if (window.ethereum) {
+                try {
+                    const wasAdded = await window.ethereum.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: 'ERC20',
+                            options: {
+                                address: address,
+                                symbol: symbol,
+                                decimals: decimals,
+                                image: coinImages[symbol + 'USDT'] || ''
+                            }
+                        }
+                    });
+                    
+                    if (wasAdded) {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Added';
+                        console.log('✅ Token added to wallet:', symbol);
+                    }
+                } catch (error) {
+                    console.error('Failed to add token:', error);
+                    if (error.code === 4001) {
+                        alert('User rejected the request');
+                    }
+                }
+            } else {
+                alert('Please install MetaMask to add tokens to your wallet');
+            }
+        });
+    });
+    
     console.log("Portfolio updated");
 }
 
