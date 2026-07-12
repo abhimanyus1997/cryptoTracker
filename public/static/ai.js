@@ -304,7 +304,26 @@ class AIClient {
     }
 
     systemPrompt(retrieved) {
-        return `You are CryptoTracker’s careful, local AI analyst. Answer using the retrieved dashboard context below when relevant. Cite relevant context snippets using [1], [2], etc. If the answer is not in the context, say so clearly. Never present a price forecast as certain or financial advice. Keep answers concise.\n\nRETRIEVED DASHBOARD CONTEXT:\n${retrieved || 'No query-specific context has been retrieved yet.'}`;
+        return `You are CryptoTracker's helpful AI analyst. Provide clear, actionable insights about cryptocurrency holdings, market trends, and portfolio management. 
+
+When context is available:
+- Cite sources using [1], [2], etc.
+- Provide specific numbers and percentages
+- Explain what the metrics mean for the user
+
+When asked general questions (greetings, general crypto questions):
+- Respond naturally and helpfully
+- Offer to help with portfolio analysis
+- Be conversational but concise
+
+Always:
+- Be helpful and engaging
+-Avoid disclaimers unless discussing actual financial advice
+- Keep responses under 2 paragraphs for simple questions
+- Provide detailed analysis when asked about holdings
+
+RETRIEVED DASHBOARD CONTEXT:
+${retrieved || 'No holdings data available yet. User can connect wallet or add tokens.'}`;
     }
 
     openModal() {
@@ -441,12 +460,13 @@ class AIClient {
         bubble.innerHTML = '';
         const words = text.split(' ');
         
+        // Faster typing for better UX
         for (let i = 0; i < words.length; i++) {
             bubble.innerHTML = this.render(words.slice(0, i + 1).join(' '));
             this.ui.box.scrollTop = this.ui.box.scrollHeight;
             
-            // Natural typing speed: 20-50ms per word
-            const delay = Math.random() * 30 + 20;
+            // Variable speed: 10-30ms for natural feel
+            const delay = Math.random() * 20 + 10;
             await new Promise(resolve => setTimeout(resolve, delay));
         }
     }
