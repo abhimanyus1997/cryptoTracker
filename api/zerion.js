@@ -89,11 +89,26 @@ export default async function handler(req, res) {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
 
-        const reader = response.body;
-        if (reader.readable) {
-          response.body.pipe(res);
+        // Properly handle SSE stream
+        try {
+          const reader = response.body.getReader();
+          const encoder = new TextEncoder();
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            // Forward the chunk directly
+            res.write(value);
+          }
+          
+          res.end();
           return;
+        } catch (streamError) {
+          console.error('Stream error:', streamError);
+          return res.status(500).json({ error: 'Stream failed' });
         }
       }
 
