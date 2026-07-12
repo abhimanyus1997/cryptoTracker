@@ -20,8 +20,7 @@ export default defineConfig({
   base: process.env.VITE_BASE_PATH || '/',
   plugins: [copyRuntimeFiles()],
   define: {
-    'process.env.SUPERUSER_WALLET': JSON.stringify(process.env.SUPERUSER_WALLET || ''),
-    'process.env.LITELLM_API_KEY': JSON.stringify(process.env.LITELLM_API_KEY || '')
+    'process.env.SUPERUSER_WALLET': JSON.stringify(process.env.SUPERUSER_WALLET || '')
   },
   build: {
     outDir: 'dist',

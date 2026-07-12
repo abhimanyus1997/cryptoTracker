@@ -27,7 +27,7 @@ const AI_CONFIG = {
     groqModel: 'openai/gpt-oss-120b',
     litellm: {
         apiBase: 'http://13.126.102.204:4000',
-        apiKey: window.ENV_LITELLM_KEY || 'sk-Q8oyqZuoy7zUDhMljWwmrw',
+        apiKey: '',
         model: 'nvidia.nemotron-nano-9b-v2'
     },
     rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 },
@@ -401,10 +401,13 @@ class AIClient {
     }
 
     async callLiteLLM(query, context) {
-        const { apiBase, apiKey, model } = AI_CONFIG.litellm;
-        const response = await fetch(`${apiBase}/v1/chat/completions`, {
+        const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'https://cryptotracker.abhimanyu.fyi'
+            : '';
+        const { model } = AI_CONFIG.litellm;
+        const response = await fetch(`${host}/api/zerion?litellm=true`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model,
                 messages: [
@@ -417,7 +420,7 @@ class AIClient {
         });
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(err.error?.message || `LiteLLM error: ${response.status}`);
+            throw new Error(err.error || `LiteLLM proxy error: ${response.status}`);
         }
         const data = await response.json();
         return data.choices?.[0]?.message?.content || 'No response generated.';
