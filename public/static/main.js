@@ -1317,16 +1317,69 @@ document.addEventListener('DOMContentLoaded', function () {
             transactionsToImport = [];
             verificationTableBody.innerHTML = '';
 
-            const filters = {
-                buy: document.getElementById('filter-buy').checked,
-                sell: document.getElementById('filter-sell').checked,
-                in: document.getElementById('filter-in').checked,
-                out: document.getElementById('filter-out').checked
-            };
+            // Fetch top 500 tokens by market cap for validation
+            let validSymbols = new Set();
+            try {
+                const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1');
+                response.data.forEach(coin => {
+                    validSymbols.add(coin.symbol.toUpperCase() + 'USDT');
+                    validSymbols.add(coin.symbol.toUpperCase());
+                });
+                console.log(`✅ Loaded ${validSymbols.size} valid symbols from top 500`);
+            } catch (err) {
+                console.warn('Could not fetch top 500 tokens, using all CSV entries');
+            }
 
             for (const line of lines) {
                 const parts = line.split(',').map(s => s.trim().replace(/"/g, ''));
-                const [txHash, block, ts, dt, from, to, contract, valueIn, valueOut, currentVal, txFee, txFeeUsd, historicalPrice, status, err, method] = parts;
+                
+                // Check if it's portfolio.csv format: Symbol,Name,Ticker,Amount,PurchasePrice
+                let symbol, name, ticker, amount, purchasePrice;
+                
+                if (parts.length >= 5 && !parts[0].startsWith('0x')) {
+                    // Portfolio.csv format
+                    [symbol, name, ticker, amount, purchasePrice] = parts;
+                    amount = parseFloat(amount);
+                    purchasePrice = parseFloat(purchasePrice);
+                    
+                    // Skip tokens not in top 500 (if we have the list)
+                    if (validSymbols.size > 0 && !validSymbols.has(symbol)) {
+                        console.log(`⏭️ Skipping ${symbol} - not in top 500`);
+                        continue;
+                    }
+                    
+                    // Skip tokens with 0 or negative amount
+                    if (amount <= 0) {
+                        console.log(`⏭️ Skipping ${symbol} - zero or negative amount`);
+                        continue;
+                    }
+                    
+                    transactionsToImport.push({
+                        date: new Date().toISOString().split('T')[0],
+                        type: 'buy',
+                        symbol,
+                        name,
+                        ticker,
+                        amount,
+                        purchasePrice
+                    });
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="py-2 px-3">Import</td>
+                        <td class="py-2 px-3">CSV Import</td>
+                        <td class="py-2 px-3">${name}</td>
+                        <td class="py-2 px-3 text-right">${amount.toFixed(6)}</td>
+                        <td class="py-2 px-3 text-right">${formatCurrency(purchasePrice)}</td>
+                        <td class="py-2 px-3 text-right">
+                            <select class="category-select bg-gray-700 border border-gray-600 rounded text-white text-xs py-1 px-2 focus:outline-none">
+                                <option value="buy" selected>Buy</option>
+                                <option value="omit">Omit</option>
+                            </select>
+                        </td>
+                    `;
+                    verificationTableBody.appendChild(row);
+                }
                 
                 const valueInNum = parseFloat(valueIn);
                 const valueOutNum = parseFloat(valueOut);

@@ -383,9 +383,20 @@
           const row = document.createElement('div');
           row.className = 'wallet-token-row';
           row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
+          
+          // Get icon from multiple sources: CoinStats icon, Binance, or CoinGecko
+          let iconUrl = token.icon || token.image || '';
+          const symbolLower = (token.symbol || 'btc').toLowerCase();
+          const nameLower = (token.name || 'bitcoin').toLowerCase().replace(/\s+/g, '-');
+          
+          if (!iconUrl) {
+            // Try Binance icon URL pattern
+            iconUrl = `https://raw.githubusercontent.com/TrustWallet/wallet-core/master/assets/icons/coins/${symbolLower}.png`;
+          }
+          
           row.innerHTML = `
             <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
-              ${icon ? `<img src="${icon}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">` : ''}
+              ${iconUrl ? `<img src="${iconUrl}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" onerror="this.onerror=null;this.src='https://assets.coingecko.com/coins/images/1/small/bitcoin.png';">` : ''}
               <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${token.symbol || '???'}</strong>
             </div>
             <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
