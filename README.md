@@ -6,6 +6,7 @@ Live site: [cryptotracker.abhimanyu.fyi](https://cryptotracker.abhimanyu.fyi)
 
 ## Highlights
 
+- Designed and custom-crafted entirely by abhimanyus1997
 - Portfolio and DEX holding views with live Binance prices
 - Performance charts, basic technical projections, CSV import, and CSV export
 - Local WebGPU RAG: choose LiteRT Gemma or Qwen 3.5 models while retrieving relevant holdings, prices, ROI, and dashboard scope before answering
