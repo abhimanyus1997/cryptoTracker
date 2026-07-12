@@ -226,7 +226,26 @@
   // Tier order: CoinStats API > x402 > Zerion > skip
   // ──────────────────────────────────────────────────
 
-  async function loadPortfolio(address) {
+  let portfolioCache = null;
+  let portfolioCacheTime = 0;
+  let transactionsCache = null;
+  let transactionsCacheTime = 0;
+  let nftCache = null;
+  let nftCacheTime = 0;
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  async function loadPortfolio(address, forceRefresh = false) {
+    const now = Date.now();
+    
+    // Check cache first
+    if (!forceRefresh && portfolioCache && (now - portfolioCacheTime < CACHE_DURATION)) {
+      console.log('📦 Using cached portfolio data');
+      const portfolioEl = document.getElementById('zerion-portfolio-summary');
+      if (portfolioEl && portfolioCache) {
+        portfolioEl.innerHTML = portfolioCache;
+      }
+      return;
+    }
     const portfolioEl = document.getElementById('zerion-portfolio-summary');
     if (portfolioEl) portfolioEl.textContent = 'Loading portfolio…';
 
@@ -286,14 +305,22 @@
       const totalValue = attrs.total.positions;
       const change24h = attrs.changes?.absolute_1d ?? 0;
       const changePct = attrs.changes?.percent_1d ?? 0;
+      
+      const portfolioHtml = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
+          <div><span>Total Value</span><strong>$${totalValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
+          <div><span>24h Change</span><strong class="${change24h >= 0 ? 'text-accent' : ''}" style="${change24h < 0 ? 'color:#ef4444' : ''}">${change24h >= 0 ? '+' : ''}$${Math.abs(change24h).toLocaleString('en-US', { maximumFractionDigits: 2 })} (${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%)</strong></div>
+        </div>
+      `;
+      
       if (portfolioEl) {
-        portfolioEl.innerHTML = `
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
-            <div><span>Total Value</span><strong>$${totalValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong></div>
-            <div><span>24h Change</span><strong class="${change24h >= 0 ? 'text-accent' : ''}" style="${change24h < 0 ? 'color:#ef4444' : ''}">${change24h >= 0 ? '+' : ''}$${Math.abs(change24h).toLocaleString('en-US', { maximumFractionDigits: 2 })} (${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%)</strong></div>
-          </div>
-        `;
+        portfolioEl.innerHTML = portfolioHtml;
       }
+      
+      // Cache the result
+      portfolioCache = portfolioHtml;
+      portfolioCacheTime = now;
+      console.log('💾 Portfolio data cached for', address);
       return;
     } catch (e) {
       console.warn('Portfolio Tier 3 (Zerion) failed:', e.message);
@@ -500,7 +527,18 @@
   // Transaction History (lazy-loaded on tab click)
   // ──────────────────────────────────────────────────
 
-  async function loadTransactionHistory() {
+  async function loadTransactionHistory(forceRefresh = false) {
+    const now = Date.now();
+    
+    // Check cache
+    if (!forceRefresh && transactionsCache && (now - transactionsCacheTime < CACHE_DURATION)) {
+      console.log('📦 Using cached transaction data');
+      const txPanel = document.getElementById('zerion-tx-panel');
+      if (txPanel && transactionsCache) {
+        txPanel.innerHTML = transactionsCache;
+      }
+      return;
+    }
     const address = getActiveAddress();
     if (!address) return;
     const txPanel = document.getElementById('zerion-tx-panel');
@@ -534,7 +572,13 @@
     // Fallback to Zerion
     try {
       const data = await zerionFetch(`/wallets/${address}/transactions/?currency=usd&page[size]=15`);
-      if (!data.data.length) { txPanel.innerHTML = '<p style="color:#6f786d; font-size:.72rem;">No recent transactions.</p>'; return; }
+      if (!data.data.length) { 
+        const noTxHtml = '<p style="color:#6f786d; font-size:.72rem;">No recent transactions.</p>';
+        txPanel.innerHTML = noTxHtml;
+        transactionsCache = noTxHtml;
+        transactionsCacheTime = now;
+        return; 
+      }
       txPanel.innerHTML = '';
       for (const tx of data.data) {
         const { operation_type, mined_at, transfers, fee, application_metadata } = tx.attributes;
@@ -572,8 +616,14 @@
         `;
         txPanel.appendChild(row);
       }
+      
+      // Cache the result
+      transactionsCache = txPanel.innerHTML;
+      transactionsCacheTime = now;
+      console.log('💾 Transactions cached');
     } catch (e) {
-      txPanel.innerHTML = `<p style="color:#ef4444; font-size:.7rem;">${e.message}</p>`;
+      const errorHtml = `<p style="color:#ef4444; font-size:.7rem;">${e.message}</p>`;
+      txPanel.innerHTML = errorHtml;
     }
   }
 
@@ -581,7 +631,18 @@
   // NFT Portfolio (lazy-loaded on tab click via Zerion)
   // ──────────────────────────────────────────────────
 
-  async function loadNFTPortfolio() {
+  async function loadNFTPortfolio(forceRefresh = false) {
+    const now = Date.now();
+    
+    // Check cache
+    if (!forceRefresh && nftCache && (now - nftCacheTime < CACHE_DURATION)) {
+      console.log('📦 Using cached NFT data');
+      const nftPanel = document.getElementById('zerion-nft-panel');
+      if (nftPanel && nftCache) {
+        nftPanel.innerHTML = nftCache;
+      }
+      return;
+    }
     const address = getActiveAddress();
     if (!address) return;
     const nftPanel = document.getElementById('zerion-nft-panel');
@@ -589,7 +650,13 @@
     nftPanel.innerHTML = '<p style="color:#6f786d; font-size:.7rem;">Loading NFTs…</p>';
     try {
       const data = await zerionFetch(`/wallets/${address}/nft-collections/?currency=usd&sort=-total_floor_price&page[size]=10`);
-      if (!data.data.length) { nftPanel.innerHTML = '<p style="color:#6f786d; font-size:.72rem;">No NFTs found.</p>'; return; }
+      if (!data.data.length) { 
+        const noNftHtml = '<p style="color:#6f786d; font-size:.72rem;">No NFTs found.</p>';
+        nftPanel.innerHTML = noNftHtml;
+        nftCache = noNftHtml;
+        nftCacheTime = now;
+        return; 
+      }
       nftPanel.innerHTML = '';
       for (const col of data.data) {
         const { collection_info, nfts_count, total_floor_price } = col.attributes;
@@ -608,6 +675,11 @@
         `;
         nftPanel.appendChild(row);
       }
+      
+      // Cache the result
+      nftCache = nftPanel.innerHTML;
+      nftCacheTime = now;
+      console.log('💾 NFTs cached');
     } catch (e) {
       nftPanel.innerHTML = `<p style="color:#ef4444; font-size:.7rem;">${e.message}</p>`;
     }
@@ -831,4 +903,6 @@
     const eth = window.currentPrices?.ETHUSDT;
     output.textContent = eth ? `Paper signal: monitor ETH near $${eth.toLocaleString('en-US', { maximumFractionDigits: 2 })}; no order was placed.` : 'Waiting for a market price before creating a paper signal.';
   });
+  
+  console.log('✅ wallet.js initialization complete');
 })();
