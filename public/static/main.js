@@ -340,8 +340,8 @@ async function updatePortfolio(prices) {
 
         const coinImg = coinImages[holding.symbol];
         const imgHtml = coinImg
-            ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.outerHTML='<div class=coin-logo-fallback>${holding.ticker.charAt(0)}</div>'">`
-            : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
+            ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.src='/api/token-icon?symbol=${holding.ticker}&name='+encodeURIComponent(holding.name)">`
+            : `<img src="/api/token-icon?symbol=${holding.ticker}&name="+encodeURIComponent(holding.name)+" alt="${holding.ticker}" class="coin-logo">`;
         
         // Get contract info for this token
         const contractInfo = tokenContracts.get(holding.symbol);
@@ -471,8 +471,8 @@ async function updateDexPortfolio(prices) {
 
         const coinImg = coinImages[holding.symbol];
         const imgHtml = coinImg
-            ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.outerHTML='<div class=coin-logo-fallback>${holding.ticker.charAt(0)}</div>'">`
-            : `<div class="coin-logo-fallback">${holding.ticker.charAt(0)}</div>`;
+            ? `<img src="${coinImg}" alt="${holding.ticker}" class="coin-logo" onerror="this.src='/api/token-icon?symbol=${holding.ticker}&name='+encodeURIComponent(holding.name)">`
+            : `<img src="/api/token-icon?symbol=${holding.ticker}&name="+encodeURIComponent(holding.name)+" alt="${holding.ticker}" class="coin-logo">`;
         
         // Get contract info for this token
         const contractInfo = tokenContracts.get(holding.symbol);
