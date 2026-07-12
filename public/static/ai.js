@@ -455,13 +455,13 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
             : '';
         const { model } = AI_CONFIG.litellm;
         
-        // Use non-streaming mode for simplicity
+        // Stream reasoning and the final answer as soon as LiteLLM sends tokens.
         const response = await fetch(`${host}/api/zerion?litellm=true`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model,
-                stream: false, // Disable SSE streaming
+                stream: true,
                 messages: [
                     { role: 'system', content: this.systemPrompt(context) },
                     { role: 'user', content: query }
@@ -476,78 +476,101 @@ ${retrieved || 'No holdings data available yet. User can connect wallet or add t
             throw new Error(err.error || `LiteLLM proxy error: ${response.status}`);
         }
 
-        const data = await response.json();
-        const fullText = data.choices?.[0]?.message?.content || 'No response.';
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('LiteLLM returned no readable stream.');
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        const updateStreamingBubble = () => {
+            const opening = fullText.search(/<(?:think|thinking)>/i);
+            const closing = fullText.search(/<\/(?:think|thinking)>/i);
+            if (opening >= 0 && closing < 0) {
+                const liveThinking = fullText.slice(opening).replace(/<(?:think|thinking)>/i, '').trim();
+                bubble.innerHTML = `<div class="ai-thinking-live"><i class="fas fa-brain"></i> Thinking…</div><div class="ai-thinking-preview">${this.render(liveThinking)}</div>`;
+            } else if (closing >= 0) {
+                const answer = fullText.slice(closing).replace(/<\/(?:think|thinking)>/i, '').trim();
+                bubble.innerHTML = this.render(answer);
+            } else {
+                bubble.innerHTML = this.render(fullText);
+            }
+            this.ui.box.scrollTop = this.ui.box.scrollHeight;
+        };
+
+        const consume = (line) => {
+            if (!line.startsWith('data:')) return;
+            const payload = line.slice(5).trim();
+            if (!payload || payload === '[DONE]') return;
+            try {
+                const chunk = JSON.parse(payload);
+                const token = chunk.choices?.[0]?.delta?.content || '';
+                if (token) { fullText += token; updateStreamingBubble(); }
+            } catch (_) { /* Ignore incomplete SSE frames. */ }
+        };
+
+        while (true) {
+            const { value, done } = await reader.read();
+            buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+            const lines = buffer.split(/\r?\n/);
+            buffer = lines.pop() || '';
+            lines.forEach(consume);
+            if (done) break;
+        }
+        if (buffer) consume(buffer);
+        const data = { choices: [{ message: { content: fullText } }] };
+        if (!fullText) fullText = 'No response.';
         
         // Extract thinking - look for explicit tags OR natural thinking patterns
         let thinking = null;
         let responseText = fullText;
         
-        // Method 1: Check for <thinking> tags
-        const thinkingMatch = fullText.match(/<thinking>([\s\S]*?)<\/thinking>/);
+        // Method 1: Check for the formats used by different reasoning models:
+        // <think>...</think>, <thinking>...</thinking>, and an unpaired </think>.
+        const thinkingMatch = fullText.match(/<(?:think|thinking)>\s*([\s\S]*?)\s*<\/(?:think|thinking)>/i);
         if (thinkingMatch) {
             thinking = thinkingMatch[1].trim();
-            responseText = fullText.replace(/<thinking>[\s\S]*?<\/thinking>/, '').trim();
+            responseText = fullText.replace(thinkingMatch[0], '').trim();
+        } else {
+            const closingThinkIndex = fullText.search(/<\/(?:think|thinking)>/i);
+            if (closingThinkIndex >= 0) {
+                thinking = fullText.slice(0, closingThinkIndex).trim();
+                responseText = fullText.slice(closingThinkIndex).replace(/<\/(?:think|thinking)>/i, '').trim();
+            }
         }
         
-        // Method 2: Check for natural thinking patterns
+        // Method 2: Detect untagged reasoning, but only split at a likely answer boundary.
         if (!thinking) {
             const lines = fullText.split('\n');
             const firstLine = lines[0] || '';
-            
-            const isThinking = (
-                firstLine.toLowerCase().includes('user') ||
-                firstLine.toLowerCase().includes('let me') ||
-                firstLine.toLowerCase().includes('okay') ||
-                firstLine.toLowerCase().includes('the user') ||
-                firstLine.toLowerCase().includes('looking at') ||
-                firstLine.toLowerCase().includes('checking') ||
-                firstLine.toLowerCase().includes('since') ||
-                firstLine.toLowerCase().includes('so,') ||
-                firstLine.toLowerCase().includes('also,') ||
-                firstLine.toLowerCase().includes('that covers')
-            );
-            
+            const firstLineLower = firstLine.toLowerCase();
+            const isThinking = ['user', 'let me', 'okay', 'the user', 'looking at',
+                'checking', 'since', 'so,', 'also,', 'that covers']
+                .some(marker => firstLineLower.includes(marker));
+
             if (isThinking && lines.length > 3) {
                 let thinkingEndIndex = -1;
-                
-                // Look for  marker first
-                if (fullText.includes('')) {
-                    thinkingEndIndex = fullText.indexOf('');
+                const doubleNewline = fullText.indexOf('\n\n');
+                if (doubleNewline > 0 && doubleNewline < fullText.length * 0.7) {
+                    thinkingEndIndex = doubleNewline;
                 }
-                
-                // Or double newline
-                if (thinkingEndIndex === -1) {
-                    const doubleNewline = fullText.indexOf('\n\n');
-                    if (doubleNewline > 0) {
-                        thinkingEndIndex = doubleNewline;
-                    }
-                }
-                
-                // Or greeting response
+
                 if (thinkingEndIndex === -1) {
                     for (let i = 1; i < lines.length; i++) {
                         const line = lines[i].trim();
-                        if (line && (
-                            line.startsWith('Hello') ||
-                            line.startsWith('Hi') ||
-                            line.startsWith('Hey') ||
-                            /^Yes|^No|^Correct|^Sure/.test(line) ||
-                            /^\d+\s*[\+\-\*\/=]/.test(line) ||
-                            (line.includes('!') && line.length < 100)
-                        )) {
+                        if (line && (/^\d+\s*[\+\-\*\/=]/.test(line) ||
+                            /^(Yes|No|Correct|Sure)\b/.test(line) ||
+                            line.includes('equals') ||
+                            (!line.includes('user') && !line.includes('check') && !line.includes('context')))) {
                             thinkingEndIndex = fullText.indexOf(lines[i]);
                             break;
                         }
                     }
                 }
-                
-                if (thinkingEndIndex > 20) {
+
+                if (thinkingEndIndex > 50) {
                     thinking = fullText.substring(0, thinkingEndIndex).trim();
                     responseText = fullText.substring(thinkingEndIndex).trim();
                 }
-            }
-        }
             }
         }
         
