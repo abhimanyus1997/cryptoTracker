@@ -608,7 +608,6 @@
             line-height: 1;
             background: linear-gradient(135deg, #ffffff 0%, #9ef01a 50%, #22c55e 100%);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
@@ -699,7 +698,7 @@
         <!-- Heading -->
         <h1 class="text-4xl md:text-6xl hero-title text-white max-w-4xl mb-6">
             AI Revolutionizing <br>
-            <span class="text-accent" style="background: linear-gradient(135deg, var(--accent) 0%, #22c55e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Crypto Tracking</span>
+            <span class="text-accent" style="background: linear-gradient(135deg, var(--accent) 0%, #22c55e 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Crypto Tracking</span>
         </h1>
 
         <!-- Subtext -->
@@ -938,7 +937,7 @@
 
         // TRON Light Bike Trails - Following Grid Lines
         const lightRibbonsContainer = document.getElementById('lightRibbons');
-        const gridSize = 50; // Match CSS --grid-size
+        const mainGridSize = 50; // Match CSS --grid-size
         const numBikes = 15;
 
         // Create bike trails that follow grid lines
@@ -950,12 +949,12 @@
             const duration = 4 + Math.random() * 4;
             const delay = Math.random() * -8;
             
-            // Snap to grid - positions divisible by gridSize
+            // Snap to grid - positions divisible by mainGridSize
             if (isHorizontal) {
                 ribbon.classList.add('light-ribbon', 'bike-horizontal');
                 
                 // Snap vertical position to grid
-                const gridY = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+                const gridY = Math.floor(Math.random() * (window.innerHeight / mainGridSize)) * mainGridSize;
                 ribbon.style.top = `${gridY}px`;
                 ribbon.style.left = '-150px';
                 
@@ -978,7 +977,7 @@
                 ribbon.classList.add('light-ribbon', 'bike-vertical');
                 
                 // Snap horizontal position to grid
-                const gridX = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
+                const gridX = Math.floor(Math.random() * (window.innerWidth / mainGridSize)) * mainGridSize;
                 ribbon.style.left = `${gridX}px`;
                 ribbon.style.top = '-150px';
                 
@@ -1007,7 +1006,7 @@
             let keyframes = '0% { ';
             const segments = 3 + Math.floor(Math.random() * 3); // 3-5 segments
             const duration = 100 / segments;
-            const startY = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            const startY = Math.floor(Math.random() * (window.innerHeight / mainGridSize)) * mainGridSize;
             
             keyframes += `transform: translateX(-150px); }\n`;
             
@@ -1018,7 +1017,7 @@
                 
                 if (shouldTurn && i < segments - 1) {
                     // Turn 90 degrees up or down
-                    const turn = Math.random() > 0.5 ? gridSize : -gridSize;
+                    const turn = Math.random() > 0.5 ? mainGridSize : -mainGridSize;
                     currentY = Math.max(0, Math.min(currentY + turn, window.innerHeight));
                     keyframes += `${progress}% { transform: translate(${window.innerWidth / segments * i}px, ${currentY - startY}px); }\n`;
                 } else {
@@ -1032,7 +1031,7 @@
 
         // Generate path for vertical bikes (with 90-degree turns)
         function generateVerticalPath() {
-            const startY = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            const startY = Math.floor(Math.random() * (window.innerHeight / mainGridSize)) * mainGridSize;
             const segments = 3 + Math.floor(Math.random() * 3);
             const segmentHeight = (window.innerHeight + 300) / segments;
             
@@ -1073,7 +1072,7 @@
 
         // Create Grid Glow Nodes at intersections
         const gridNodesContainer = document.getElementById('gridNodes');
-        const gridSize = 50; // Same as CSS --grid-size
+        const nodeGridSize = 50; // Same as CSS --grid-size
         const numNodes = 40;
 
         for (let i = 0; i < numNodes; i++) {
@@ -1081,8 +1080,8 @@
             node.classList.add('grid-node');
             
             // Position at grid intersections
-            const x = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
-            const y = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            const x = Math.floor(Math.random() * (window.innerWidth / nodeGridSize)) * nodeGridSize;
+            const y = Math.floor(Math.random() * (window.innerHeight / nodeGridSize)) * nodeGridSize;
             
             node.style.left = `${x}px`;
             node.style.top = `${y}px`;
@@ -1100,8 +1099,8 @@
                 for (let i = 0; i < numNodes; i++) {
                     const node = document.createElement('div');
                     node.classList.add('grid-node');
-                    const x = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
-                    const y = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+                    const x = Math.floor(Math.random() * (window.innerWidth / nodeGridSize)) * nodeGridSize;
+                    const y = Math.floor(Math.random() * (window.innerHeight / nodeGridSize)) * nodeGridSize;
                     node.style.left = `${x}px`;
                     node.style.top = `${y}px`;
                     node.style.animationDelay = `${Math.random() * 2}s`;
