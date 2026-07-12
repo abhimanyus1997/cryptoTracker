@@ -227,8 +227,6 @@
     } catch (e) {
       pnlEl.textContent = e.message;
     }
-  }
-
   async function scanWithZerion(address) {
     tokenList.textContent = 'Fetching all positions via Zerion (all chains, no rate limits)…';
     const positions = [];
@@ -236,7 +234,7 @@
     while (url) {
       const data = await zerionFetch(url);
       positions.push(...data.data);
-      url = data.links?.next ? data.links.next.replace(ZERION_BASE, '') : null;
+      url = data.links?.next ? data.links.next.replace(window.location.origin, '') : null;
     }
     return positions;
   }
@@ -245,16 +243,72 @@
     const address = getActiveAddress();
     if (!address) { tokenList.textContent = 'Connect a wallet first.'; return; }
     scanTokens.disabled = true;
+    tokenList.innerHTML = '';
 
-    if (hasZerionKey()) {
-      scanTokens.textContent = 'Scanning via Zerion API (all chains)…';
+    const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'https://cryptotracker.abhimanyu.fyi' 
+      : '';
+
+    // Tier 1: CoinStats Multi-Chain API Scan
+    try {
+      scanTokens.textContent = 'Scanning CoinStats Multi-Chain (Tier 1)…';
       showScanProgress('indeterminate');
-      try {
-        const positions = await scanWithZerion(address);
-        hideScanProgress();
+      const response = await fetch(`${host}/api/zerion?coinstats=true&path=${encodeURIComponent(`/wallet/balances?address=${address}&blockchain=all`)}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const balances = Array.isArray(data) ? data : (data.balances || []);
+        let foundAny = false;
+        
         tokenList.innerHTML = '';
-        if (!positions.length) { tokenList.textContent = 'No token positions found.'; return; }
+        for (const chainItem of balances) {
+          const chain = chainItem.blockchain || 'unknown';
+          const tokens = chainItem.balances || [];
+          for (const token of tokens) {
+            const quantity = token.amount || 0;
+            const price = token.price || 0;
+            const value = quantity * price;
+            if (quantity <= 0) continue;
+            foundAny = true;
 
+            const row = document.createElement('div');
+            row.className = 'wallet-token-row';
+            row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
+            row.innerHTML = `
+              <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
+                <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${token.symbol || '???'}</strong>
+              </div>
+              <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
+              <span>${quantity.toLocaleString('en-US', { maximumFractionDigits: 6 })}</span>
+              <span>$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+              <span style="font-size:.65rem; color:var(--accent); font-weight:700;">$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+            `;
+            tokenList.appendChild(row);
+
+            if (price > 0) {
+              addToHoldings((token.symbol || '').toUpperCase() + 'USDT', token.name || token.symbol, (token.symbol || '').toUpperCase(), quantity, price);
+            }
+          }
+        }
+        if (foundAny) {
+          hideScanProgress();
+          scanTokens.innerHTML = `<i class="fas fa-check"></i> Found positions via CoinStats`;
+          if (typeof window.fetchPrices === 'function') window.fetchPrices();
+          scanTokens.disabled = false;
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Tier 1 CoinStats Multi-Chain scan failed, attempting Tier 2 Zerion...', e);
+    }
+
+    // Tier 2: Zerion Multi-Chain API Scan
+    try {
+      scanTokens.textContent = 'Scanning Zerion Proxy (Tier 2)…';
+      const positions = await scanWithZerion(address);
+      hideScanProgress();
+      tokenList.innerHTML = '';
+      if (positions && positions.length) {
         let addedCount = 0;
         for (const pos of positions) {
           const attrs = pos.attributes;
@@ -270,17 +324,17 @@
 
           const row = document.createElement('div');
           row.className = 'wallet-token-row';
+          row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
           row.innerHTML = `
             <div style="display:flex; align-items:center; gap:.4rem; overflow:hidden;">
               ${icon ? `<img src="${icon}" style="width:16px;height:16px;border-radius:50%;" onerror="this.style.display='none'">` : ''}
               <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${symbol}</strong>
             </div>
             <span style="font-size:.65rem; color:#6f786d;">${chain}</span>
-            <span>${quantity > 0.001 ? quantity.toLocaleString('en-US', { maximumFractionDigits: 6 }) : quantity.toExponential(2)}</span>
-            <span>$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+            <span>${quantity.toLocaleString('en-US', { maximumFractionDigits: 6 })}</span>
+            <span>$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
             ${change24h != null ? `<span style="color:${change24h >= 0 ? 'var(--accent)' : '#ef4444'}; font-size:.65rem;">${change24h >= 0 ? '+' : ''}$${Math.abs(change24h).toFixed(2)}</span>` : '<span></span>'}
           `;
-          row.style.gridTemplateColumns = 'minmax(60px,1.2fr) .6fr .8fr .8fr .6fr';
           tokenList.appendChild(row);
 
           if (quantity > 0 && price > 0) {
@@ -288,20 +342,18 @@
             addedCount++;
           }
         }
-
-        scanTokens.innerHTML = `<i class="fas fa-check"></i> Found ${positions.length} positions across all chains`;
+        scanTokens.innerHTML = `<i class="fas fa-check"></i> Found ${positions.length} positions via Zerion`;
         if (addedCount > 0 && typeof window.fetchPrices === 'function') window.fetchPrices();
-      } catch (e) {
-        hideScanProgress();
-        tokenList.textContent = e.message;
-        if (e.message.includes('Rate limited')) {
-          scanTokens.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Rate limited — add API key in Settings';
-        }
-      } finally { setTimeout(() => { scanTokens.disabled = false; scanTokens.innerHTML = '<i class="fas fa-radar"></i> Scan all tokens (Zerion API)'; }, 3000); }
-    } else {
-      scanTokens.textContent = 'No Zerion API key — using fallback RPC scan…';
-      await fallbackRpcScan(address);
+        scanTokens.disabled = false;
+        return;
+      }
+    } catch (e) {
+      console.warn('Tier 2 Zerion Multi-Chain scan failed, attempting Tier 3 Local RPC...', e);
     }
+
+    // Tier 3: Local RPC Scan Fallback
+    hideScanProgress();
+    await fallbackRpcScan(address);
   }
 
   // ──────────────────────────────────────────────────
