@@ -72,8 +72,8 @@
             </div>
             <div class="flex gap-3">
                 <button id="refresh-data"
-                    class="px-4 py-2 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center">
-                    <i class="fas fa-rotate mr-2"></i>Refresh
+                    class="p-2.5 rounded-lg bg-accent text-gray-900 font-semibold hover:bg-opacity-90 transition shadow-lg shadow-accent/20 flex items-center justify-center" title="Refresh">
+                    <i class="fas fa-rotate"></i>
                 </button>
                 <div class="relative">
                     <button id="connect-wallet" class="wallet-connect" type="button">
@@ -692,7 +692,7 @@
 
     <script>
         // Set superuser wallet dynamically (injected by build process or replaced dynamically)
-        window.ENV_SUPERUSER_WALLET = process.env.SUPERUSER_WALLET;
+        window.ENV_SUPERUSER_WALLET = (typeof process !== 'undefined' && process.env && process.env.SUPERUSER_WALLET) || '0xd7e9d18153de624713C18b1cA18A238C42033EA5';
     </script>
     <script src="./static/main.js"></script>
     <script src="./static/wallet.js"></script>

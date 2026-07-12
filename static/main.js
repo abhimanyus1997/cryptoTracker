@@ -1045,11 +1045,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('refresh-data')?.addEventListener('click', async function () {
         console.log("Fetching...");
-        this.innerHTML = '<div class="loading-spinner mr-2"></div> Refreshing...';
+        const icon = this.querySelector('i');
+        if (icon) icon.classList.add('fa-spin');
         this.disabled = true;
         await fetchPrices();
         await initPerformanceChart();
-        this.innerHTML = '<i class="fas fa-sync mr-2"></i> Refresh Data';
+        if (icon) icon.classList.remove('fa-spin');
         this.disabled = false;
         console.log("Data refreshed");
     });
