@@ -77,7 +77,10 @@
     const cached = cacheGet(cacheKey);
     if (cached) return cached;
 
-    const res = await fetch(`/api/zerion?path=${encodeURIComponent(path)}`);
+    const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'https://cryptotracker.abhimanyu.fyi' 
+      : '';
+    const res = await fetch(`${host}/api/zerion?path=${encodeURIComponent(path)}`);
     if (res.status === 429) {
       showApiKeyPrompt();
       throw new Error('Rate limited — enter your own Zerion API key in Settings.');

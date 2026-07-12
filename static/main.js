@@ -149,7 +149,10 @@ async function fetchPrices() {
         const address = document.getElementById('wallet-address')?.title || '';
         const isSuperAdmin = window.aiClient && typeof window.aiClient.isSuperAdmin === 'function' ? window.aiClient.isSuperAdmin() : false;
         
-        const url = `/api/zerion?coinstats=true${isSuperAdmin ? '&bypassCache=true' : ''}`;
+        const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'https://cryptotracker.abhimanyu.fyi'
+            : '';
+        const url = `${host}/api/zerion?coinstats=true${isSuperAdmin ? '&bypassCache=true' : ''}`;
         const response = await axios.get(url);
         
         if (response.data && response.data.result) {
