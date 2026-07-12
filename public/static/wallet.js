@@ -41,63 +41,6 @@
   const addToken = document.getElementById('add-wallet-token');
   const scanTokens = document.getElementById('scan-top-tokens');
   const tokenList = document.getElementById('wallet-token-list');
-  
-  // Robust Wallet Connection Initialization
-  const initWallet = async () => {
-    const connectBtn = document.getElementById('connect-wallet');
-    if (!connectBtn) return;
-
-    // Show MetaMask installation prompt if not detected
-    if (!window.ethereum) {
-      console.warn('Web3 provider not detected. Please install MetaMask.');
-      
-      connectBtn.addEventListener('click', () => {
-        alert('Web3 provider not detected.\\n\\nPlease install MetaMask extension:\\nhttps://metamask.io/download/');
-        window.open('https://metamask.io/download/', '_blank');
-      });
-      
-      // Update button text to indicate MetaMask is required
-      const btnText = connectBtn.querySelector('span');
-      if (btnText) {
-        btnText.textContent = 'Install MetaMask';
-      } else {
-        connectBtn.textContent = 'Install MetaMask';
-      }
-      return;
-    }
-
-    // MetaMask detected - set up connection
-    connectBtn.addEventListener('click', async () => {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        console.log('Connected:', accounts[0]);
-        activeAccount = accounts[0];
-        if (profile.address) profile.address.textContent = accounts[0];
-        if (profile.state) profile.state.textContent = 'Connected';
-      } catch (err) {
-        console.error('Connection rejected', err);
-        alert('Wallet connection was rejected. Please try again.');
-      }
-    });
-    
-    // Listen for account changes
-    window.ethereum.on('accountsChanged', (accounts) => {
-      if (accounts.length === 0) {
-        activeAccount = null;
-        if (profile.address) profile.address.textContent = '';
-        if (profile.state) profile.state.textContent = 'Disconnected';
-      } else {
-        activeAccount = accounts[0];
-        if (profile.address) profile.address.textContent = accounts[0];
-      }
-    });
-  };
-  
-  // Listen for MetaMask's initialization event
-  window.addEventListener('ethereum#initialized', initWallet, { once: true });
-  
-  // Fallback for providers that don't fire the event
-  setTimeout(initWallet, 500);
   const profile = {
     state: document.getElementById('wallet-state'), address: document.getElementById('wallet-address'),
     network: document.getElementById('wallet-network'), balance: document.getElementById('wallet-balance'),
