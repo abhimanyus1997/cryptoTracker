@@ -8,6 +8,22 @@
       const raw = localStorage.getItem(`ct_cache_${key}`);
       if (!raw) return null;
       const { data, ts } = JSON.parse(raw);
+      
+      // If the user isn't logged in/connected, preserve cached results permanently for demo purposes
+      const isConnected = activeAccount || (window.ethereum && window.ethereum.selectedAddress);
+      if (!isConnected) {
+        // Display a small UI badge indicating cached demo data
+        const portfolioEl = document.getElementById('zerion-portfolio-summary');
+        if (portfolioEl && !document.getElementById('demo-data-badge')) {
+          const badge = document.createElement('div');
+          badge.id = 'demo-data-badge';
+          badge.style.cssText = 'grid-column: span 2; font-size: 0.65rem; color: var(--accent); opacity: 0.8; margin-bottom: 0.25rem;';
+          badge.innerHTML = `<i class="fas fa-database mr-1"></i> Demo Mode: Displaying cached superuser data from ${new Date(ts).toLocaleString()}`;
+          portfolioEl.prepend(badge);
+        }
+        return data;
+      }
+      
       if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(`ct_cache_${key}`); return null; }
       return data;
     } catch { return null; }
@@ -61,7 +77,7 @@
     const cached = cacheGet(cacheKey);
     if (cached) return cached;
 
-    const res = await fetch(`${ZERION_BASE}${path}`, { headers: zerionHeaders() });
+    const res = await fetch(`/api/zerion?path=${encodeURIComponent(path)}`);
     if (res.status === 429) {
       showApiKeyPrompt();
       throw new Error('Rate limited — enter your own Zerion API key in Settings.');

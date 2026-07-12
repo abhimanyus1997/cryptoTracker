@@ -31,8 +31,8 @@ const AI_CONFIG = {
         model: 'nvidia.nemotron-nano-9b-v2'
     },
     rateLimit: { maxPerSession: 50, windowMs: 60 * 60 * 1000 },
-    superAdmin: '0xd7e9d18153de624713C18b1cA18A238C42033EA5'.toLowerCase(),
-    subscriptionWallet: '0xd7e9d18153de624713C18b1cA18A238C42033EA5',
+    superAdmin: (window.ENV_SUPERUSER_WALLET || '').toLowerCase(),
+    subscriptionWallet: window.ENV_SUPERUSER_WALLET || '0xd7e9d18153de624713C18b1cA18A238C42033EA5',
     subscriptionAmount: '0.001' // ETH to unlock unlimited
 };
 

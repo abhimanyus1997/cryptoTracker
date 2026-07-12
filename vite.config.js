@@ -19,6 +19,9 @@ function copyRuntimeFiles() {
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || '/',
   plugins: [copyRuntimeFiles()],
+  define: {
+    'process.env.SUPERUSER_WALLET': JSON.stringify(process.env.SUPERUSER_WALLET || '')
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,

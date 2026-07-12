@@ -141,20 +141,47 @@ async function fetchPrices() {
         });
     }
 
+    let prices = {};
+    let fetched = false;
+
+    // 1. Try CoinStats first as requested (with caching bypass for superuser)
     try {
-        const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
-        const prices = response.data.reduce((acc, item) => {
-            acc[item.symbol] = parseFloat(item.price);
-            return acc;
-        }, {});
-        window.currentPrices = prices; // Expose for AI client
-        await updatePortfolio(prices);
-        await updateDexPortfolio(prices);
-        await updateSummary(prices);
-        console.log("Prices fetched successfully");
-    } catch (error) {
-        console.error('Error fetching prices:', error);
+        const address = document.getElementById('wallet-address')?.title || '';
+        const isSuperAdmin = window.aiClient && typeof window.aiClient.isSuperAdmin === 'function' ? window.aiClient.isSuperAdmin() : false;
+        
+        const url = `/api/zerion?coinstats=true${isSuperAdmin ? '&bypassCache=true' : ''}`;
+        const response = await axios.get(url);
+        
+        if (response.data && response.data.result) {
+            response.data.result.forEach(coin => {
+                const sym = `${coin.symbol.toUpperCase()}USDT`;
+                prices[sym] = parseFloat(coin.price);
+            });
+            fetched = true;
+            console.log("Prices fetched successfully via CoinStats API");
+        }
+    } catch (e) {
+        console.warn("CoinStats fetch failed, trying Binance fallback...", e);
     }
+
+    // 2. Fall back to Binance if CoinStats is down or has issues
+    if (!fetched) {
+        try {
+            const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
+            prices = response.data.reduce((acc, item) => {
+                acc[item.symbol] = parseFloat(item.price);
+                return acc;
+            }, {});
+            console.log("Prices fetched successfully via Binance API");
+        } catch (error) {
+            console.error('Error fetching prices from fallback:', error);
+        }
+    }
+
+    window.currentPrices = prices; // Expose for AI client
+    await updatePortfolio(prices);
+    await updateDexPortfolio(prices);
+    await updateSummary(prices);
 }
 
 function formatCurrency(value) {
