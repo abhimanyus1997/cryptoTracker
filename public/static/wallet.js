@@ -377,7 +377,18 @@
           const value = quantity * price;
           const icon = token.icon || token.image || '';
           const name = token.name || token.symbol || 'Unknown';
+          const symbol = token.symbol || '???';
+          
           if (quantity <= 0) continue;
+          
+          // SECURITY CHECK: Skip blacklisted tokens
+          if (typeof window.isTokenWhitelisted === 'function') {
+            if (!window.isTokenWhitelisted(symbol)) {
+              console.log(`🚫 Skipping unknown token: ${symbol} (not in top 500)`);
+              continue;
+            }
+          }
+          
           foundAny = true;
 
           const row = document.createElement('div');
@@ -440,7 +451,18 @@
             const price = token.price || 0;
             const value = quantity * price;
             const icon = token.icon || token.image || '';
+            const symbol = token.symbol || '???';
+            
             if (quantity <= 0) continue;
+            
+            // SECURITY CHECK: Skip blacklisted tokens
+            if (typeof window.isTokenWhitelisted === 'function') {
+              if (!window.isTokenWhitelisted(symbol)) {
+                console.log(`🚫 Skipping unknown token: ${symbol} (not in top 500)`);
+                continue;
+              }
+            }
+            
             foundAny = true;
 
             const row = document.createElement('div');
@@ -880,6 +902,18 @@
 
   function addToHoldings(pairSymbol, name, ticker, amount, price) {
     if (!window.portfolio) return;
+    
+    // SECURITY CHECK: Only allow whitelisted tokens (top 500 from CoinGecko)
+    if (typeof window.isTokenWhitelisted === 'function') {
+      if (!window.isTokenWhitelisted(ticker)) {
+        console.warn(`🚫 Blocked unknown token: ${ticker} - Not in top 500 verified tokens`);
+        if (typeof window.blacklistToken === 'function') {
+          window.blacklistToken(ticker, 'Not in CoinGecko top 500');
+        }
+        return; // Block the token
+      }
+    }
+    
     const existing = window.portfolio.find(h => h.ticker === ticker);
     if (existing) {
       if (amount > 0) {
