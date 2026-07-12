@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Add CORS headers for local/Vercel dev environment compatibility
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -13,18 +12,23 @@ export default async function handler(req, res) {
     return;
   }
 
-  // CoinStats coins query parameter options
-  const { path, coinstats, bypassCache } = req.query;
+  const { path, coinstats, bypassCache, litellm } = req.query;
 
-  // 1. Check if we should route to CoinStats
+  // 1. CoinStats API (wallet balances, coins, etc.)
   if (coinstats === 'true') {
     const apiKey = process.env.COINSTATS_API_KEY || '';
     if (!apiKey) {
       return res.status(500).json({ error: 'Missing COINSTATS_API_KEY on host environment' });
     }
 
-    // Default or custom endpoint matching CoinStats coins request
-    const targetUrl = 'https://api.coinstats.app/v1/coins?limit=1000';
+    // Support arbitrary CoinStats paths (wallet/balances, wallet/balance, coins, etc.)
+    let targetUrl;
+    if (path) {
+      const cleanPath = path.startsWith('/') ? path : `/${path}`;
+      targetUrl = `https://api.coinstats.app/v1${cleanPath}`;
+    } else {
+      targetUrl = 'https://api.coinstats.app/v1/coins?limit=1000';
+    }
 
     try {
       const headers = {
@@ -32,11 +36,8 @@ export default async function handler(req, res) {
         'X-API-KEY': apiKey
       };
 
-      // If requested to bypass cache (for superuser)
       if (bypassCache === 'true') {
         headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-        headers['Pragma'] = 'no-cache';
-        headers['Expires'] = '0';
       }
 
       const response = await fetch(targetUrl, { method: 'GET', headers });
@@ -52,8 +53,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // 2. Check if we should route to LiteLLM
-  const { litellm } = req.query;
+  // 2. LiteLLM proxy
   if (litellm === 'true') {
     const apiKey = process.env.LITELLM_API_KEY || '';
     const apiBase = process.env.LITELLM_API_BASE || 'http://13.126.102.204:4000';
@@ -62,7 +62,6 @@ export default async function handler(req, res) {
     }
 
     try {
-      // Proxy request body directly to the local LiteLLM server
       const response = await fetch(`${apiBase}/v1/chat/completions`, {
         method: 'POST',
         headers: {
@@ -76,12 +75,11 @@ export default async function handler(req, res) {
         return res.status(response.status).json({ error: `LiteLLM Proxy error: ${response.statusText}` });
       }
 
-      // Support Server-Sent Events (SSE) streaming for LiteLLM
       if (req.body.stream) {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
-        
+
         const reader = response.body;
         if (reader.readable) {
           response.body.pipe(res);
@@ -96,7 +94,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. Normal Zerion API Proxy flow
+  // 3. Zerion API proxy
   if (!path) {
     return res.status(400).json({ error: 'Missing path parameter' });
   }
